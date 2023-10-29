@@ -8,7 +8,7 @@
 <h3>About Myself</h4>
 <p> An ordinary computer enthusiastic man with classical music, history, and technologies as his favourites. I was born in November 2003 in Singburi, Thailand. Currently, I'm studying at <a href="https://kmutnb.ac.th/?lang=en-gb">KMUTNB</a> for a degree of computer engineering.</p>
 <hr>
-<h3">Github's Stats</h3>
+<h3>Github's Stats</h3>
 <div class="markdown contact" align="center">
     <p>
         <img src="https://github-readme-stats.vercel.app/api/top-langs?username=skyjtx&show_icons=true&theme=dark&locale=en&layout=compact" alt="skyjtx" />
