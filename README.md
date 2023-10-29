@@ -8,10 +8,7 @@
 <h4 align="center">About Myself</h4>
 <p> An ordinary computer enthusiastic man with classical music, history, and technologies as his favourites. I was born in November 2003 in Singburi, Thailand. Currently, I'm studying at <a href="https://kmutnb.ac.th/?lang=en-gb">KMUTNB</a> for a degree of computer engineering.</p>
 <hr>
-<h4 align="center">About Website</h4>
-<p>My website was created due to my lecturer's assignment. The lecturer has assigned me to make a simple markdown website but I want to make <span style="font-weight: bold; ">A WEBSITE.</span> So, SkyJTx.github.io was born.</p>
-<hr>
-<h3 align="center">Github's Status</h3>
+<h3 align="center">Github's Stats</h3>
 <div class="markdown contact" align="center">
     <p>
         <img src="https://github-readme-stats.vercel.app/api/top-langs?username=skyjtx&show_icons=true&theme=dark&locale=en&layout=compact" alt="skyjtx" />
@@ -28,3 +25,10 @@
         </a>
     </p>
 </div>
+<hr>
+<h4 align="center">
+    <a href="https://skyjtx.github.io/">
+        Website Here
+    </h>
+</h4>
+<hr>
