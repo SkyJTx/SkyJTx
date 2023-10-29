@@ -6,7 +6,7 @@
 </div>
 <hr>
 <h4 align="center">About Myself</h4>
-<p>A ordinary computer nerd-ish that have classical music, history, and technologies as his favourites. I was born in November, 2003 in Singburi, Thailand. Currently, I'm studying at <a href="https://kmutnb.ac.th/?lang=en-gb">KMUTNB</a> in degree of computer engineering.</p>
+<p> An ordinary computer enthusiastic man with classical music, history, and technologies as his favourites. I was born in November 2003 in Singburi, Thailand. Currently, I'm studying at <a href="https://kmutnb.ac.th/?lang=en-gb">KMUTNB</a> for a degree of computer engineering.</p>
 <hr>
 <h4 align="center">About Website</h4>
 <p>My website was created due to my lecturer's assignment. The lecturer has assigned me to make a simple markdown website but I want to make <span style="font-weight: bold; ">A WEBSITE.</span> So, SkyJTx.github.io was born.</p>
