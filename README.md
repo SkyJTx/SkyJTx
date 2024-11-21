@@ -27,7 +27,7 @@
 </div>
 <hr>
 <h4 align="center">
-    <a href="https://skyjt.vercel.app/work">
+    <a href="https://skyjt.vercel.app">
         Website Here
     </a>
 </h4>
