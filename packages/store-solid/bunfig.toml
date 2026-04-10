@@ -1,0 +1,4 @@
+# bunfig.toml
+[jsx]
+runtime = "automatic"
+importSource = "solid-js"
