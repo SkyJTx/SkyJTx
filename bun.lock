@@ -8,6 +8,7 @@
     "apps/web": {
       "name": "@skyjtx/my-site",
       "dependencies": {
+        "@skyjtx/query-solid": "workspace:*",
         "@skyjtx/signals-solid": "workspace:*",
         "@skyjtx/store-solid": "workspace:*",
         "@solidjs/meta": "^0.29.4",
@@ -23,6 +24,9 @@
     "packages/query-solid": {
       "name": "@skyjtx/query-solid",
       "version": "0.1.0",
+      "dependencies": {
+        "@skyjtx/signals-solid": "workspace:*",
+      },
       "devDependencies": {
         "bun-types": "^1.3.11",
       },
@@ -30,6 +34,7 @@
         "@solidjs/meta": "^0.29.4",
         "@solidjs/router": "^0.15.0",
         "@solidjs/start": "2.0.0-alpha.2",
+        "seroval": "^1.5.2",
         "solid-js": "^1.9.5",
       },
     },

@@ -44,10 +44,6 @@ import { isCallable } from "./helpers";
 export function useSignal<T>(
   value: Value<T>,
   options?: SignalOptions<T>,
-): Signal<T>;
-export function useSignal<T>(
-  value: Value<T>,
-  options?: SignalOptions<T>,
 ): Signal<T> {
   const unwrapped = unwrap(value);
   const [signal, setSignal] = createSignal(unwrapped, options);
@@ -104,13 +100,13 @@ export function useSignal<T>(
  * );
  */
 export function useComputed<T>(
-  getOrSet: Getter<T>,
-  options?: MemoOptions<T>,
-): Computed<T>;
-export function useComputed<T>(
   getOrSet: GetterSetter<T>,
   options?: MemoOptions<T>,
 ): WritableComputed<T>;
+export function useComputed<T>(
+  getOrSet: Getter<T>,
+  options?: MemoOptions<T>,
+): Computed<T>;
 export function useComputed<T>(
   getOrSet: Getter<T> | GetterSetter<T>,
   options?: MemoOptions<T>,
@@ -189,13 +185,13 @@ export function useComputed<T>(
  * count++; // Cannot update and will not trigger reactive updates because destructuring breaks reactivity.
  */
 export function useReactive<T extends object>(
-  initializer: Value<T>,
+  initializer: Getter<T>,
   options?: {
     name?: string;
   },
 ): Value<T>;
 export function useReactive<T extends object>(
-  initializer: Getter<T>,
+  initializer: Value<T>,
   options?: {
     name?: string;
   },

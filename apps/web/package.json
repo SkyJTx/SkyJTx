@@ -9,6 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@skyjtx/query-solid": "workspace:*",
     "@skyjtx/signals-solid": "workspace:*",
     "@skyjtx/store-solid": "workspace:*",
     "@solidjs/meta": "^0.29.4",

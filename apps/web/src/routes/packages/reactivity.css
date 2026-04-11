@@ -147,14 +147,16 @@ body {
 .labeled-value {
     display: flex;
     align-items: center;
-    gap: 2rem;
+    justify-content: space-between;
     font-size: 1.2rem;
+    padding: 0.75rem 0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .labeled-value .label {
     color: var(--text-muted);
     font-weight: 500;
-    min-width: 250px;
+    flex: 1;
 }
 
 .labeled-value .value {
@@ -385,4 +387,58 @@ body {
     border-radius: 12px;
     overflow-x: auto;
     box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.5);
+}
+/* Query Solid Showcase */
+.status-loading {
+    color: var(--accent-blue);
+}
+
+.status-error {
+    color: var(--accent-pink);
+}
+
+.status-success {
+    color: #2b6cb0;
+}
+
+.success-message {
+    margin-top: 1rem;
+    font-weight: 700;
+}
+
+.loading-fallback {
+    opacity: 0.75;
+}
+
+.loading-text {
+    padding: 1rem;
+    text-align: center;
+    font-weight: 600;
+    color: var(--text-muted);
+}
+
+/* Signals Solid Showcase */
+.signals-visualizer {
+    align-items: baseline;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+    gap: 2.5rem;
+    margin: 1.5rem 0 2.5rem;
+}
+
+.signals-coordinate {
+    display: flex;
+    align-items: baseline;
+    gap: 1rem;
+    min-width: 220px;
+}
+
+.signals-coordinate .coord-label {
+    font-size: 0.85rem;
+    font-weight: 700;
+    letter-spacing: 2px;
+}
+
+.signals-coordinate .coord-val {
+    font-size: 2.75rem;
 }

@@ -4,17 +4,20 @@ import { FileRoutes } from "@solidjs/start/router";
 import { Suspense } from "solid-js";
 import "./app.css";
 import { StoresProvider } from "@skyjtx/store-solid";
+import { QueriesProvider } from "@skyjtx/query-solid";
 
 export default function App() {
   return (
     <Router
       root={(props) => (
-        <StoresProvider>
-          <MetaProvider>
-            <Title>Reactivity Studio</Title>
-            <Suspense>{props.children}</Suspense>
-          </MetaProvider>
-        </StoresProvider>
+        <QueriesProvider>
+          <StoresProvider>
+            <MetaProvider>
+              <Title>Reactivity Studio</Title>
+              <Suspense>{props.children}</Suspense>
+            </MetaProvider>
+          </StoresProvider>
+        </QueriesProvider>
       )}
     >
       <FileRoutes />
