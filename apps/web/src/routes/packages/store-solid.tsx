@@ -15,7 +15,7 @@ const useShowcaseCounterStore = defineStore("showcase.counter", () => ({
   get double() {
     return this.count * 2;
   },
-  set double(value: number) {
+  setDouble(value: number) {
     this.count = value / 2;
   },
   get triple() {
@@ -64,7 +64,7 @@ function StoreCounterPanel(props: { title: string }) {
         <button class="neu-btn" onClick={() => store.reset()}>
           Reset
         </button>
-        <button class="neu-btn" onClick={() => (store.double = 10)}>
+        <button class="neu-btn" onClick={() => store.setDouble(10)}>
           Set Double to 10
         </button>
       </div>
