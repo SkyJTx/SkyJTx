@@ -1,6 +1,6 @@
 {
   "name": "@skyjt/store-solid",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "SolidJS store utilities with SSR hydration support.",
   "type": "module",
   "main": "./dist/index.js",
