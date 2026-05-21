@@ -1,6 +1,14 @@
 # dependencies
 /node_modules
 
+# Build outputs
+**/dist
+**/*.tgz
+
+# Bun
+.bun
+.bunx
+
 # IDEs and editors
 /.idea
 .project

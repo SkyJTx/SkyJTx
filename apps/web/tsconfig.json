@@ -12,13 +12,24 @@
     "allowJs": true,
     "strict": true,
     "noEmit": true,
+    "ignoreDeprecations": "6.0",
     "types": [
       "vite/client"
     ],
     "isolatedModules": true,
+    "baseUrl": ".",
     "paths": {
       "~/*": [
         "./src/*"
+      ],
+      "@skyjtx/signals-solid": [
+        "../../packages/signals-solid/src/index.ts"
+      ],
+      "@skyjtx/query-solid": [
+        "../../packages/query-solid/src/index.ts"
+      ],
+      "@skyjtx/store-solid": [
+        "../../packages/store-solid/src/index.ts"
       ]
     }
   }
