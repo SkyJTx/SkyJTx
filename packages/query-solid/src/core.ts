@@ -6,6 +6,13 @@ import {
 } from "solid-js";
 import { isServer } from "solid-js/web";
 import { useReactive } from "@skyjtx/signals-solid";
+import type {
+  UseMutationOptions,
+  UseQueryOptions,
+  UseQueryOptionsWithInitialData,
+  UseQueryOptionsWithoutInitialData,
+  UseQueryResult,
+} from "./types";
 
 declare global {
   interface Window {
@@ -50,12 +57,13 @@ export class QueryClient {
 
 export const QueryClientContext = createContext<QueryClient>();
 
-export type UseQueryOptions<TData, TError = unknown> = {
-  queryKey: string[] | (() => string[]) | string | (() => string);
-  queryFn: () => Promise<TData>;
-  enabled?: boolean | (() => boolean);
-  initialData?: TData | (() => TData);
-};
+export function useSolidQuery<TData, TError = unknown>(
+  options: UseQueryOptionsWithInitialData<TData, TError>,
+): UseQueryResult<TData, TError, true>;
+
+export function useSolidQuery<TData, TError = unknown>(
+  options: UseQueryOptionsWithoutInitialData<TData, TError>,
+): UseQueryResult<TData, TError, false>;
 
 export function useSolidQuery<TData, TError = unknown>(
   options: UseQueryOptions<TData, TError>,
@@ -139,19 +147,8 @@ export function useSolidQuery<TData, TError = unknown>(
     },
     refetch,
     mutate,
-  });
+  }) as UseQueryResult<TData, TError, false | true>;
 }
-
-export type UseMutationOptions<TVariables, TData, TError = unknown> = {
-  mutationFn: (variables: TVariables) => Promise<TData>;
-  onSuccess?: (data: TData, variables: TVariables) => void;
-  onError?: (error: TError, variables: TVariables) => void;
-  onSettled?: (
-    data: TData | undefined,
-    error: TError | null,
-    variables: TVariables,
-  ) => void;
-};
 
 export function useSolidMutation<TVariables, TData, TError = unknown>(
   options: UseMutationOptions<TVariables, TData, TError>,

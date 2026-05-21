@@ -299,6 +299,33 @@ describe("@skyjtx/query-solid", () => {
     }
   });
 
+  test("useSolidQuery narrows data when initialData is provided", () => {
+    let dispose = () => {};
+    const client = new QueryClient();
+
+    createRoot((rootDispose) => {
+      dispose = rootDispose;
+
+      createComponent(QueryClientContext.Provider, {
+        value: client,
+        get children() {
+          const query = useSolidQuery({
+            queryKey: "typed:seeded",
+            queryFn: async () => ({ id: "1" }),
+            initialData: { id: "seed" },
+          });
+
+          const typedData: { id: string } = query.data;
+          void typedData;
+
+          return null;
+        },
+      });
+    });
+
+    dispose();
+  });
+
   test("useSolidMutation success updates state and calls callbacks", async () => {
     let dispose = () => {};
     const deferred = defer<{ ok: boolean }>();

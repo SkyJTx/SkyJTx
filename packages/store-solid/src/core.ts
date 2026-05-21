@@ -2,14 +2,13 @@ import { createContext, useContext } from "solid-js";
 import { useReactive } from "@skyjtx/signals-solid";
 import { isServer } from "solid-js/web";
 import { unwrap } from "solid-js/store";
+import type { StoreInitializer } from "./types";
 
 declare global {
   interface Window {
     __STORE_LIB_REGISTRY__: Record<string, any>;
   }
 }
-
-export type StoreInitializer<T extends object> = () => T;
 
 export const StoreRegistryContext = createContext<Map<string, any>>();
 
