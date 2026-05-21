@@ -10,7 +10,7 @@
     "skipLibCheck": true,
     "baseUrl": ".",
     "paths": {
-      "@skyjtx/signals-solid": [
+      "@skyjt/signals-solid": [
         "../signals-solid/dist/index.d.ts"
       ]
     }

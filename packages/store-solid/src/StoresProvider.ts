@@ -1,7 +1,6 @@
 import { ParentComponent, createComponent } from "solid-js";
 import { isServer, useAssets, Dynamic } from "solid-js/web";
 import { extractStoreState, StoreRegistryContext } from "./core";
-import { unwrap } from "solid-js/store";
 import { serialize } from "seroval";
 
 export const StoresProvider: ParentComponent = (props) => {

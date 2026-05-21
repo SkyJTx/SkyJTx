@@ -1,17 +1,17 @@
-# @skyjtx/signals-solid
+# @skyjt/signals-solid
 
 SolidJS signal helpers with a Vue-like API on top of Solid primitives.
 
 ## Install
 
 ```bash
-npm install @skyjtx/signals-solid
+npm install @skyjt/signals-solid
 ```
 
 ## Usage
 
 ```ts
-import { useSignal, useComputed, useReactive } from "@skyjtx/signals-solid";
+import { useSignal, useComputed, useReactive } from "@skyjt/signals-solid";
 
 const count = useSignal(0);
 count.value = 1;

@@ -1,17 +1,17 @@
-# @skyjtx/query-solid
+# @skyjt/query-solid
 
 SolidJS query utilities with SSR hydration support.
 
 ## Install
 
 ```bash
-npm install @skyjtx/query-solid
+npm install @skyjt/query-solid
 ```
 
 ## Usage
 
 ```tsx
-import { QueriesProvider, QueryClient, useSolidQuery } from "@skyjtx/query-solid";
+import { QueriesProvider, QueryClient, useSolidQuery } from "@skyjt/query-solid";
 
 const client = new QueryClient();
 

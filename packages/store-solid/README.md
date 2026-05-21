@@ -1,17 +1,17 @@
-# @skyjtx/store-solid
+# @skyjt/store-solid
 
 SolidJS store utilities with SSR hydration support.
 
 ## Install
 
 ```bash
-npm install @skyjtx/store-solid
+npm install @skyjt/store-solid
 ```
 
 ## Usage
 
 ```tsx
-import { StoresProvider, defineStore } from "@skyjtx/store-solid";
+import { StoresProvider, defineStore } from "@skyjt/store-solid";
 
 const useCounter = defineStore("counter", () => ({ count: 0 }));
 

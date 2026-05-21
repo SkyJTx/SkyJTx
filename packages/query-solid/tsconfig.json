@@ -22,7 +22,7 @@
             "~/*": [
                 "./src/*"
             ],
-            "@skyjtx/signals-solid": [
+            "@skyjt/signals-solid": [
                 "../signals-solid/src/index.ts"
             ]
         }
