@@ -5,7 +5,7 @@ import {
   createResource,
 } from "solid-js";
 import { isServer } from "solid-js/web";
-import { useReactive } from "@skyjtx/signals-solid";
+import { useReactive } from "@skyjt/signals-solid";
 import type {
   UseMutationOptions,
   UseQueryOptions,

@@ -63,7 +63,7 @@ const defer = <T>(): Deferred<T> => {
   };
 };
 
-describe("@skyjtx/query-solid", () => {
+describe("@skyjt/query-solid", () => {
   test("useSolidQuery throws when used without a <QueriesProvider>", () => {
     createRoot((dispose) => {
       try {

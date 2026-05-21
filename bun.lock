@@ -10,11 +10,11 @@
       },
     },
     "apps/web": {
-      "name": "@skyjtx/my-site",
+      "name": "@skyjt/my-site",
       "dependencies": {
-        "@skyjtx/query-solid": "workspace:*",
-        "@skyjtx/signals-solid": "workspace:*",
-        "@skyjtx/store-solid": "workspace:*",
+        "@skyjt/query-solid": "workspace:*",
+        "@skyjt/signals-solid": "workspace:*",
+        "@skyjt/store-solid": "workspace:*",
         "@solidjs/meta": "^0.29.4",
         "@solidjs/router": "^0.15.0",
         "@solidjs/start": "2.0.0-alpha.2",
@@ -26,10 +26,10 @@
       },
     },
     "packages/query-solid": {
-      "name": "@skyjtx/query-solid",
+      "name": "@skyjt/query-solid",
       "version": "0.1.0",
       "dependencies": {
-        "@skyjtx/signals-solid": "^0.1.0",
+        "@skyjt/signals-solid": "^0.1.0",
       },
       "devDependencies": {
         "bun-types": "^1.3.11",
@@ -45,7 +45,7 @@
       },
     },
     "packages/signals-solid": {
-      "name": "@skyjtx/signals-solid",
+      "name": "@skyjt/signals-solid",
       "version": "0.1.0",
       "devDependencies": {
         "bun-types": "^1.3.11",
@@ -57,10 +57,10 @@
       },
     },
     "packages/store-solid": {
-      "name": "@skyjtx/store-solid",
+      "name": "@skyjt/store-solid",
       "version": "0.1.0",
       "dependencies": {
-        "@skyjtx/signals-solid": "^0.1.0",
+        "@skyjt/signals-solid": "^0.1.0",
       },
       "devDependencies": {
         "bun-types": "^1.3.11",
@@ -337,13 +337,21 @@
 
     "@sindresorhus/merge-streams": ["@sindresorhus/merge-streams@4.0.0", "", {}, "sha512-tlqY9xq5ukxTUZBmoOp+m61cqwQD5pHJtFY3Mn8CA8ps6yghLH/Hw8UPdqg4OLmFW3IFlcXnQNmo/dh8HzXYIQ=="],
 
-    "@skyjtx/my-site": ["@skyjtx/my-site@workspace:apps/web"],
+    "@skyjt/my-site": [
+      "@skyjt/my-site@workspace:apps/web"
+    ],
 
-    "@skyjtx/query-solid": ["@skyjtx/query-solid@workspace:packages/query-solid"],
+    "@skyjt/query-solid": [
+      "@skyjt/query-solid@workspace:packages/query-solid"
+    ],
 
-    "@skyjtx/signals-solid": ["@skyjtx/signals-solid@workspace:packages/signals-solid"],
+    "@skyjt/signals-solid": [
+      "@skyjt/signals-solid@workspace:packages/signals-solid"
+    ],
 
-    "@skyjtx/store-solid": ["@skyjtx/store-solid@workspace:packages/store-solid"],
+    "@skyjt/store-solid": [
+      "@skyjt/store-solid@workspace:packages/store-solid"
+    ],
 
     "@solidjs/meta": ["@solidjs/meta@0.29.4", "", { "peerDependencies": { "solid-js": ">=1.8.4" } }, "sha512-zdIWBGpR9zGx1p1bzIPqF5Gs+Ks/BH8R6fWhmUa/dcK1L2rUC8BAcZJzNRYBQv74kScf1TSOs0EY//Vd/I0V8g=="],
 

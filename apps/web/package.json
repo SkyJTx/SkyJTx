@@ -1,5 +1,5 @@
 {
-  "name": "@skyjtx/my-site",
+  "name": "@skyjt/my-site",
   "type": "module",
   "private": true,
   "scripts": {
@@ -9,9 +9,9 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@skyjtx/query-solid": "workspace:*",
-    "@skyjtx/signals-solid": "workspace:*",
-    "@skyjtx/store-solid": "workspace:*",
+    "@skyjt/query-solid": "workspace:*",
+    "@skyjt/signals-solid": "workspace:*",
+    "@skyjt/store-solid": "workspace:*",
     "@solidjs/meta": "^0.29.4",
     "@solidjs/router": "^0.15.0",
     "@solidjs/start": "2.0.0-alpha.2",

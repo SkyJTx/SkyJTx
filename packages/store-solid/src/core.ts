@@ -1,5 +1,5 @@
 import { createContext, useContext } from "solid-js";
-import { useReactive } from "@skyjtx/signals-solid";
+import { useReactive } from "@skyjt/signals-solid";
 import { isServer } from "solid-js/web";
 import { unwrap } from "solid-js/store";
 import type { StoreInitializer } from "./types";

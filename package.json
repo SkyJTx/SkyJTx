@@ -1,5 +1,5 @@
 {
-  "name": "skyjtx",
+  "name": "skyjt",
   "scripts": {
     "packages:clean": "bun run scripts/packages.ts clean",
     "packages:build": "bun run scripts/packages.ts build",

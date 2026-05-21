@@ -1,5 +1,5 @@
 {
-  "name": "@skyjtx/signals-solid",
+  "name": "@skyjt/signals-solid",
   "version": "0.1.0",
   "description": "SolidJS signal helpers with a Vue-like API.",
   "type": "module",

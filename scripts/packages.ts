@@ -1,14 +1,14 @@
 const packages = [
   {
-    name: "@skyjtx/signals-solid",
+    name: "@skyjt/signals-solid",
     path: "packages/signals-solid",
   },
   {
-    name: "@skyjtx/query-solid",
+    name: "@skyjt/query-solid",
     path: "packages/query-solid",
   },
   {
-    name: "@skyjtx/store-solid",
+    name: "@skyjt/store-solid",
     path: "packages/store-solid",
   },
 ];

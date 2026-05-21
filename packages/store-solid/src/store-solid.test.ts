@@ -4,7 +4,7 @@ import { createComponent, createRoot } from "solid-js";
 import { StoreRegistryContext, defineStore } from "./core";
 import { StoresProvider } from "./StoresProvider";
 
-describe("@skyjtx/store-solid", () => {
+describe("@skyjt/store-solid", () => {
   test("defineStore throws when used without a <StoresProvider>", () => {
     createRoot((dispose) => {
       try {

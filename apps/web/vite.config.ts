@@ -6,9 +6,9 @@ import { solidStart } from "@solidjs/start/config";
 export default defineConfig({
   plugins: [solidStart(), nitro()],
   optimizeDeps: {
-    exclude: ["@skyjtx/signals-solid"],
+    exclude: ["@skyjt/signals-solid"],
   },
   ssr: {
-    noExternal: ["@skyjtx/signals-solid"],
+    noExternal: ["@skyjt/signals-solid"],
   },
 });

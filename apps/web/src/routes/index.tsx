@@ -1,5 +1,5 @@
 import { Title } from "@solidjs/meta";
-import { useSolidQuery } from "@skyjtx/query-solid";
+import { useSolidQuery } from "@skyjt/query-solid";
 
 export default function Home() {
   const query = useSolidQuery({
