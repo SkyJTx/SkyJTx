@@ -12,12 +12,11 @@
         "allowJs": true,
         "strict": true,
         "noEmit": true,
-        "ignoreDeprecations": "6.0",
         "types": [
             "bun-types"
         ],
         "isolatedModules": true,
-        "baseUrl": ".",
+
         "paths": {
             "~/*": [
                 "./src/*"
