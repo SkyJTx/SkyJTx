@@ -16,7 +16,6 @@
       "vite/client"
     ],
     "isolatedModules": true,
-    "baseUrl": ".",
     "paths": {
       "~/*": [
         "./src/*"
