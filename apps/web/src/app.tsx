@@ -5,6 +5,7 @@ import { Suspense } from "solid-js";
 import "./app.css";
 import { StoresProvider } from "@skyjt/store-solid";
 import { QueriesProvider } from "@skyjt/query-solid";
+import { AppThemeProvider } from "./theme/ThemeProvider";
 
 export default function App() {
   return (
@@ -13,8 +14,10 @@ export default function App() {
         <QueriesProvider>
           <StoresProvider>
             <MetaProvider>
-              <Title>Reactivity Studio</Title>
-              <Suspense>{props.children}</Suspense>
+              <AppThemeProvider>
+                <Title>Reactivity Studio</Title>
+                <Suspense>{props.children}</Suspense>
+              </AppThemeProvider>
             </MetaProvider>
           </StoresProvider>
         </QueriesProvider>
