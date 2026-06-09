@@ -33,31 +33,42 @@ const NavRight = styled("div")`
   align-items: center;
 `;
 
+const NavWrapper = styled("div")`
+  position: fixed;
+  top: 1rem;
+  z-index: 100;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  pointer-events: none;
+`;
+
 export function NavigationBar(props: NavigationBarProps) {
   const theme = useTheme() as Theme;
   const resolvedAction = children(() => props.action);
 
   return (
-    <Box
-      style={{
-        padding: "0.4rem 1rem",
-        position: "relative",
-        overflow: "visible",
-        margin: "0 auto",
-      }}
-      fitContent={true}
-    >
-      <NavInner>
-        <NavLeft>
-          {props.menu}
-        </NavLeft>
-        <Show when={resolvedAction()}>
-          <Divider theme={theme} />
-          <NavRight>
-            {resolvedAction()}
-          </NavRight>
-        </Show>
-      </NavInner>
-    </Box>
+    <NavWrapper>
+      <Box
+        style={{
+          padding: "0.4rem 1rem",
+          overflow: "visible",
+          "pointer-events": "auto",
+        }}
+        fitContent={true}
+      >
+        <NavInner>
+          <NavLeft>
+            {props.menu}
+          </NavLeft>
+          <Show when={resolvedAction()}>
+            <Divider theme={theme} />
+            <NavRight>
+              {resolvedAction()}
+            </NavRight>
+          </Show>
+        </NavInner>
+      </Box>
+    </NavWrapper>
   );
 }

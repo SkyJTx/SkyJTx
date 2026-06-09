@@ -7,7 +7,7 @@ const BackgroundContainer = styled("div")<{ theme: Theme }>`
   min-height: 100vh;
   width: 100%;
   background-color: ${(props) => props.theme.colors.background};
-  overflow: hidden;
+  overflow-x: hidden;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -54,6 +54,19 @@ function hexToRgb(hex: string): RGB | null {
       }
     : null;
 }
+
+function resolveColor(colorStr: string): string {
+  if (colorStr.startsWith("var(")) {
+    const varName = colorStr.slice(4, -1);
+    if (typeof window !== "undefined") {
+      const val = document.documentElement.style.getPropertyValue(varName) || 
+                  getComputedStyle(document.documentElement).getPropertyValue(varName);
+      return val.trim();
+    }
+  }
+  return colorStr;
+}
+
 
 export function Background(props: BackgroundProps) {
   const theme = useTheme() as Theme;
@@ -148,8 +161,9 @@ export function Background(props: BackgroundProps) {
 
       projectedPoints.sort((a, b) => b.z - a.z);
 
-      const primaryRgb = hexToRgb(theme.colors.primary) || { r: 56, g: 189, b: 248 };
-      const secondaryRgb = hexToRgb(theme.colors.secondary) || { r: 14, g: 165, b: 233 };
+      const primaryRgb = hexToRgb(resolveColor(theme.colors.primary)) || { r: 56, g: 189, b: 248 };
+      const secondaryRgb = hexToRgb(resolveColor(theme.colors.secondary)) || { r: 14, g: 165, b: 233 };
+
 
       const minZ = viewerDistance - (rows / 2) * spacing;
       const maxZ = viewerDistance + (rows / 2) * spacing;

@@ -96,3 +96,5 @@ export function getTheme(theme: string): Theme {
 }
 
 export * from "./ThemeController";
+export * from "./ThemeToggler";
+

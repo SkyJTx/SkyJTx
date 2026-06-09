@@ -1,12 +1,12 @@
 <h1 align="center">Hi 👋, I'm Nattakarn Khumsupha</h1>
-<h3 align="center">A current computer engineering student.</h3>
+<h3 align="center">A graduated computer engineer.</h3>
 <div class="markdown contact view" align="center">
     <img src="https://komarev.com/ghpvc/?username=skyjtx&label=Profile%20views&color=0e75b6&style=flat" alt="skyjtx" />
     <img src="https://visitor-badge.laobi.icu/badge?page_id=SkyJTx.SkyJTx.github.io" alt="skyjtx">
 </div>
 <hr>
 <h3>About Myself</h4>
-<p> An ordinary computer enthusiastic man with classical music, history, and technologies as his favourites. I was born in November 2003 in Singburi, Thailand. Currently, I'm studying at <a href="https://kmutnb.ac.th/?lang=en-gb">KMUTNB</a> for a degree of computer engineering.</p>
+<p> An ordinary computer enthusiastic man with classical music, history, and technologies as his favourites. I was born in November 2003 in Singburi, Thailand. Currently, I am an alumni of <a href="https://kmutnb.ac.th/?lang=en-gb">KMUTNB</a> with a degree of computer engineering.</p>
 <hr>
 <h3>Github's Stats</h3>
 <div class="markdown contact" align="center">
