@@ -3,6 +3,8 @@ import { BrandTitle, BrandSubtitle } from "~/components/Brand";
 import { Box } from "~/components/Box";
 import { Button } from "~/components/Button";
 import { Theme } from "~/components/ThemeComponents/types";
+import { withOpacity } from "~/components/ThemeComponents/index";
+
 
 const SectionWrapper = styled("section")<{ theme: Theme }>`
   display: flex;
@@ -11,8 +13,8 @@ const SectionWrapper = styled("section")<{ theme: Theme }>`
   justify-content: flex-start;
   width: 100%;
   max-width: 1200px;
-  min-height: 100vh;
-  padding: 8rem 2rem 4rem 2rem;
+  min-height: auto;
+  padding: 6rem 2rem;
   box-sizing: border-box;
 `;
 
@@ -75,7 +77,7 @@ const TechTag = styled("span")<{ theme: Theme }>`
   font-size: 0.75rem;
   padding: 0.2rem 0.6rem;
   border-radius: ${(p) => p.theme.radii.full};
-  background: ${(p) => p.theme.colors.primary}15;
+  background: ${(p) => withOpacity(p.theme.colors.primary, 0.08)};
   color: ${(p) => p.theme.colors.primary};
   font-family: ${(p) => p.theme.typography.fontFamily};
 `;

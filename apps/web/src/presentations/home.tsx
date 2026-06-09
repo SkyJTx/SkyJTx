@@ -1,12 +1,13 @@
 import { useComputed } from "@skyjt/signals-solid";
 import { styled, useTheme } from "solid-styled-components";
 import { Logo, BrandTitle, BrandSubtitle } from "~/components/Brand";
-import { useThemeController } from "~/components/ThemeComponents";
+import { useThemeController, withOpacity } from "~/components/ThemeComponents";
 import { useNavigationRepo } from "~/components/NavigationBar";
 import { Box } from "~/components/Box";
 import { Button } from "~/components/Button";
 import { SocialLinks } from "~/components/SocialLinks";
 import { Theme } from "~/components/ThemeComponents/types";
+
 
 const HomeWrapper = styled("section")<{ theme: Theme }>`
   display: flex;
@@ -103,7 +104,7 @@ const CardIconWrapper = styled("div")<{ theme: Theme }>`
   width: 48px;
   height: 48px;
   border-radius: ${(p) => p.theme.radii.md};
-  background: ${(p) => p.theme.colors.primary}15;
+  background: ${(p) => withOpacity(p.theme.colors.primary, 0.08)};
   color: ${(p) => p.theme.colors.primary};
   margin-bottom: 1.25rem;
 `;

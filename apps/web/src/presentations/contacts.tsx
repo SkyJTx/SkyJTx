@@ -12,8 +12,8 @@ const SectionWrapper = styled("section")<{ theme: Theme }>`
   justify-content: flex-start;
   width: 100%;
   max-width: 800px;
-  min-height: 100vh;
-  padding: 8rem 2rem 4rem 2rem;
+  min-height: auto;
+  padding: 6rem 2rem;
   box-sizing: border-box;
 `;
 

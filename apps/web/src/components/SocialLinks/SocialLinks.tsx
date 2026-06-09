@@ -1,5 +1,6 @@
 import { styled, useTheme } from "solid-styled-components";
 import { Theme } from "~/components/ThemeComponents/types";
+import { withOpacity } from "~/components/ThemeComponents/index";
 
 interface SocialLinksProps {
   githubUrl?: string;
@@ -17,8 +18,8 @@ const SocialContainer = styled("div")`
 const SocialIconLink = styled("a")<{ theme: Theme }>`
   background: linear-gradient(
     135deg,
-    ${(props) => props.theme.colors.surface}cc 0%,
-    ${(props) => props.theme.colors.background}80 100%
+    ${(props) => withOpacity(props.theme.colors.surface, 0.8)} 0%,
+    ${(props) => withOpacity(props.theme.colors.background, 0.5)} 100%
   );
   backdrop-filter: blur(12px) saturate(160%);
   -webkit-backdrop-filter: blur(12px) saturate(160%);
@@ -39,9 +40,10 @@ const SocialIconLink = styled("a")<{ theme: Theme }>`
     color: ${(props) => props.theme.colors.primary};
     transform: translateY(-2px);
     box-shadow: 
-      0 4px 12px ${(props) => props.theme.colors.primary}33,
-      inset 0 0 4px ${(props) => props.theme.colors.primary}44;
+      0 4px 12px ${(props) => withOpacity(props.theme.colors.primary, 0.2)},
+      inset 0 0 4px ${(props) => withOpacity(props.theme.colors.primary, 0.27)};
   }
+
 
   &:active {
     transform: translateY(0);
