@@ -7,36 +7,20 @@ import {
   NavigationMenu,
 } from "~/components/NavigationBar/index";
 import { Theme } from "~/components/ThemeComponents/types";
+import { ThemeToggler } from "~/components/ThemeComponents/index";
+
 
 const PageContainer = styled("div")`
   width: 100%;
-  max-width: 1200px;
-  padding: 2rem 1.5rem;
   z-index: 1;
 `;
 
-const ActionButton = styled("button")<{ theme: Theme }>`
-  background: linear-gradient(135deg, ${(props) => props.theme.colors.primary} 0%, ${(props) => props.theme.colors.secondary} 100%);
-  color: white;
-  border: none;
-  padding: 0.35rem 0.9rem;
-  border-radius: ${(props) => props.theme.radii.md};
-  font-family: ${(props) => props.theme.typography.fontFamily};
-  font-size: 0.75rem;
-  font-weight: ${(props) => props.theme.typography.fontWeight.bold};
-  cursor: pointer;
-  transition: all ${(props) => props.theme.transitions.fast};
-  box-shadow: 0 4px 12px ${(props) => props.theme.colors.primary}44;
-
-  &:hover {
-    box-shadow: 0 6px 16px ${(props) => props.theme.colors.primary}66;
-    transform: translateY(-1px);
-  }
-
-  &:active {
-    transform: translateY(0);
-  }
+const ActionsContainer = styled("div")`
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
 `;
+
 
 const CustomTabButton = styled("button")<{ theme: Theme; active: boolean }>`
   background: transparent;
@@ -49,7 +33,9 @@ const CustomTabButton = styled("button")<{ theme: Theme; active: boolean }>`
   gap: 0.4rem;
   transition: all ${(props) => props.theme.transitions.fast};
   font-size: 0.75rem;
-  font-weight: ${(props) => (props.active ? props.theme.typography.fontWeight.bold : props.theme.typography.fontWeight.medium)};
+  font-weight: ${(props) => props.theme.typography.fontWeight.medium};
+  text-shadow: ${(props) => (props.active ? "0.5px 0 0 currentColor" : "none")};
+
 
   &:hover {
     color: ${(props) => props.theme.colors.primary};
@@ -78,7 +64,12 @@ export default function PersonalPageLayout(props: RouteSectionProps) {
                 )}
               </NavigationMenu>
             }
-            action={<ActionButton theme={theme}>Get Started</ActionButton>}
+            action={
+              <ActionsContainer>
+                <ThemeToggler />
+              </ActionsContainer>
+            }
+
           />
           {props.children}
         </PageContainer>
