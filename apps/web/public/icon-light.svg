@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="100%" height="100%">
+  <defs>
+    <!-- Blue gradient for the glyphs -->
+    <linearGradient id="blueGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#38bdf8" />
+      <stop offset="100%" stop-color="#0284c7" />
+    </linearGradient>
+
+    <!-- Neumorphic Filter -->
+    <filter id="neumorphism" x="-30%" y="-30%" width="160%" height="160%">
+      <!-- Light highlight (top-left) -->
+      <feDropShadow in="SourceGraphic" dx="-5" dy="-5" stdDeviation="5" flood-color="#ffffff" flood-opacity="0.9" result="light"/>
+      <!-- Dark shadow (bottom-right) -->
+      <feDropShadow in="SourceGraphic" dx="6" dy="6" stdDeviation="6" flood-color="#0369a1" flood-opacity="0.22" result="dark"/>
+      <!-- Merge -->
+      <feMerge>
+        <feMergeNode in="light"/>
+        <feMergeNode in="dark"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Single continuous path with rotation and filter applied -->
+  <path d="M 42 153 L 70 140 L 70 60 Q 115 60 130 140 L 130 60 L 158 47" 
+        fill="none" 
+        stroke="url(#blueGrad)" 
+        stroke-width="20" 
+        stroke-linecap="butt" 
+        stroke-linejoin="round"
+        transform="rotate(12, 100, 100)"
+        filter="url(#neumorphism)" />
+</svg>
