@@ -1,7 +1,7 @@
 import { For, JSX } from "solid-js";
 import { styled, useTheme } from "solid-styled-components";
 import { useNavigationRepo } from "./NavigationContext";
-import { Theme } from "~/theme/types";
+import { Theme } from "~/components/ThemeComponents/types";
 
 interface NavigationMenuProps<T> {
   items: T[];

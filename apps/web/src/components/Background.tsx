@@ -1,6 +1,6 @@
 import { JSX, onMount, onCleanup } from "solid-js";
 import { styled, useTheme } from "solid-styled-components";
-import { Theme } from "~/theme/types";
+import { Theme } from "~/components/ThemeComponents/types";
 
 const BackgroundContainer = styled("div")<{ theme: Theme }>`
   position: relative;

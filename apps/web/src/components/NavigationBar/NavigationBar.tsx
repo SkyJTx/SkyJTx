@@ -1,7 +1,7 @@
-import { JSX } from "solid-js";
+import { JSX, Show, children } from "solid-js";
 import { styled, useTheme } from "solid-styled-components";
 import { Box } from "~/components/Box";
-import { Theme } from "~/theme/types";
+import { Theme } from "~/components/ThemeComponents/types";
 
 interface NavigationBarProps {
   menu: JSX.Element;
@@ -12,7 +12,7 @@ const NavInner = styled("div")`
   display: flex;
   align-items: center;
   justify-content: space-between;
-  width: 100%;
+  width: fit-content;
 `;
 
 const NavLeft = styled("div")`
@@ -35,21 +35,20 @@ const NavRight = styled("div")`
 
 export function NavigationBar(props: NavigationBarProps) {
   const theme = useTheme() as Theme;
+  const resolvedAction = children(() => props.action);
 
   return (
-    <Box style={{ padding: "0.5rem 1.5rem" }}>
+    <Box style={{ padding: "0.5rem 1.5rem" }} fitContent={true}>
       <NavInner>
         <NavLeft>
           {props.menu}
         </NavLeft>
-        {props.action && (
-          <>
-            <Divider theme={theme} />
-            <NavRight>
-              {props.action}
-            </NavRight>
-          </>
-        )}
+        <Show when={resolvedAction()}>
+          <Divider theme={theme} />
+          <NavRight>
+            {resolvedAction()}
+          </NavRight>
+        </Show>
       </NavInner>
     </Box>
   );

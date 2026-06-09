@@ -1,8 +1,8 @@
 // @refresh reload
 import { createHandler, StartServer } from "@solidjs/start/server";
+import { extractCss } from "solid-styled-components";
 
 export default createHandler(() => {
-
   return (
     <StartServer
       document={({ assets, children, scripts }) => (
@@ -15,6 +15,7 @@ export default createHandler(() => {
             />
             <link rel="icon" href="/favicon.ico" />
             {assets}
+            <style id="_goober">{extractCss()}</style>
           </head>
           <body>
             <div id="app">{children}</div>
