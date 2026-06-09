@@ -58,11 +58,11 @@ const CustomTabButton = styled("button")<{ theme: Theme; active: boolean }>`
 
 export default function PersonalPageLayout(props: RouteSectionProps) {
   const theme = useTheme() as Theme;
-  const menus = ["Overview", "Documentation", "Packages", "Settings"];
+  const menus = ["Home", "About", "Works", "Contacts"];
 
   return (
     <Background>
-      <NavigationProvider initialMenu="Overview">
+      <NavigationProvider initialMenu="Home">
         <PageContainer>
           <NavigationBar
             menu={
