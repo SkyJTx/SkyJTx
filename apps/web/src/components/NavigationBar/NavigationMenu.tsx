@@ -2,6 +2,8 @@ import { For, JSX, Show } from "solid-js";
 import { styled, useTheme } from "solid-styled-components";
 import { useNavigationRepo } from "./NavigationContext";
 import { Theme } from "~/components/ThemeComponents/types";
+import { withOpacity } from "~/components/ThemeComponents/index";
+
 
 interface NavigationMenuProps<T> {
   items: T[];
@@ -39,7 +41,7 @@ const MenuItemWrapper = styled("div")<{ theme: Theme; active: boolean }>`
     height: ${(props) => (props.active ? "100%" : "0%")};
     background: linear-gradient(
       to top,
-      ${(props) => props.theme.colors.primary}20 0%,
+      ${(props) => withOpacity(props.theme.colors.primary, 0.125)} 0%,
       transparent 100%
     );
     opacity: ${(props) => (props.active ? 1 : 0)};
@@ -126,7 +128,7 @@ const GlowRadial = styled("div")<{ theme: Theme }>`
   height: 30px;
   background: radial-gradient(
     circle,
-    ${(props) => props.theme.colors.primary}40 0%,
+    ${(props) => withOpacity(props.theme.colors.primary, 0.25)} 0%,
     transparent 70%
   );
   filter: blur(6px);

@@ -57,7 +57,19 @@ export default function PersonalPageLayout(props: RouteSectionProps) {
                   <CustomTabButton
                     theme={theme}
                     active={isActive()}
-                    onClick={onClick}
+                    onClick={() => {
+                      onClick();
+                      if (typeof window !== "undefined") {
+                        (window as any).isScrollingToSection = true;
+                        const element = document.getElementById(item);
+                        if (element) {
+                          element.scrollIntoView({ behavior: "smooth", block: "start" });
+                        }
+                        setTimeout(() => {
+                          (window as any).isScrollingToSection = false;
+                        }, 800);
+                      }
+                    }}
                   >
                     <span>{item}</span>
                   </CustomTabButton>

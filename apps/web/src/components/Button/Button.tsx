@@ -1,6 +1,7 @@
 import { JSX } from "solid-js";
 import { styled, useTheme } from "solid-styled-components";
 import { Theme } from "~/components/ThemeComponents/types";
+import { withOpacity } from "~/components/ThemeComponents/index";
 
 interface ButtonProps {
   children: JSX.Element;
@@ -46,13 +47,13 @@ const StyledButton = styled("button")<{
         );
         color: #ffffff;
         border: none;
-        box-shadow: 0 4px 12px ${p.theme.colors.primary}33;
+        box-shadow: 0 4px 12px ${withOpacity(p.theme.colors.primary, 0.2)};
 
         &:hover {
           transform: translateY(-2px);
           box-shadow: 
-            0 6px 20px ${p.theme.colors.primary}55,
-            0 0 12px ${p.theme.colors.secondary}44;
+            0 6px 20px ${withOpacity(p.theme.colors.primary, 0.33)},
+            0 0 12px ${withOpacity(p.theme.colors.secondary, 0.27)};
         }
 
         &:active {
@@ -65,8 +66,8 @@ const StyledButton = styled("button")<{
       return `
         background: linear-gradient(
           135deg,
-          ${p.theme.colors.surface}cc 0%,
-          ${p.theme.colors.background}80 100%
+          ${withOpacity(p.theme.colors.surface, 0.8)} 0%,
+          ${withOpacity(p.theme.colors.background, 0.5)} 100%
         );
         color: ${p.theme.colors.text};
         border: 1px solid ${p.theme.colors.border};
@@ -77,7 +78,7 @@ const StyledButton = styled("button")<{
           border-color: ${p.theme.colors.primary};
           color: ${p.theme.colors.primary};
           transform: translateY(-2px);
-          box-shadow: 0 4px 12px ${p.theme.colors.primary}22;
+          box-shadow: 0 4px 12px ${withOpacity(p.theme.colors.primary, 0.13)};
         }
 
         &:active {

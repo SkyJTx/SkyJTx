@@ -2,12 +2,13 @@ import { styled, useTheme } from "solid-styled-components";
 import { Theme } from "./types";
 import { useThemeController } from "./ThemeController";
 import { Switch, Match } from "solid-js";
+import { withOpacity } from "./utils";
 
 const TogglerButton = styled("button")<{ theme: Theme }>`
   background: linear-gradient(
     135deg,
-    ${(props) => props.theme.colors.surface}cc 0%,
-    ${(props) => props.theme.colors.background}80 100%
+    ${(props) => withOpacity(props.theme.colors.surface, 0.8)} 0%,
+    ${(props) => withOpacity(props.theme.colors.background, 0.5)} 100%
   );
   backdrop-filter: blur(12px) saturate(160%);
   -webkit-backdrop-filter: blur(12px) saturate(160%);
@@ -28,8 +29,9 @@ const TogglerButton = styled("button")<{ theme: Theme }>`
     border-color: ${(props) => props.theme.colors.primary};
     color: ${(props) => props.theme.colors.primary};
     transform: translateY(-1px);
-    box-shadow: 0 4px 12px ${(props) => props.theme.colors.primary}33;
+    box-shadow: 0 4px 12px ${(props) => withOpacity(props.theme.colors.primary, 0.2)};
   }
+
 
   &:active {
     transform: translateY(0);

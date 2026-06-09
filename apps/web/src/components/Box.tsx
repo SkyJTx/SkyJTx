@@ -1,6 +1,7 @@
 import { JSX } from "solid-js";
 import { styled, useTheme } from "solid-styled-components";
 import { Theme } from "~/components/ThemeComponents/types";
+import { withOpacity } from "~/components/ThemeComponents/index";
 
 export interface BoxProps {
   children?: JSX.Element;
@@ -10,6 +11,7 @@ export interface BoxProps {
   padding?: string | number;
   boxRadius?: string;
   fitContent?: boolean;
+  blur?: string;
 }
 
 export const StyledBox = styled("div")<{
@@ -18,22 +20,23 @@ export const StyledBox = styled("div")<{
   $padding?: string | number;
   $boxRadius?: string;
   $fitContent?: boolean;
+  $blur?: string;
 }>`
   /* Liquid Glass base */
   background: linear-gradient(
     135deg,
-    ${(props) => props.theme.colors.surface}cc 0%,
-    ${(props) => props.theme.colors.background}80 100%
+    ${(props) => withOpacity(props.theme.colors.surface, 0.8)} 0%,
+    ${(props) => withOpacity(props.theme.colors.background, 0.5)} 100%
   );
-  backdrop-filter: blur(18px) saturate(160%);
-  -webkit-backdrop-filter: blur(18px) saturate(160%);
+  backdrop-filter: blur(${(props) => props.$blur ?? "18px"}) saturate(160%);
+  -webkit-backdrop-filter: blur(${(props) => props.$blur ?? "18px"}) saturate(160%);
   border-radius: ${(props) => props.$boxRadius ?? props.theme.radii.lg};
   border: 1px solid ${(props) => props.theme.colors.border};
 
   /* Subtle glow instead of heavy shadow */
   box-shadow:
-    inset 0 0 6px ${(props) => props.theme.colors.primary}99,
-    0 0 100px ${(props) => props.theme.colors.secondary}22;
+    inset 0 0 6px ${(props) => withOpacity(props.theme.colors.primary, 0.6)},
+    0 0 100px ${(props) => withOpacity(props.theme.colors.secondary, 0.13)};
 
   /* Layout tokens */
   ${(props) => (props.$padding !== undefined ? `padding: ${props.$padding};` : `padding: ${props.theme.spacing.lg};`)}
@@ -45,8 +48,8 @@ export const StyledBox = styled("div")<{
   /* Hover effect: gentle lift */
   &:hover {
     box-shadow:
-      inset 0 0 8px ${(props) => props.theme.colors.primary}cc,
-      0 4px 20px ${(props) => props.theme.colors.secondary}44;
+      inset 0 0 8px ${(props) => withOpacity(props.theme.colors.primary, 0.8)},
+      0 4px 20px ${(props) => withOpacity(props.theme.colors.secondary, 0.27)};
     transform: translateY(-2px);
   }
 `;
@@ -63,9 +66,11 @@ export function Box(props: BoxProps) {
       $padding={props.padding}
       $boxRadius={props.boxRadius}
       $fitContent={props.fitContent}
+      $blur={props.blur}
     >
       {props.children}
     </StyledBox>
   );
 }
+
 
