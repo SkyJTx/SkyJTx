@@ -4,6 +4,7 @@ import { Box } from "~/components/Box";
 import { useNavigationRepo } from "~/components/NavigationBar/index";
 import { Theme } from "~/components/ThemeComponents/types";
 import { useThemeController } from "~/components/ThemeComponents/index";
+import { useWatch } from "@skyjt/signals-solid";
 
 const ContentContainer = styled("div")`
   margin-top: 2rem;
@@ -56,6 +57,13 @@ export default function Home() {
   const repo = useNavigationRepo<string>();
   const theme = useTheme() as Theme;
   const themeController = useThemeController();
+
+  useWatch(
+    () => repo.activeMenu,
+    () => {
+      console.log('activeMenu', repo.activeMenu);
+    }
+  );
 
   return (
     <ContentContainer>

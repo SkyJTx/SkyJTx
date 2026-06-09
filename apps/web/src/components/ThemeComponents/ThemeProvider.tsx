@@ -25,9 +25,12 @@ export function AppThemeProvider(props: AppThemeProviderProps) {
   const isMounted = useSignal(false);
   const controller = new ThemeController();
 
-  const theme = useComputed(() => {
-    if (!isMounted.value) return darkTheme;
-    return controller.resolvedTheme.value === "light" ? lightTheme : darkTheme;
+  const themeProxy = new Proxy({} as Theme, {
+    get(target, prop) {
+      if (!isMounted.value) return Reflect.get(darkTheme, prop);
+      const activeTheme = controller.resolvedTheme.value === "light" ? lightTheme : darkTheme;
+      return Reflect.get(activeTheme, prop);
+    }
   });
 
   onMount(() => {
@@ -40,9 +43,9 @@ export function AppThemeProvider(props: AppThemeProviderProps) {
 
   return (
     <ThemeContext.Provider value={controller}>
-      <SolidThemeProvider theme={theme.value}>
+      <SolidThemeProvider theme={themeProxy}>
         {props.children}
-        <Overlay visible={!isMounted.value} theme={theme.value} />
+        <Overlay visible={!isMounted.value} theme={themeProxy} />
       </SolidThemeProvider>
     </ThemeContext.Provider>
   );

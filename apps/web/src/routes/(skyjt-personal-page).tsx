@@ -11,7 +11,7 @@ import { Theme } from "~/components/ThemeComponents/types";
 const PageContainer = styled("div")`
   width: 100%;
   max-width: 1200px;
-  padding: 0 1.5rem;
+  padding: 2rem 1.5rem;
   z-index: 1;
 `;
 
@@ -19,10 +19,10 @@ const ActionButton = styled("button")<{ theme: Theme }>`
   background: linear-gradient(135deg, ${(props) => props.theme.colors.primary} 0%, ${(props) => props.theme.colors.secondary} 100%);
   color: white;
   border: none;
-  padding: 0.5rem 1.25rem;
+  padding: 0.35rem 0.9rem;
   border-radius: ${(props) => props.theme.radii.md};
   font-family: ${(props) => props.theme.typography.fontFamily};
-  font-size: ${(props) => props.theme.typography.fontSize.sm};
+  font-size: 0.75rem;
   font-weight: ${(props) => props.theme.typography.fontWeight.bold};
   cursor: pointer;
   transition: all ${(props) => props.theme.transitions.fast};
@@ -42,12 +42,13 @@ const CustomTabButton = styled("button")<{ theme: Theme; active: boolean }>`
   background: transparent;
   color: ${(props) => (props.active ? props.theme.colors.primary : props.theme.colors.text)};
   border: none;
-  padding: 0.6rem 1rem;
+  padding: 0.4rem 0.75rem;
   cursor: pointer;
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.4rem;
   transition: all ${(props) => props.theme.transitions.fast};
+  font-size: 0.75rem;
   font-weight: ${(props) => (props.active ? props.theme.typography.fontWeight.bold : props.theme.typography.fontWeight.medium)};
 
   &:hover {

@@ -1,4 +1,3 @@
-import { keyframes } from "solid-styled-components";
 import { Theme } from "./types";
 
 export const lightTheme: Theme = {
@@ -87,4 +86,13 @@ export const darkTheme: Theme = {
   transitions: lightTheme.transitions,
 };
 
-export * from "./ThemeController";
+export function getTheme(theme: string): Theme {
+  return new Proxy({}, {
+    get(_, prop: string, __) {
+      const target = theme === 'light' ? lightTheme : darkTheme;
+      return Reflect.get(target, prop);
+    }
+  }) as unknown as Theme;
+}
+
+export * from "./ThemeController";

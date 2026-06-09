@@ -15,6 +15,14 @@ export class ThemeController {
   private systemThemeSignal = useSignal<"light" | "dark">("dark");
   private isInitialized = false;
 
+  private resolvedThemeSignal = useComputed(() => {
+    const mode = this.modeSignal.value;
+    if (mode === "system") {
+      return this.systemThemeSignal.value;
+    }
+    return mode;
+  });
+
   /**
    * Initializes the theme controller state and registers listeners.
    */
@@ -65,13 +73,7 @@ export class ThemeController {
    * Returns a computed signal of the active theme ("light" or "dark").
    */
   public get resolvedTheme() {
-    return useComputed(() => {
-      const mode = this.modeSignal.value;
-      if (mode === "system") {
-        return this.systemThemeSignal.value;
-      }
-      return mode;
-    });
+    return this.resolvedThemeSignal;
   }
 
   /**

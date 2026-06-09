@@ -25,7 +25,7 @@ const Divider = styled("div")<{ theme: Theme }>`
   width: 1px;
   height: 24px;
   background-color: ${(props) => props.theme.colors.border};
-  margin: 0 ${(props) => props.theme.spacing.lg};
+  margin: 0 1rem;
 `;
 
 const NavRight = styled("div")`
@@ -38,7 +38,15 @@ export function NavigationBar(props: NavigationBarProps) {
   const resolvedAction = children(() => props.action);
 
   return (
-    <Box style={{ padding: "0.5rem 1.5rem" }} fitContent={true}>
+    <Box
+      style={{
+        padding: "0.4rem 1rem",
+        position: "relative",
+        overflow: "visible",
+        margin: "0 auto",
+      }}
+      fitContent={true}
+    >
       <NavInner>
         <NavLeft>
           {props.menu}
