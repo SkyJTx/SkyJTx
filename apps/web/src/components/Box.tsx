@@ -3,7 +3,7 @@ import { styled, useTheme } from "solid-styled-components";
 import { Theme } from "~/components/ThemeComponents/types";
 
 export interface BoxProps {
-  children: JSX.Element;
+  children?: JSX.Element;
   class?: string;
   style?: JSX.CSSProperties;
   margin?: string | number;
