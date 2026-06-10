@@ -1,13 +1,18 @@
 import { createContext, useContext, JSX } from "solid-js";
+import { Signal } from "@skyjt/signals-solid";
 import { NavigationRepository } from "./Repository";
 
 const NavigationContext = createContext<NavigationRepository<any>>();
 
 export function NavigationProvider<T>(props: {
-  initialMenu: T;
+  initialMenu?: T;
+  activeMenu?: Signal<T>;
   children: JSX.Element;
 }) {
-  const repo = new NavigationRepository<T>(props.initialMenu);
+  const repo = new NavigationRepository<T>(
+    props.activeMenu ? props.activeMenu.peek() : props.initialMenu!,
+    props.activeMenu
+  );
 
   return (
     <NavigationContext.Provider value={repo}>

@@ -30,8 +30,12 @@ export default function Home() {
       for (const entry of entries) {
         if (entry.isIntersecting) {
           const id = entry.target.id;
-          if (id) {
+          if (id && repo.activeMenu !== id) {
+            window.isObserverUpdating = true;
             repo.activeMenu = id;
+            queueMicrotask(() => {
+              window.isObserverUpdating = false;
+            });
           }
         }
       }
