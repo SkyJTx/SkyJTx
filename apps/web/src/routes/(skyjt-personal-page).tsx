@@ -36,6 +36,11 @@ const CustomTabButton = styled("button")<{ theme: Theme; active: boolean }>`
   font-weight: ${(props) => props.theme.typography.fontWeight.medium};
   text-shadow: ${(props) => (props.active ? "0.5px 0 0 currentColor" : "none")};
 
+  @media (max-width: 480px) {
+    padding: 0.3rem 0.5rem;
+    font-size: 0.7rem;
+    gap: 0.2rem;
+  }
 
   &:hover {
     color: ${(props) => props.theme.colors.primary};
@@ -43,7 +48,7 @@ const CustomTabButton = styled("button")<{ theme: Theme; active: boolean }>`
 `;
 
 export default function PersonalPageLayout(props: RouteSectionProps) {
-  const theme = useTheme() as Theme;
+  const theme = useTheme();
   const menus = ["Home", "About", "Works", "Contacts"];
 
   return (
@@ -55,21 +60,21 @@ export default function PersonalPageLayout(props: RouteSectionProps) {
               <NavigationMenu items={menus}>
                 {(item, isActive, onClick) => (
                   <CustomTabButton
-                    theme={theme}
-                    active={isActive()}
-                    onClick={() => {
-                      onClick();
-                      if (typeof window !== "undefined") {
-                        (window as any).isScrollingToSection = true;
-                        const element = document.getElementById(item);
-                        if (element) {
-                          element.scrollIntoView({ behavior: "smooth", block: "start" });
-                        }
-                        setTimeout(() => {
-                          (window as any).isScrollingToSection = false;
-                        }, 800);
-                      }
-                    }}
+                     theme={theme}
+                     active={isActive()}
+                     onClick={() => {
+                       onClick();
+                       if (typeof window !== "undefined") {
+                         window.isScrollingToSection = true;
+                         const element = document.getElementById(item);
+                         if (element) {
+                           element.scrollIntoView({ behavior: "smooth", block: "start" });
+                         }
+                         setTimeout(() => {
+                           window.isScrollingToSection = false;
+                         }, 800);
+                       }
+                     }}
                   >
                     <span>{item}</span>
                   </CustomTabButton>

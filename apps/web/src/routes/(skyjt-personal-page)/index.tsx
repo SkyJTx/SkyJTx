@@ -24,7 +24,7 @@ export default function Home() {
     };
 
     const observer = new IntersectionObserver((entries) => {
-      if (typeof window !== "undefined" && (window as any).isScrollingToSection) {
+      if (typeof window !== "undefined" && window.isScrollingToSection) {
         return;
       }
       for (const entry of entries) {

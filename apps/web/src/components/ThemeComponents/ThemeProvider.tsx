@@ -98,7 +98,6 @@ export function AppThemeProvider(props: AppThemeProviderProps) {
     }
     controller.init();
     
-    // Set initial CSS variables
     const activeTheme = controller.resolvedTheme.value === "light" ? lightTheme : darkTheme;
     for (const [key, val] of Object.entries(activeTheme.colors)) {
       document.documentElement.style.setProperty(`--color-${key}`, val);

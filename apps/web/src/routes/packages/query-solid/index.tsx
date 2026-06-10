@@ -6,7 +6,7 @@ const delayedServerIncrement = action(async (newValue: number) => {
   "use server";
   const delay = (ms: number) =>
     new Promise((resolve) => setTimeout(resolve, ms));
-  await delay(1000); // Simulate a delay of 1 second
+  await delay(1000);
   console.log("Server incremented value:", newValue);
   return newValue + 1;
 });
@@ -57,7 +57,7 @@ const delayedServerIncrement = action(async (newValue: number) => {
   "use server";
   const delay = (ms: number) =>
     new Promise((resolve) => setTimeout(resolve, ms));
-  await delay(1000); // Simulate a delay of 1 second
+  await delay(1000);
   console.log("Server incremented value:", newValue);
   return newValue + 1;
 });

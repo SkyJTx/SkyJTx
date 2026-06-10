@@ -18,6 +18,10 @@ const MenuContainer = styled("div")<{ theme: Theme }>`
   display: flex;
   align-items: center;
   gap: ${(props) => props.theme.spacing.md};
+
+  @media (max-width: 480px) {
+    gap: 0.25rem;
+  }
 `;
 
 const MenuItemWrapper = styled("div")<{ theme: Theme; active: boolean }>`
@@ -138,7 +142,7 @@ const GlowRadial = styled("div")<{ theme: Theme }>`
 
 export function NavigationMenu<T>(props: NavigationMenuProps<T>) {
   const repo = useNavigationRepo<T>();
-  const theme = useTheme() as Theme;
+  const theme = useTheme();
 
   return (
     <MenuContainer theme={theme}>

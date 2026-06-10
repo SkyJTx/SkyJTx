@@ -22,7 +22,6 @@ export const StyledBox = styled("div")<{
   $fitContent?: boolean;
   $blur?: string;
 }>`
-  /* Liquid Glass base */
   background: linear-gradient(
     135deg,
     ${(props) => withOpacity(props.theme.colors.surface, 0.8)} 0%,
@@ -33,19 +32,16 @@ export const StyledBox = styled("div")<{
   border-radius: ${(props) => props.$boxRadius ?? props.theme.radii.lg};
   border: 1px solid ${(props) => props.theme.colors.border};
 
-  /* Subtle glow instead of heavy shadow */
   box-shadow:
     inset 0 0 6px ${(props) => withOpacity(props.theme.colors.primary, 0.6)},
     0 0 100px ${(props) => withOpacity(props.theme.colors.secondary, 0.13)};
 
-  /* Layout tokens */
   ${(props) => (props.$padding !== undefined ? `padding: ${props.$padding};` : `padding: ${props.theme.spacing.lg};`)}
   ${(props) => (props.$margin !== undefined ? `margin: ${props.$margin};` : "")}
   ${(props) => (props.$fitContent ? "width: fit-content;" : "")}
   color: ${(props) => props.theme.colors.text};
   transition: ${(props) => props.theme.transitions.normal};
 
-  /* Hover effect: gentle lift */
   &:hover {
     box-shadow:
       inset 0 0 8px ${(props) => withOpacity(props.theme.colors.primary, 0.8)},
@@ -55,7 +51,7 @@ export const StyledBox = styled("div")<{
 `;
 
 export function Box(props: BoxProps) {
-  const theme = useTheme() as Theme;
+  const theme = useTheme();
 
   return (
     <StyledBox
@@ -72,5 +68,3 @@ export function Box(props: BoxProps) {
     </StyledBox>
   );
 }
-
-

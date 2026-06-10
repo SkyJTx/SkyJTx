@@ -5,6 +5,8 @@ import { Theme } from "~/components/ThemeComponents/types";
 interface BrandSubtitleProps {
   children: JSX.Element;
   maxWidth?: string;
+  style?: JSX.CSSProperties;
+  class?: string;
 }
 
 const StyledBrandSubtitle = styled("p")<{ theme: Theme; $maxWidth: string }>`
@@ -18,11 +20,16 @@ const StyledBrandSubtitle = styled("p")<{ theme: Theme; $maxWidth: string }>`
 `;
 
 export function BrandSubtitle(props: BrandSubtitleProps) {
-  const theme = useTheme() as Theme;
+  const theme = useTheme();
   const maxWidth = props.maxWidth ?? "500px";
 
   return (
-    <StyledBrandSubtitle theme={theme} $maxWidth={maxWidth}>
+    <StyledBrandSubtitle
+      theme={theme}
+      $maxWidth={maxWidth}
+      style={props.style}
+      class={props.class}
+    >
       {props.children}
     </StyledBrandSubtitle>
   );

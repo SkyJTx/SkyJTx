@@ -36,8 +36,9 @@ export class ThemeController {
     }
     this.isInitialized = true;
 
-    const saved = localStorage.getItem("theme-mode") as ThemeMode | null;
-    if (saved === "light" || saved === "dark" || saved === "system") {
+    const savedValue = localStorage.getItem("theme-mode");
+    const saved = (savedValue === "light" || savedValue === "dark" || savedValue === "system") ? savedValue : null;
+    if (saved) {
       this.modeSignal.value = saved;
     }
 
