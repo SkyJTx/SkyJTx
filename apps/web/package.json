@@ -5,8 +5,8 @@
   "scripts": {
     "dev": "vite dev",
     "build": "vite build",
-    "start": "vite start",
-    "preview": "vite preview"
+    "start": "node .output/server/index.mjs",
+    "preview": "node .output/server/index.mjs"
   },
   "dependencies": {
     "@skyjt/query-solid": "workspace:*",
