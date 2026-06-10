@@ -1,4 +1,4 @@
 {
   "installCommand": "cd ../.. && bun install --frozen-lockfile",
-  "buildCommand": "bun run build"
+  "buildCommand": "cd ../.. && bun packages:build && cd apps/web && bun run build"
 }
