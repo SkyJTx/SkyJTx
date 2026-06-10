@@ -8,6 +8,7 @@ import {
 } from "~/components/NavigationBar/index";
 import { Theme } from "~/components/ThemeComponents/types";
 import { ThemeToggler } from "~/components/ThemeComponents/index";
+import { useSignal, useWatch } from "@skyjt/signals-solid";
 
 
 const PageContainer = styled("div")`
@@ -50,10 +51,31 @@ const CustomTabButton = styled("button")<{ theme: Theme; active: boolean }>`
 export default function PersonalPageLayout(props: RouteSectionProps) {
   const theme = useTheme();
   const menus = ["Home", "About", "Works", "Contacts"];
+  const activeMenu = useSignal<typeof menus[number]>("Home");
+
+  useWatch(activeMenu, ({value, prev}) => {
+    if (window.isObserverUpdating) {
+      return;
+    }
+    const item = value;
+
+    if (window.scrollTimeoutId) {
+      clearTimeout(window.scrollTimeoutId);
+    }
+    window.isScrollingToSection = true;
+    const element = document.getElementById(item);
+    if (element) {
+      element.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+    window.scrollTimeoutId = window.setTimeout(() => {
+      window.isScrollingToSection = false;
+      window.scrollTimeoutId = undefined;
+    }, 800);
+  });
 
   return (
     <Background>
-      <NavigationProvider initialMenu="Home">
+      <NavigationProvider activeMenu={activeMenu}>
         <PageContainer>
           <NavigationBar
             menu={
@@ -62,19 +84,7 @@ export default function PersonalPageLayout(props: RouteSectionProps) {
                   <CustomTabButton
                      theme={theme}
                      active={isActive()}
-                     onClick={() => {
-                       onClick();
-                       if (typeof window !== "undefined") {
-                         window.isScrollingToSection = true;
-                         const element = document.getElementById(item);
-                         if (element) {
-                           element.scrollIntoView({ behavior: "smooth", block: "start" });
-                         }
-                         setTimeout(() => {
-                           window.isScrollingToSection = false;
-                         }, 800);
-                       }
-                     }}
+                     onClick={onClick}
                   >
                     <span>{item}</span>
                   </CustomTabButton>

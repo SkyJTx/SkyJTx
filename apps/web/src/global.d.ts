@@ -10,5 +10,7 @@ declare module "solid-styled-components" {
 declare global {
   interface Window {
     isScrollingToSection?: boolean;
+    isObserverUpdating?: boolean;
+    scrollTimeoutId?: number;
   }
 }
