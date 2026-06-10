@@ -4,6 +4,8 @@ import { Theme } from "~/components/ThemeComponents/types";
 
 interface BrandTitleProps {
   children: JSX.Element;
+  style?: JSX.CSSProperties;
+  class?: string;
 }
 
 const StyledBrandTitle = styled("h1")<{ theme: Theme }>`
@@ -23,10 +25,14 @@ const StyledBrandTitle = styled("h1")<{ theme: Theme }>`
 `;
 
 export function BrandTitle(props: BrandTitleProps) {
-  const theme = useTheme() as Theme;
+  const theme = useTheme();
 
   return (
-    <StyledBrandTitle theme={theme}>
+    <StyledBrandTitle
+      theme={theme}
+      style={props.style}
+      class={props.class}
+    >
       {props.children}
     </StyledBrandTitle>
   );

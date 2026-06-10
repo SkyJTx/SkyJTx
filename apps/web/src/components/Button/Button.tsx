@@ -106,7 +106,7 @@ const StyledButton = styled("button")<{
  * A reusable, premium styled button component.
  */
 export function Button(props: ButtonProps) {
-  const theme = useTheme() as Theme;
+  const theme = useTheme();
   const variant = props.variant ?? "secondary";
 
   return (

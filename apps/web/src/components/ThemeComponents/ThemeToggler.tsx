@@ -100,7 +100,7 @@ const MonitorIcon = () => (
  * A beautiful toggler button component that cycles theme mode between light, dark, and system.
  */
 export function ThemeToggler() {
-  const theme = useTheme() as Theme;
+  const theme = useTheme();
   const controller = useThemeController();
 
   const handleToggle = () => {

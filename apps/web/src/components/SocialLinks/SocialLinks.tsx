@@ -106,7 +106,7 @@ const MailIcon = () => (
  * A reusable glassmorphic social icons component.
  */
 export function SocialLinks(props: SocialLinksProps) {
-  const theme = useTheme() as Theme;
+  const theme = useTheme();
   const github = () => props.githubUrl ?? "https://github.com";
   const linkedin = () => props.linkedinUrl ?? "https://linkedin.com";
   const email = () => props.emailAddress ?? "mailto:hello@example.com";

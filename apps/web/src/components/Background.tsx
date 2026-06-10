@@ -69,7 +69,7 @@ function resolveColor(colorStr: string): string {
 
 
 export function Background(props: BackgroundProps) {
-  const theme = useTheme() as Theme;
+  const theme = useTheme();
   let canvasRef: HTMLCanvasElement | undefined;
 
   onMount(() => {

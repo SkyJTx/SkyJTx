@@ -26,6 +26,10 @@ const Divider = styled("div")<{ theme: Theme }>`
   height: 24px;
   background-color: ${(props) => props.theme.colors.border};
   margin: 0 1rem;
+
+  @media (max-width: 480px) {
+    margin: 0 0.5rem;
+  }
 `;
 
 const NavRight = styled("div")`
@@ -44,7 +48,7 @@ const NavWrapper = styled("div")`
 `;
 
 export function NavigationBar(props: NavigationBarProps) {
-  const theme = useTheme() as Theme;
+  const theme = useTheme();
   const resolvedAction = children(() => props.action);
 
   return (
