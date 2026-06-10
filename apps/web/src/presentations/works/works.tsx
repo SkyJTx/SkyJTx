@@ -1,7 +1,6 @@
 import { useTheme } from "solid-styled-components";
 import { BrandTitle, BrandSubtitle } from "~/components/Brand";
 import { Box } from "~/components/Box";
-import { Button } from "~/components/Button";
 import { useWorksController } from "./works.controller";
 import * as S from "./styles";
 
@@ -17,45 +16,18 @@ export function WorksPresentation() {
       <BrandTitle>My Works</BrandTitle>
       <BrandSubtitle>Selected projects and experiments</BrandSubtitle>
 
-      <S.ProjectGrid>
+      <div style={{ width: "100%", "margin-top": "3rem" }}>
         <Box>
-          <S.CardLayout>
-            <S.ProjectInfo>
-              <S.ProjectTitle theme={theme}>SkyJTx Platform</S.ProjectTitle>
-              <S.ProjectDescription theme={theme}>
-                A high-speed reactive rendering toolset engineered with customizable signal structures and a minimal runtime overhead.
-              </S.ProjectDescription>
-              <S.TagList>
-                <S.TechTag theme={theme}>SolidJS</S.TechTag>
-                <S.TechTag theme={theme}>TypeScript</S.TechTag>
-                <S.TechTag theme={theme}>Reactive Signals</S.TechTag>
-              </S.TagList>
-            </S.ProjectInfo>
-            <Button variant="secondary" onClick={() => c.handleOpenUrl("https://github.com")}>
-              View Repository
-            </Button>
-          </S.CardLayout>
+          <div style={{ display: "flex", "flex-direction": "column", "align-items": "center", "justify-content": "center", padding: "4rem 2rem", "text-align": "center" }}>
+            <div style={{ "font-size": "1.5rem", "font-weight": theme.typography.fontWeight.bold, color: theme.colors.primary, "margin-bottom": "0.5rem" }}>
+              Coming Soon
+            </div>
+            <p style={{ margin: 0, color: theme.colors.muted, "font-size": "0.95rem", "max-width": "400px", "line-height": "1.6" }}>
+              I am currently preparing selected engineering and development projects. Check back soon for updates.
+            </p>
+          </div>
         </Box>
-
-        <Box>
-          <S.CardLayout>
-            <S.ProjectInfo>
-              <S.ProjectTitle theme={theme}>Waveform Synthesizer</S.ProjectTitle>
-              <S.ProjectDescription theme={theme}>
-                Interactive digital audio workstation using the Web Audio API to model and render synthesis, filters, and dynamic wave shapes in real-time.
-              </S.ProjectDescription>
-              <S.TagList>
-                <S.TechTag theme={theme}>Web Audio API</S.TechTag>
-                <S.TechTag theme={theme}>Canvas 2D</S.TechTag>
-                <S.TechTag theme={theme}>TypeScript</S.TechTag>
-              </S.TagList>
-            </S.ProjectInfo>
-            <Button variant="secondary" onClick={() => c.handleOpenUrl("https://github.com")}>
-              Launch Experiment
-            </Button>
-          </S.CardLayout>
-        </Box>
-      </S.ProjectGrid>
+      </div>
     </S.SectionWrapper>
   );
 }
