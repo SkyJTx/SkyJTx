@@ -5,7 +5,13 @@ import { solidStart } from "@solidjs/start/config";
 import tailwindcss from "@tailwindcss/vite";
 
 export default defineConfig({
-  plugins: [solidStart(), nitro(), tailwindcss()],
+  plugins: [
+    solidStart(),
+    nitro({
+      preset: process.env.VERCEL ? "vercel" : "node-server",
+    }),
+    tailwindcss(),
+  ],
   optimizeDeps: {
     exclude: ["@skyjt/signals-solid"],
   },
