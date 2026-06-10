@@ -1,8 +1,6 @@
 import { useTheme } from "solid-styled-components";
 import { BrandTitle, BrandSubtitle } from "~/components/Brand";
 import { Box } from "~/components/Box";
-import { Button } from "~/components/Button";
-import { SocialLinks } from "~/components/SocialLinks";
 import { useContactsController } from "./contacts.controller";
 import * as S from "./styles";
 
@@ -20,20 +18,14 @@ export function ContactsPresentation() {
 
       <S.ContentBox>
         <Box>
-          <S.ContactInfoWrapper>
-            <S.TextParagraph theme={theme}>
-              Whether you are looking to build a reactive web system, design a custom liquid glass
-              interface, or chat about audio engineering and signal flows, I would love to connect!
-            </S.TextParagraph>
-            <SocialLinks
-              githubUrl="https://github.com/SkyJTx"
-              linkedinUrl="https://www.linkedin.com/in/nattakarn-khumsupha-85b871337/"
-              emailAddress="mailto:nattakarn.khumsupha.user1@outlook.com"
-            />
-            <Button variant="primary" onClick={c.handleSendEmail}>
-              Send an Email
-            </Button>
-          </S.ContactInfoWrapper>
+          <div style={{ display: "flex", "flex-direction": "column", "align-items": "center", "justify-content": "center", padding: "4rem 2rem", "text-align": "center" }}>
+            <div style={{ "font-size": "1.5rem", "font-weight": theme.typography.fontWeight.bold, color: theme.colors.primary, "margin-bottom": "0.5rem" }}>
+              Coming Soon
+            </div>
+            <p style={{ margin: 0, color: theme.colors.muted, "font-size": "0.95rem", "max-width": "400px", "line-height": "1.6" }}>
+              The contact section is currently being updated. Please check back later.
+            </p>
+          </div>
         </Box>
       </S.ContentBox>
     </S.SectionWrapper>
