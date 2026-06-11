@@ -82,7 +82,7 @@ export const TechTag = styled("span")<{ theme: Theme }>`
   font-family: ${(p) => p.theme.typography.fontFamily};
 `;
 
-export const WorksBoxContainer = styled("div")`
+export const WorksBoxContainer = styled("div")<{ theme: Theme }>`
   width: 100%;
   margin-top: ${(p) => p.theme.spacing["2xl"]};
 `;
