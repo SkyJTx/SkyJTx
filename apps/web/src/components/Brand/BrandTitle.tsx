@@ -9,7 +9,7 @@ interface BrandTitleProps {
 }
 
 const StyledBrandTitle = styled("h1")<{ theme: Theme }>`
-  font-size: 3rem;
+  font-size: 2.25rem;
   font-weight: 800;
   margin: 0;
   background: linear-gradient(

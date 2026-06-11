@@ -3,7 +3,7 @@ import { styled, useTheme } from "solid-styled-components";
 import { Theme } from "~/components/ThemeComponents/types";
 import { withOpacity } from "~/components/ThemeComponents/index";
 
-interface ButtonProps {
+interface ElevatedButtonProps {
   children: JSX.Element;
   onClick?: (event: MouseEvent) => void;
   disabled?: boolean;
@@ -12,7 +12,7 @@ interface ButtonProps {
   style?: JSX.CSSProperties;
 }
 
-const StyledButton = styled("button")<{ theme: Theme }>`
+const StyledElevatedButton = styled("button")<{ theme: Theme }>`
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -28,13 +28,12 @@ const StyledButton = styled("button")<{ theme: Theme }>`
   outline: none;
   background: linear-gradient(
     135deg,
-    ${(p) => withOpacity(p.theme.colors.surface, 0.8)} 0%,
-    ${(p) => withOpacity(p.theme.colors.background, 0.5)} 100%
+    ${(p) => p.theme.colors.primary} 0%,
+    ${(p) => p.theme.colors.secondary} 100%
   );
-  color: ${(p) => p.theme.colors.text};
-  border: 1px solid ${(p) => p.theme.colors.border};
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  color: #ffffff;
+  border: none;
+  box-shadow: 0 4px 12px ${(p) => withOpacity(p.theme.colors.primary, 0.2)};
 
   &:disabled {
     opacity: 0.5;
@@ -43,10 +42,10 @@ const StyledButton = styled("button")<{ theme: Theme }>`
   }
 
   &:hover:not(:disabled) {
-    border-color: ${(p) => p.theme.colors.primary};
-    color: ${(p) => p.theme.colors.primary};
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px ${(p) => withOpacity(p.theme.colors.primary, 0.13)};
+    box-shadow: 
+      0 6px 20px ${(p) => withOpacity(p.theme.colors.primary, 0.33)},
+      0 0 12px ${(p) => withOpacity(p.theme.colors.secondary, 0.27)};
   }
 
   &:active:not(:disabled) {
@@ -55,13 +54,13 @@ const StyledButton = styled("button")<{ theme: Theme }>`
 `;
 
 /**
- * A standard, premium outline/secondary styled button component.
+ * A premium styled elevated button component.
  */
-export function Button(props: ButtonProps) {
+export function ElevatedButton(props: ElevatedButtonProps) {
   const theme = useTheme();
 
   return (
-    <StyledButton
+    <StyledElevatedButton
       theme={theme}
       type={props.type ?? "button"}
       disabled={props.disabled}
@@ -70,6 +69,6 @@ export function Button(props: ButtonProps) {
       style={props.style}
     >
       {props.children}
-    </StyledButton>
+    </StyledElevatedButton>
   );
 }

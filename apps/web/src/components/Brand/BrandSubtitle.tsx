@@ -10,7 +10,7 @@ interface BrandSubtitleProps {
 }
 
 const StyledBrandSubtitle = styled("p")<{ theme: Theme; $maxWidth: string }>`
-  font-size: 1.125rem;
+  font-size: 0.95rem;
   color: ${(p) => p.theme.colors.muted};
   max-width: ${(p) => p.$maxWidth};
   margin-top: 0.75rem;

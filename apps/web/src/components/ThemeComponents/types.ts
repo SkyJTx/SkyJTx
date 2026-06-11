@@ -17,14 +17,20 @@ export interface Theme {
     md: string;
     lg: string;
     xl: string;
+    "2xl": string;
+    "3xl": string;
   };
   typography: {
     fontFamily: string;
     fontSize: {
+      xs: string;
       sm: string;
       base: string;
       lg: string;
       xl: string;
+      "2xl": string;
+      "3xl": string;
+      "4xl": string;
     };
     lineHeight: {
       normal: string;

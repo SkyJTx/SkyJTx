@@ -1,4 +1,6 @@
 import { styled } from "solid-styled-components";
+import { Box } from "~/components/Box";
+import { BrandTitle } from "~/components/Brand";
 import { Theme } from "~/components/ThemeComponents/types";
 
 export const SectionWrapper = styled("section")<{ theme: Theme }>`
@@ -34,130 +36,72 @@ export const ContentBox = styled("div")`
   }
 `;
 
-export const AboutGrid = styled("div")`
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 2rem;
-  width: 100%;
+export const AboutBox = styled(Box)`
+  max-width: 800px;
+  margin: 0 auto;
+`;
 
-  @media (min-width: 768px) {
-    grid-template-columns: 1.2fr 1fr;
-  }
+export const AboutTitle = styled(BrandTitle)<{ theme: Theme }>`
+  font-size: ${(p) => p.theme.typography.fontSize["2xl"]};
+  margin-top: 0;
+  margin-bottom: 0.5rem;
 `;
 
 export const BioParagraph = styled("p")<{ theme: Theme }>`
-  font-size: 0.95rem;
+  font-size: ${(p) => p.theme.typography.fontSize.base};
   line-height: 1.6;
   color: ${(p) => p.theme.colors.text};
-  margin-bottom: 1rem;
+  margin-bottom: 0;
   font-family: ${(p) => p.theme.typography.fontFamily};
-
-  &:last-child {
-    margin-bottom: 0;
-  }
+  text-align: left;
 `;
 
-export const SectionSubTitle = styled("h3")<{ theme: Theme }>`
-  font-size: 1.2rem;
-  font-weight: ${(p) => p.theme.typography.fontWeight.bold};
-  color: ${(p) => p.theme.colors.primary};
-  margin-top: 1.5rem;
-  margin-bottom: 1rem;
-  font-family: ${(p) => p.theme.typography.fontFamily};
-`;
-
-export const Timeline = styled("div")`
+export const AboutContainer = styled("div")`
   display: flex;
   flex-direction: column;
-  gap: 1.25rem;
-  margin-top: 1rem;
-`;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5rem;
 
-export const TimelineItem = styled("div")<{ theme: Theme }>`
-  position: relative;
-  padding-left: 1.5rem;
-  border-left: 2px solid ${(p) => p.theme.colors.border};
-
-  &::before {
-    content: "";
-    position: absolute;
-    left: -6px;
-    top: 6px;
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-    background: ${(p) => p.theme.colors.primary};
-    border: 2px solid ${(p) => p.theme.colors.background};
-    box-shadow: 0 0 8px ${(p) => p.theme.colors.primary};
+  @media (min-width: 600px) {
+    flex-direction: row;
+    align-items: flex-start;
+    justify-content: flex-start;
+    gap: 2rem;
   }
 `;
 
-export const TimelineDate = styled("span")<{ theme: Theme }>`
-  font-size: 0.75rem;
-  font-weight: ${(p) => p.theme.typography.fontWeight.medium};
-  color: ${(p) => p.theme.colors.primary};
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-`;
-
-export const TimelineTitle = styled("h4")<{ theme: Theme }>`
-  font-size: 1rem;
-  font-weight: ${(p) => p.theme.typography.fontWeight.bold};
-  color: ${(p) => p.theme.colors.text};
-  margin: 0.25rem 0 0.125rem 0;
-  font-family: ${(p) => p.theme.typography.fontFamily};
-`;
-
-export const TimelineSub = styled("div")<{ theme: Theme }>`
-  font-size: 0.85rem;
-  color: ${(p) => p.theme.colors.muted};
-  font-family: ${(p) => p.theme.typography.fontFamily};
-`;
-
-export const TimelineGpax = styled("span")<{ theme: Theme }>`
-  font-size: 0.85rem;
-  font-weight: ${(p) => p.theme.typography.fontWeight.bold};
-  color: ${(p) => p.theme.colors.success};
-  margin-left: 0.5rem;
-`;
-
-export const SkillGroup = styled("div")`
-  margin-bottom: 1.5rem;
-
-  &:last-child {
-    margin-bottom: 0;
-  }
-`;
-
-export const SkillGroupTitle = styled("h4")<{ theme: Theme }>`
-  font-size: 0.85rem;
-  font-weight: ${(p) => p.theme.typography.fontWeight.bold};
-  color: ${(p) => p.theme.colors.muted};
-  margin-bottom: 0.75rem;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  font-family: ${(p) => p.theme.typography.fontFamily};
-`;
-
-export const TagContainer = styled("div")`
+export const AvatarWrapper = styled("div")`
   display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  flex-shrink: 0;
 `;
 
-export const Tag = styled("span")<{ theme: Theme }>`
-  font-size: 0.75rem;
-  padding: 0.25rem 0.6rem;
-  border-radius: ${(p) => p.theme.radii.sm};
+export const CircleAvatar = styled("div")<{ theme: Theme }>`
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 2px solid ${(p) => p.theme.colors.primary};
+  display: flex;
+  align-items: center;
+  justify-content: center;
   background: ${(p) => p.theme.colors.surface};
-  color: ${(p) => p.theme.colors.text};
-  border: 1px solid ${(p) => p.theme.colors.border};
-  font-family: ${(p) => p.theme.typography.fontFamily};
-  transition: all ${(p) => p.theme.transitions.fast};
+  transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
 
   &:hover {
-    border-color: ${(p) => p.theme.colors.primary};
-    background: ${(p) => p.theme.colors.background};
-    color: ${(p) => p.theme.colors.primary};
+    transform: scale(1.05);
+    border-color: ${(p) => p.theme.colors.secondary};
+    box-shadow: 0 0 16px ${(p) => p.theme.colors.primary}33;
   }
+`;
+
+export const TextContent = styled("div")`
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
+  flex: 1;
 `;
