@@ -1,0 +1,6 @@
+- remove WELCOME TO MY SPACE
+- remove Explore Project, Get In Touch Buttons. make the style into ElevatedButton and Button. with proper props like disabled, onClick, children. also with style customization.
+- move the logo into about page. it should appear as circle avatar inside a component that have a about text.
+- About Me in about section should move inside the box
+- remove My journey and background.
+- all text in the website can be less sized

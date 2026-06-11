@@ -47,20 +47,19 @@ const NavWrapper = styled("div")`
   pointer-events: none;
 `;
 
+const StyledNavBox = styled(Box)`
+  padding: 0.4rem 1rem;
+  overflow: visible;
+  pointer-events: auto;
+`;
+
 export function NavigationBar(props: NavigationBarProps) {
   const theme = useTheme();
   const resolvedAction = children(() => props.action);
 
   return (
     <NavWrapper>
-      <Box
-        style={{
-          padding: "0.4rem 1rem",
-          overflow: "visible",
-          "pointer-events": "auto",
-        }}
-        fitContent={true}
-      >
+      <StyledNavBox fitContent={true}>
         <NavInner>
           <NavLeft>
             {props.menu}
@@ -72,7 +71,7 @@ export function NavigationBar(props: NavigationBarProps) {
             </NavRight>
           </Show>
         </NavInner>
-      </Box>
+      </StyledNavBox>
     </NavWrapper>
   );
 }

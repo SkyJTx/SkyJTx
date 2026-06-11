@@ -20,15 +20,19 @@ const LogoWrapper = styled("div")<{ $size: string }>`
   }
 `;
 
+const LogoImage = styled("img")`
+  width: 100%;
+  height: 100%;
+`;
+
 export function Logo(props: LogoProps) {
   const size = props.size ?? "200px";
 
   return (
     <LogoWrapper $size={size}>
-      <img
+      <LogoImage
         src={props.src()}
         alt={props.alt ?? "Logo"}
-        style={{ width: "100%", height: "100%" }}
       />
     </LogoWrapper>
   );

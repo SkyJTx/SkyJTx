@@ -1,6 +1,6 @@
 import { styled } from "solid-styled-components";
+import { BrandTitle, BrandSubtitle } from "~/components/Brand";
 import { Theme } from "~/components/ThemeComponents/types";
-import { withOpacity } from "~/components/ThemeComponents";
 
 export const HomeWrapper = styled("section")<{ theme: Theme }>`
   display: flex;
@@ -43,19 +43,13 @@ export const HeroSection = styled("div")<{ theme: Theme }>`
 
 export const HeroContent = styled("div")<{ theme: Theme }>`
   display: flex;
-  flex-direction: column-reverse;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
   width: 100%;
-  max-width: 1200px;
+  max-width: 800px;
   gap: 1.5rem;
   box-sizing: border-box;
-
-  @media (min-width: 768px) {
-    flex-direction: row;
-    justify-content: space-between;
-    gap: 3rem;
-  }
 `;
 
 export const HeroLeft = styled("div")<{ theme: Theme }>`
@@ -63,21 +57,19 @@ export const HeroLeft = styled("div")<{ theme: Theme }>`
   flex-direction: column;
   align-items: center;
   text-align: center;
-  flex: 1.2;
   width: 100%;
-
-  @media (min-width: 768px) {
-    align-items: flex-start;
-    text-align: left;
-  }
 `;
 
-export const HeroRight = styled("div")<{ theme: Theme }>`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex: 0.8;
-  width: 100%;
+export const Title = styled(BrandTitle)`
+  font-size: clamp(1.75rem, 4.5vw, 2.8rem);
+  line-height: 1.15;
+`;
+
+export const Subtitle = styled(BrandSubtitle)<{ theme: Theme }>`
+  margin-bottom: ${(p) => p.theme.spacing.md};
+  margin-top: ${(p) => p.theme.spacing.sm};
+  font-size: clamp(0.85rem, 2vw, 1.05rem);
+  max-width: 100%;
 `;
 
 export const SocialLinksWrapper = styled("div")<{ theme: Theme }>`
@@ -85,36 +77,10 @@ export const SocialLinksWrapper = styled("div")<{ theme: Theme }>`
   justify-content: center;
   width: 100%;
   margin-top: 0.5rem;
-
-  @media (min-width: 768px) {
-    justify-content: flex-start;
-    margin-top: 0.75rem;
-  }
-`;
-
-export const LogoWrapper = styled("div")<{ theme: Theme }>`
-  filter: drop-shadow(0 8px 24px rgba(56, 189, 248, 0.15));
-  display: flex;
-  align-items: center;
-  justify-content: center;
-`;
-
-export const Greeting = styled("span")<{ theme: Theme }>`
-  font-size: 0.875rem;
-  font-weight: ${(p) => p.theme.typography.fontWeight.bold};
-  color: ${(p) => p.theme.colors.primary};
-  text-transform: uppercase;
-  letter-spacing: 0.15em;
-  margin-bottom: 0.75rem;
-
-  @media (min-width: 768px) {
-    font-size: 1rem;
-    margin-bottom: 1rem;
-  }
 `;
 
 export const Description = styled("p")<{ theme: Theme }>`
-  font-size: 0.95rem;
+  font-size: ${(p) => p.theme.typography.fontSize.base};
   color: ${(p) => p.theme.colors.muted};
   max-width: 500px;
   margin-top: 0;
@@ -123,22 +89,8 @@ export const Description = styled("p")<{ theme: Theme }>`
   font-family: ${(p) => p.theme.typography.fontFamily};
 
   @media (min-width: 768px) {
-    font-size: 1.05rem;
+    font-size: ${(p) => p.theme.typography.fontSize.lg};
     margin-bottom: 2.5rem;
-  }
-`;
-
-export const ButtonGroup = styled("div")<{ theme: Theme }>`
-  display: flex;
-  gap: 1rem;
-  align-items: center;
-  flex-wrap: wrap;
-  justify-content: center;
-  margin-bottom: 1.5rem;
-
-  @media (min-width: 768px) {
-    justify-content: flex-start;
-    margin-bottom: 1.75rem;
   }
 `;
 
@@ -152,7 +104,7 @@ export const ScrollIndicator = styled("div")<{ theme: Theme }>`
   align-items: center;
   gap: 0.25rem;
   color: ${(p) => p.theme.colors.muted};
-  font-size: 0.7rem;
+  font-size: ${(p) => p.theme.typography.fontSize.xs};
   text-transform: uppercase;
   letter-spacing: 0.15em;
   cursor: pointer;
@@ -179,68 +131,4 @@ export const ScrollIndicator = styled("div")<{ theme: Theme }>`
       transform: translateX(-50%) translateY(-3px);
     }
   }
-`;
-
-export const FocusSection = styled("div")<{ theme: Theme }>`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: flex-start;
-  width: 100%;
-  max-width: 1200px;
-  padding: 6rem 2rem 8rem 2rem;
-  box-sizing: border-box;
-`;
-
-export const SectionTitle = styled("h2")<{ theme: Theme }>`
-  font-size: 1.75rem;
-  font-weight: ${(p) => p.theme.typography.fontWeight.bold};
-  color: ${(p) => p.theme.colors.text};
-  margin-bottom: 2.5rem;
-  font-family: ${(p) => p.theme.typography.fontFamily};
-  text-align: center;
-  letter-spacing: -0.02em;
-`;
-
-export const FocusGrid = styled("div")`
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 1.5rem;
-  width: 100%;
-`;
-
-export const CardContent = styled("div")`
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  text-align: left;
-  height: 100%;
-`;
-
-export const CardIconWrapper = styled("div")<{ theme: Theme }>`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 48px;
-  height: 48px;
-  border-radius: ${(p) => p.theme.radii.md};
-  background: ${(p) => withOpacity(p.theme.colors.primary, 0.08)};
-  color: ${(p) => p.theme.colors.primary};
-  margin-bottom: 1.25rem;
-`;
-
-export const CardTitle = styled("h3")<{ theme: Theme }>`
-  font-size: 1.25rem;
-  font-weight: ${(p) => p.theme.typography.fontWeight.bold};
-  color: ${(p) => p.theme.colors.text};
-  margin: 0 0 0.5rem 0;
-  font-family: ${(p) => p.theme.typography.fontFamily};
-`;
-
-export const CardDescription = styled("p")<{ theme: Theme }>`
-  font-size: 0.95rem;
-  color: ${(p) => p.theme.colors.muted};
-  line-height: 1.5;
-  margin: 0;
-  font-family: ${(p) => p.theme.typography.fontFamily};
 `;

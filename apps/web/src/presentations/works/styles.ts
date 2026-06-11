@@ -51,7 +51,7 @@ export const ProjectInfo = styled("div")`
 `;
 
 export const ProjectTitle = styled("h3")<{ theme: Theme }>`
-  font-size: 1.25rem;
+  font-size: ${(p) => p.theme.typography.fontSize["2xl"]};
   font-weight: ${(p) => p.theme.typography.fontWeight.bold};
   color: ${(p) => p.theme.colors.text};
   margin: 0 0 0.5rem 0;
@@ -59,7 +59,7 @@ export const ProjectTitle = styled("h3")<{ theme: Theme }>`
 `;
 
 export const ProjectDescription = styled("p")<{ theme: Theme }>`
-  font-size: 0.95rem;
+  font-size: ${(p) => p.theme.typography.fontSize.base};
   color: ${(p) => p.theme.colors.muted};
   line-height: 1.6;
   margin: 0 0 1.5rem 0;
@@ -74,10 +74,40 @@ export const TagList = styled("div")`
 `;
 
 export const TechTag = styled("span")<{ theme: Theme }>`
-  font-size: 0.75rem;
+  font-size: ${(p) => p.theme.typography.fontSize.xs};
   padding: 0.2rem 0.6rem;
   border-radius: ${(p) => p.theme.radii.full};
   background: ${(p) => withOpacity(p.theme.colors.primary, 0.08)};
   color: ${(p) => p.theme.colors.primary};
+  font-family: ${(p) => p.theme.typography.fontFamily};
+`;
+
+export const WorksBoxContainer = styled("div")`
+  width: 100%;
+  margin-top: ${(p) => p.theme.spacing["2xl"]};
+`;
+
+export const PlaceholderWrapper = styled("div")`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 2rem;
+  text-align: center;
+`;
+
+export const PlaceholderTitle = styled("div")<{ theme: Theme }>`
+  font-size: ${(p) => p.theme.typography.fontSize["2xl"]};
+  font-weight: ${(p) => p.theme.typography.fontWeight.bold};
+  color: ${(p) => p.theme.colors.primary};
+  margin-bottom: ${(p) => p.theme.spacing.sm};
+`;
+
+export const PlaceholderDescription = styled("p")<{ theme: Theme }>`
+  margin: 0;
+  color: ${(p) => p.theme.colors.muted};
+  font-size: ${(p) => p.theme.typography.fontSize.base};
+  max-width: 400px;
+  line-height: ${(p) => p.theme.typography.lineHeight.relaxed};
   font-family: ${(p) => p.theme.typography.fontFamily};
 `;
