@@ -6,9 +6,14 @@ export const HomeWrapper = styled("section")<{ theme: Theme }>`
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: flex-start;
+  justify-content: center;
   width: 100%;
+  min-height: 100vh;
   box-sizing: border-box;
+
+  @media (max-height: 700px) {
+    justify-content: flex-start;
+  }
 `;
 
 export const HeroSection = styled("div")<{ theme: Theme }>`

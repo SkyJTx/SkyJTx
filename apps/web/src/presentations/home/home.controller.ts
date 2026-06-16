@@ -1,3 +1,5 @@
+import { PERSONAL_INFO } from "~/constants/personalInfo";
+
 export function useHomeController() {
   const handleScrollDown = () => {
     const target = document.getElementById("About");
@@ -8,5 +10,6 @@ export function useHomeController() {
 
   return {
     handleScrollDown,
+    personalInfo: PERSONAL_INFO,
   };
 }

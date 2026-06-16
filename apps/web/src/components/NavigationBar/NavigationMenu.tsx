@@ -1,6 +1,7 @@
 import { For, JSX, Show } from "solid-js";
 import { styled, useTheme } from "solid-styled-components";
 import { useNavigationRepo } from "./NavigationContext";
+import { useComputed } from "@skyjt/signals-solid";
 import { Theme } from "~/components/ThemeComponents/types";
 import { withOpacity } from "~/components/ThemeComponents/index";
 
@@ -148,7 +149,7 @@ export function NavigationMenu<T>(props: NavigationMenuProps<T>) {
     <MenuContainer theme={theme}>
       <For each={props.items}>
         {(item) => {
-          const isActive = () => repo.activeMenu === item;
+          const isActive = useComputed(() => repo.activeMenu === item);
           const onClick = () => repo.setActiveMenu(item);
 
           return (
