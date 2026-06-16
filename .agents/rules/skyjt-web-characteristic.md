@@ -1,5 +1,6 @@
 ---
-trigger: always_on
+trigger: glob
+globs: apps/web/*
 ---
 
 # Information about Me

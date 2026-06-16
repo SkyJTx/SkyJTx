@@ -6,15 +6,23 @@ export const SectionWrapper = styled("section")<{ theme: Theme }>`
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: flex-start;
+  justify-content: center;
   width: 100%;
   max-width: 1200px;
-  min-height: auto;
+  min-height: 100vh;
   padding: 6rem 2rem;
   box-sizing: border-box;
 
+  @media (max-width: 768px) {
+    padding: 4rem 1.5rem;
+  }
+
   @media (max-width: 480px) {
-    padding: 4rem 1rem;
+    padding: 2.5rem 1rem;
+  }
+
+  @media (max-height: 700px) {
+    justify-content: flex-start;
   }
 `;
 
