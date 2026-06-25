@@ -14,7 +14,13 @@ export type IconName =
   | "arrow-down"
   | "sun"
   | "moon"
-  | "monitor";
+  | "monitor"
+  | "external-link"
+  | "chevron-left"
+  | "chevron-right"
+  | "x"
+  | "file-text"
+  | "image";
 
 export interface IconProps extends JSX.SvgSVGAttributes<SVGSVGElement> {
   name: IconName;
@@ -108,6 +114,33 @@ export function Icon(props: IconProps) {
           <rect width="20" height="14" x="2" y="3" rx="2" />
           <line x1="8" x2="16" y1="21" y2="21" />
           <line x1="12" x2="12" y1="17" y2="21" />
+        </Match>
+        <Match when={local.name === "external-link"}>
+          <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+          <polyline points="15 3 21 3 21 9" />
+          <line x1="10" y1="14" x2="21" y2="3" />
+        </Match>
+        <Match when={local.name === "chevron-left"}>
+          <polyline points="15 18 9 12 15 6" />
+        </Match>
+        <Match when={local.name === "chevron-right"}>
+          <polyline points="9 18 15 12 9 6" />
+        </Match>
+        <Match when={local.name === "x"}>
+          <line x1="18" y1="6" x2="6" y2="18" />
+          <line x1="6" y1="6" x2="18" y2="18" />
+        </Match>
+        <Match when={local.name === "file-text"}>
+          <path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z" />
+          <path d="M14 2v4a2 2 0 0 0 2 2h4" />
+          <path d="M10 9H8" />
+          <path d="M16 13H8" />
+          <path d="M16 17H8" />
+        </Match>
+        <Match when={local.name === "image"}>
+          <rect width="18" height="18" x="3" y="3" rx="2" ry="2" />
+          <circle cx="9" cy="9" r="2" />
+          <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21" />
         </Match>
       </Switch>
     </svg>
