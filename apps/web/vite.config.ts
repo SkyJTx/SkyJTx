@@ -5,6 +5,28 @@ import { solidStart } from "@solidjs/start/config";
 import tailwindcss from "@tailwindcss/vite";
 
 export default defineConfig({
+  resolve: {
+    dedupe: ["solid-js", "solid-js/web", "solid-js/store", "solid-styled-components"],
+  },
+  ssr: {
+    noExternal: [
+      "@skyjt/signals-solid",
+      "@skyjt/store-solid",
+      "@skyjt/query-solid",
+    ],
+  },
+  optimizeDeps: {
+    exclude: [
+      "@skyjt/signals-solid",
+      "@skyjt/store-solid",
+      "@skyjt/query-solid",
+    ],
+  },
+  server: {
+    fs: {
+      allow: ["../../"],
+    },
+  },
   plugins: [
     solidStart(),
     nitro({
@@ -12,10 +34,5 @@ export default defineConfig({
     }),
     tailwindcss(),
   ],
-  optimizeDeps: {
-    exclude: ["@skyjt/signals-solid"],
-  },
-  ssr: {
-    noExternal: ["@skyjt/signals-solid"],
-  },
 });
+
