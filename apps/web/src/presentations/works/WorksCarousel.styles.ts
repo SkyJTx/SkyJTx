@@ -6,11 +6,14 @@ export const CarouselViewport = styled("div")`
   width: 100%;
   overflow: hidden;
   position: relative;
+  touch-action: pan-y;
+  user-select: none;
+  -webkit-user-drag: none;
 `;
 
-export const CarouselTrack = styled("div")<{ $offset: number }>`
+export const CarouselTrack = styled("div")<{ $offset: number; $isDragging: boolean }>`
   display: flex;
-  transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: ${(p) => p.$isDragging ? "none" : "transform 0.5s cubic-bezier(0.16, 1, 0.3, 1)"};
   transform: translateX(${(p) => p.$offset}%);
   will-change: transform;
 `;
