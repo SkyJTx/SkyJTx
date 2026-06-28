@@ -2,7 +2,7 @@ import { For, Show } from "solid-js";
 import { useTheme } from "solid-styled-components";
 import { useSignal } from "@skyjt/signals-solid";
 import { Icon } from "~/components/Icon";
-import { Lightbox } from "~/components/Lightbox";
+import { FilePreview } from "~/components/FilePreview";
 import * as S from "./styles";
 
 export interface CarouselImage {
@@ -12,6 +12,8 @@ export interface CarouselImage {
 
 export interface ImageCarouselProps {
   images: CarouselImage[];
+  projectName?: string;
+  projectDate?: string;
 }
 
 /**
@@ -91,9 +93,10 @@ export function ImageCarousel(props: ImageCarouselProps) {
         </S.DotsContainer>
       </Show>
 
-      <Lightbox
-        src={lightboxSrc.value}
-        alt={lightboxAlt.value}
+      <FilePreview
+        url={lightboxSrc.value}
+        name={props.projectName || lightboxAlt.value || "Image Preview"}
+        date={props.projectDate}
         isOpen={lightboxOpen.value}
         onClose={() => {
           lightboxOpen.value = false;

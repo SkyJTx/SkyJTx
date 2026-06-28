@@ -25,12 +25,17 @@ export function ProjectCard(props: ProjectCardProps) {
       <S.CardContainer>
         <S.MediaSection>
           <Show when={hasImages()}>
-            <ImageCarousel images={props.project.images} />
+            <ImageCarousel
+              images={props.project.images}
+              projectName={props.project.title}
+              projectDate={props.project.date}
+            />
           </Show>
           <Show when={!hasImages() && hasPdf()}>
             <PdfPreview
               url={props.project.pdfUrl!}
               title={props.project.title}
+              date={props.project.date}
             />
           </Show>
         </S.MediaSection>
