@@ -17,6 +17,7 @@ export interface ProjectData {
   images: ProjectImage[];
   links: ProjectLink[];
   pdfUrl?: string;
+  date?: string;
 }
 
 export const SOFTWARE_PROJECTS: ProjectData[] = [
@@ -53,6 +54,7 @@ export const SOFTWARE_PROJECTS: ProjectData[] = [
         icon: "github",
       },
     ],
+    date: "March 2024 (Project Date)",
   },
   {
     id: "skyjtx-website",
@@ -79,6 +81,7 @@ export const SOFTWARE_PROJECTS: ProjectData[] = [
         icon: "external-link",
       },
     ],
+    date: "June 2026 (Project Date)",
   },
   {
     id: "aidm",
@@ -102,6 +105,7 @@ export const SOFTWARE_PROJECTS: ProjectData[] = [
       },
     ],
     links: [],
+    date: "April 2024 (Project Date)",
   },
   {
     id: "multi-ai-agent-thesis",
@@ -120,5 +124,6 @@ export const SOFTWARE_PROJECTS: ProjectData[] = [
     ],
     pdfUrl:
       "https://kmqwwvhddlqvdmvnqved.supabase.co/storage/v1/object/public/skyjt-website-storage/Thesis/IEEE%20Conference%20V2.pdf",
+    date: "May 2025 - March 2026",
   },
 ];
