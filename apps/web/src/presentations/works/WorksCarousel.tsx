@@ -19,13 +19,39 @@ export function WorksCarousel(props: WorksCarouselProps) {
 
   const slidesPerView = useSignal(1);
 
+  const isDragging = useSignal(false);
+  const startX = useSignal(0);
+  const dragOffset = useSignal(0);
+  let viewportRef: HTMLDivElement | undefined;
+  let wasDragging = false;
+
   onMount(() => {
     const update = () => {
       slidesPerView.value = window.innerWidth >= 768 ? 2 : 1;
     };
     update();
     window.addEventListener("resize", update);
-    onCleanup(() => window.removeEventListener("resize", update));
+
+    if (viewportRef) {
+      viewportRef.addEventListener("touchstart", handleTouchStart, { passive: true });
+      viewportRef.addEventListener("touchmove", handleTouchMove, { passive: true });
+      viewportRef.addEventListener("touchend", handleTouchEnd);
+      viewportRef.addEventListener("mousedown", handleMouseDown);
+      viewportRef.addEventListener("click", handleCaptureClick, { capture: true });
+    }
+
+    onCleanup(() => {
+      window.removeEventListener("resize", update);
+      window.removeEventListener("mousemove", handleMouseMove);
+      window.removeEventListener("mouseup", handleMouseUp);
+      if (viewportRef) {
+        viewportRef.removeEventListener("touchstart", handleTouchStart);
+        viewportRef.removeEventListener("touchmove", handleTouchMove);
+        viewportRef.removeEventListener("touchend", handleTouchEnd);
+        viewportRef.removeEventListener("mousedown", handleMouseDown);
+        viewportRef.removeEventListener("click", handleCaptureClick, { capture: true });
+      }
+    });
   });
 
   const totalPages = useComputed(() =>
@@ -39,14 +65,93 @@ export function WorksCarousel(props: WorksCarouselProps) {
     currentPage.value = Math.max(0, Math.min(page, max));
   };
 
+  const dragOffsetPercent = useComputed(() => {
+    if (!viewportRef) return 0;
+    const width = viewportRef.getBoundingClientRect().width;
+    if (width === 0) return 0;
+    return (dragOffset.value / width) * 100;
+  });
+
   const trackOffset = useComputed(
-    () => -(currentPage.value * slidesPerView() * slideWidth()),
+    () => -(currentPage.value * slidesPerView() * slideWidth()) + dragOffsetPercent(),
   );
+
+  const handleTouchStart = (e: TouchEvent) => {
+    isDragging.value = true;
+    startX.value = e.touches[0].clientX;
+    dragOffset.value = 0;
+    wasDragging = false;
+  };
+
+  const handleTouchMove = (e: TouchEvent) => {
+    if (!isDragging.value) return;
+    const currentX = e.touches[0].clientX;
+    dragOffset.value = currentX - startX.value;
+  };
+
+  const handleTouchEnd = () => {
+    if (!isDragging.value) return;
+    isDragging.value = false;
+
+    const threshold = 50;
+    if (dragOffset.value < -threshold) {
+      goTo(currentPage.value + 1);
+    } else if (dragOffset.value > threshold) {
+      goTo(currentPage.value - 1);
+    }
+    dragOffset.value = 0;
+  };
+
+  const handleMouseMove = (e: MouseEvent) => {
+    if (!isDragging.value) return;
+    const diff = e.clientX - startX.value;
+    dragOffset.value = diff;
+    if (Math.abs(diff) > 10) {
+      wasDragging = true;
+    }
+  };
+
+  const handleMouseUp = () => {
+    if (!isDragging.value) return;
+    isDragging.value = false;
+
+    const threshold = 50;
+    if (dragOffset.value < -threshold) {
+      goTo(currentPage.value + 1);
+    } else if (dragOffset.value > threshold) {
+      goTo(currentPage.value - 1);
+    }
+    dragOffset.value = 0;
+
+    window.removeEventListener("mousemove", handleMouseMove);
+    window.removeEventListener("mouseup", handleMouseUp);
+  };
+
+  const handleMouseDown = (e: MouseEvent) => {
+    if (e.button !== 0) return;
+    isDragging.value = true;
+    startX.value = e.clientX;
+    dragOffset.value = 0;
+    wasDragging = false;
+
+    window.addEventListener("mousemove", handleMouseMove);
+    window.addEventListener("mouseup", handleMouseUp);
+  };
+
+  const handleCaptureClick = (e: MouseEvent) => {
+    if (wasDragging) {
+      e.preventDefault();
+      e.stopPropagation();
+      wasDragging = false;
+    }
+  };
+
+
 
   return (
     <>
-      <S.CarouselViewport>
-        <S.CarouselTrack $offset={trackOffset()}>
+      <S.CarouselViewport ref={viewportRef}>
+        <S.CarouselTrack $offset={trackOffset()} $isDragging={isDragging.value}>
           <For each={props.projects}>
             {(project) => (
               <S.CarouselSlide>
