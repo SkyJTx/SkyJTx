@@ -3,12 +3,17 @@ import { isServer, useAssets, Dynamic } from "solid-js/web";
 import { extractStoreState, StoreRegistryContext } from "./core";
 import { serialize } from "seroval";
 
-export const StoresProvider: ParentComponent = (props) => {
+/**
+ * Props for the StoresProvider component.
+ */
+interface StoresProviderProps {
+  nonce?: string;
+}
+
+export const StoresProvider: ParentComponent<StoresProviderProps> = (props) => {
   const registry = new Map<string, any>();
 
   if (isServer) {
-    // useAssets ensures this code waits for all lazy routes and
-    // Suspense boundaries to finish rendering before it executes
     useAssets(() => {
       const rawState: Record<string, any> = {};
 
@@ -21,6 +26,7 @@ export const StoresProvider: ParentComponent = (props) => {
       return createComponent(Dynamic, {
         component: "script",
         id: "store-hydration",
+        ...(props.nonce ? { nonce: props.nonce } : {}),
         innerHTML: `window.__STORE_LIB_REGISTRY__ = ${serializedJS};`,
       });
     });

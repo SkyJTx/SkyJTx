@@ -12,6 +12,20 @@ declare global {
 
 export const StoreRegistryContext = createContext<Map<string, any>>();
 
+/**
+ * Safely deep merge hydrated state without destroying nested references.
+ */
+function deepMerge(target: any, source: any): any {
+  if (typeof target !== "object" || target === null) return source;
+  for (const key in source) {
+    if (source[key] instanceof Object && key in target) {
+      Object.assign(source[key], deepMerge(target[key], source[key]));
+    }
+  }
+  Object.assign(target, source);
+  return target;
+}
+
 export function defineStore<T extends object>(
   name: string,
   storeInitalizer: () => T,
@@ -27,13 +41,14 @@ export function defineStore<T extends object>(
 
     if (!registry.has(name)) {
       const store = storeInitalizer();
+
       if (
         !isServer &&
         typeof window !== "undefined" &&
-        window.__STORE_LIB_REGISTRY__ &&
-        window.__STORE_LIB_REGISTRY__[name]
+        window.__STORE_LIB_REGISTRY__?.[name]
       ) {
-        Object.assign(store, window.__STORE_LIB_REGISTRY__[name]);
+        deepMerge(store, window.__STORE_LIB_REGISTRY__[name]);
+        delete window.__STORE_LIB_REGISTRY__[name];
       }
 
       registry.set(name, store);

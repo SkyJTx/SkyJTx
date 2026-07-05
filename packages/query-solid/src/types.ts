@@ -1,7 +1,9 @@
 export type UseQueryOptionsBase<TData, TError = unknown> = {
-  queryKey: string[] | (() => string[]) | string | (() => string);
+  queryKey: unknown[] | (() => unknown[]) | string | (() => string);
   queryFn: () => Promise<TData>;
   enabled?: boolean | (() => boolean);
+  staleTime?: number;
+  gcTime?: number;
 };
 
 export type UseQueryOptions<TData, TError = unknown> = UseQueryOptionsBase<

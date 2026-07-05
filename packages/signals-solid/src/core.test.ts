@@ -14,11 +14,6 @@ let useSignal!: typeof import("./core").useSignal;
 let useWatch!: typeof import("./core").useWatch;
 
 beforeAll(async () => {
-  // Bun resolves `solid-js` to the server build by default, where `createEffect` is a no-op.
-  // For unit tests of reactivity primitives we want Solid's client runtime.
-  mock.module("solid-js", () => import("solid-js/dist/solid.js"));
-  mock.module("solid-js/store", () => import("solid-js/store/dist/store.js"));
-
   ({ createRoot } = await import("solid-js"));
 
   const core = (await import(

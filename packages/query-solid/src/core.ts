@@ -3,6 +3,8 @@ import {
   useContext,
   createSignal,
   createResource,
+  createEffect,
+  onCleanup,
 } from "solid-js";
 import { isServer } from "solid-js/web";
 import { useReactive } from "@skyjt/signals-solid";
@@ -20,11 +22,50 @@ declare global {
   }
 }
 
-export class QueryClient {
-  public cache = new Map<string, any>();
-  public initialData = new Map<string, any>();
+export interface CacheEntry<T = any> {
+  data: T;
+  updatedAt: number;
+  gcTimeout?: any;
+  gcTime?: number;
+}
 
-  constructor() {
+export function stableStringify(value: any): string {
+  if (value === null) return "null";
+  if (value === undefined) return "undefined";
+
+  if (Array.isArray(value)) {
+    return `[${value.map(stableStringify).join(",")}]`;
+  }
+
+  if (typeof value === "object") {
+    const proto = Object.getPrototypeOf(value);
+    if (proto === null || proto === Object.prototype) {
+      const sortedKeys = Object.keys(value).sort();
+      return `{${sortedKeys.map((k) => `"${k}":${stableStringify(value[k])}`).join(",")}}`;
+    }
+    return JSON.stringify(value);
+  }
+
+  return JSON.stringify(value);
+}
+
+export function hashKey(key: any): string {
+  if (typeof key === "string") return key;
+  return stableStringify(key);
+}
+
+export class QueryClient {
+  public cache = new Map<string, CacheEntry>();
+  public initialData = new Map<string, any>();
+  public inFlightPromises = new Map<string, Promise<any>>();
+  public observers = new Map<string, Set<() => void>>();
+  public staleTime: number;
+  public gcTime: number;
+
+  constructor(options?: { staleTime?: number; gcTime?: number }) {
+    this.staleTime = options?.staleTime ?? 0;
+    this.gcTime = options?.gcTime ?? 5 * 60 * 1000;
+
     if (
       !isServer &&
       typeof window !== "undefined" &&
@@ -38,18 +79,92 @@ export class QueryClient {
     return this.initialData.get(key);
   }
 
-  setCache(key: string, data: any) {
-    this.cache.set(key, data);
+  setCache(key: string, data: any, gcTime?: number) {
+    const existing = this.cache.get(key);
+    if (existing?.gcTimeout) {
+      clearTimeout(existing.gcTimeout);
+    }
+
+    const time = gcTime ?? existing?.gcTime ?? this.gcTime;
+    const observersCount = this.observers.get(key)?.size ?? 0;
+    let gcTimeout: any = undefined;
+
+    if (observersCount === 0 && time !== Infinity) {
+      gcTimeout = setTimeout(() => {
+        this.cache.delete(key);
+      }, time);
+    }
+
+    this.cache.set(key, {
+      data,
+      updatedAt: Date.now(),
+      gcTimeout,
+      gcTime,
+    });
   }
 
   getCache(key: string) {
+    return this.cache.get(key)?.data;
+  }
+
+  getCacheEntry(key: string) {
     return this.cache.get(key);
+  }
+
+  addObserver(key: string, onUpdate: () => void) {
+    let list = this.observers.get(key);
+    if (!list) {
+      list = new Set();
+      this.observers.set(key, list);
+    }
+    list.add(onUpdate);
+
+    const entry = this.cache.get(key);
+    if (entry && entry.gcTimeout) {
+      clearTimeout(entry.gcTimeout);
+      entry.gcTimeout = undefined;
+    }
+  }
+
+  removeObserver(key: string, onUpdate: () => void) {
+    const list = this.observers.get(key);
+    if (list) {
+      list.delete(onUpdate);
+      if (list.size === 0) {
+        this.observers.delete(key);
+        const entry = this.cache.get(key);
+        if (entry) {
+          if (entry.gcTimeout) clearTimeout(entry.gcTimeout);
+          const time = entry.gcTime ?? this.gcTime;
+          if (time !== Infinity) {
+            entry.gcTimeout = setTimeout(() => {
+              this.cache.delete(key);
+            }, time);
+          }
+        }
+      }
+    }
+  }
+
+  invalidateQueries(key: string[] | string) {
+    const keyStr = hashKey(key);
+    const entry = this.cache.get(keyStr);
+    if (entry) {
+      entry.updatedAt = 0;
+    }
+
+    const keyObservers = this.observers.get(keyStr);
+    if (keyObservers) {
+      for (const refetch of keyObservers) {
+        refetch();
+      }
+    }
   }
 
   extractState() {
     const raw: Record<string, any> = {};
     for (const [key, val] of this.cache.entries()) {
-      raw[key] = val;
+      raw[key] = val.data;
     }
     return raw;
   }
@@ -80,7 +195,7 @@ export function useSolidQuery<TData, TError = unknown>(
       typeof options.queryKey === "function"
         ? options.queryKey()
         : options.queryKey;
-    return Array.isArray(k) ? JSON.stringify(k) : k;
+    return hashKey(k);
   };
 
   const getEnabled = () => {
@@ -97,20 +212,39 @@ export function useSolidQuery<TData, TError = unknown>(
       return getKeyString();
     },
     async (keyObj) => {
-      const key = keyObj as string;
-      const existing = client.getCache(key);
-      if (existing !== undefined) return existing as TData;
+      if (typeof keyObj !== "string") {
+        throw new Error("Invalid query key");
+      }
+      const key = keyObj;
+
+      const cached = client.getCacheEntry(key);
+      const staleTime = options.staleTime ?? client.staleTime;
+      if (cached !== undefined) {
+        const isFresh = Date.now() - cached.updatedAt < staleTime;
+        if (isFresh) {
+          return cached.data as TData;
+        }
+      }
 
       const p = client.getInitialData(key);
       if (p !== undefined) {
         client.initialData.delete(key);
-        client.setCache(key, p);
+        client.setCache(key, p, options.gcTime);
         return p as TData;
       }
 
-      const res = await options.queryFn();
-      client.setCache(key, res);
-      return res;
+      let promise = client.inFlightPromises.get(key);
+      if (!promise) {
+        promise = options.queryFn().then((res) => {
+          client.setCache(key, res, options.gcTime);
+          return res;
+        }).finally(() => {
+          client.inFlightPromises.delete(key);
+        });
+        client.inFlightPromises.set(key, promise);
+      }
+
+      return promise;
     },
     {
       initialValue: (() => {
@@ -128,6 +262,17 @@ export function useSolidQuery<TData, TError = unknown>(
       })(),
     },
   );
+
+  createEffect(() => {
+    const key = getKeyString();
+    if (!key) return;
+
+    client.addObserver(key, refetch);
+
+    onCleanup(() => {
+      client.removeObserver(key, refetch);
+    });
+  });
 
   return useReactive({
     get data() {

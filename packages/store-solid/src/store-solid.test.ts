@@ -205,4 +205,97 @@ describe("@skyjt/store-solid", () => {
       }
     });
   });
+
+  test("StoresProvider handles nonce and serializes state correctly on server", async () => {
+    let capturedAsset: any;
+    mock.module("solid-js/web", () => ({
+      isServer: true,
+      useAssets: (fn: () => any) => {
+        capturedAsset = fn();
+      },
+      Dynamic: (props: any) => props,
+    }));
+
+    const ssrProvider = (await import(
+      new URL("./StoresProvider.ts", import.meta.url).href + "?ssr"
+    )) as typeof import("./StoresProvider");
+
+    createRoot((dispose) => {
+      try {
+        createComponent(ssrProvider.StoresProvider, {
+          nonce: "test-nonce-123",
+          children: null,
+        });
+
+        expect(capturedAsset).toBeDefined();
+        expect(capturedAsset.nonce).toBe("test-nonce-123");
+        expect(capturedAsset.id).toBe("store-hydration");
+      } finally {
+        dispose();
+      }
+    });
+    mock.restore();
+  });
+
+  test("defineStore deep merges and cleans up window registry when isServer=false", async () => {
+    const originalWindow = (globalThis as any).window;
+
+    try {
+      mock.module("solid-js/web", () => ({
+        isServer: false,
+      }));
+
+      (globalThis as any).window = {
+        __STORE_LIB_REGISTRY__: {
+          userStore: {
+            profile: {
+              age: 30,
+            },
+            role: "admin",
+          },
+        },
+      };
+
+      const clientCore = (await import(
+        new URL("./core.ts", import.meta.url).href + "?client-deep"
+      )) as typeof import("./core");
+
+      createRoot((dispose) => {
+        try {
+          const useUserStore = clientCore.defineStore("userStore", () => ({
+            profile: {
+              name: "Bob",
+              age: 25,
+            },
+            role: "user",
+          }));
+
+          let store: any;
+
+          createComponent(StoresProvider, {
+            get children() {
+              store = useUserStore();
+              return null;
+            },
+          });
+
+          expect(store.role).toBe("admin");
+          expect(store.profile.name).toBe("Bob");
+          expect(store.profile.age).toBe(30);
+
+          expect((globalThis as any).window.__STORE_LIB_REGISTRY__.userStore).toBeUndefined();
+        } finally {
+          dispose();
+        }
+      });
+    } finally {
+      if (originalWindow === undefined) {
+        delete (globalThis as any).window;
+      } else {
+        (globalThis as any).window = originalWindow;
+      }
+
+      mock.restore();
+    }
+  });
 });

@@ -8,13 +8,9 @@ let QueryClient!: typeof import("./core").QueryClient;
 let QueryClientContext!: typeof import("./core").QueryClientContext;
 let useSolidMutation!: typeof import("./core").useSolidMutation;
 let useSolidQuery!: typeof import("./core").useSolidQuery;
+let hashKey!: typeof import("./core").hashKey;
 
 beforeAll(async () => {
-  // Bun resolves `solid-js` to the server build by default.
-  // For unit tests we want Solid's client runtime.
-  mock.module("solid-js", () => import("solid-js/dist/solid.js"));
-  mock.module("solid-js/store", () => import("solid-js/store/dist/store.js"));
-
   // Query-solid's SSR boundary checks are based on `isServer`.
   // In unit tests we treat the runtime as client-like.
   mock.module("solid-js/web", () => ({
@@ -29,7 +25,7 @@ beforeAll(async () => {
     new URL("./core.ts", import.meta.url).href + "?client-solid"
   )) as typeof import("./core");
 
-  ({ QueryClient, QueryClientContext, useSolidMutation, useSolidQuery } = core);
+  ({ QueryClient, QueryClientContext, useSolidMutation, useSolidQuery, hashKey } = core);
 });
 
 afterAll(() => {
@@ -200,6 +196,7 @@ describe("@skyjt/query-solid", () => {
               calls += 1;
               return { id: userId(), call: calls };
             },
+            staleTime: 5000,
           });
 
           return null;
@@ -429,6 +426,222 @@ describe("@skyjt/query-solid", () => {
         "error:Boom:2",
         "settled:undefined:err:2",
       ]);
+    } finally {
+      dispose();
+    }
+  });
+
+  test("staleTime determines when queryFn is executed again", async () => {
+    let dispose = () => {};
+    const client = new QueryClient({ staleTime: 50 });
+    let query: any;
+    let calls = 0;
+
+    createRoot((rootDispose) => {
+      dispose = rootDispose;
+      createComponent(QueryClientContext.Provider, {
+        value: client,
+        get children() {
+          query = useSolidQuery({
+            queryKey: "stale-test",
+            queryFn: async () => {
+              calls += 1;
+              return { calls };
+            },
+          });
+          return null;
+        },
+      });
+    });
+
+    try {
+      await flush();
+      await flush();
+      expect(calls).toBe(1);
+
+      // Check immediately - should be fresh, so calls should still be 1
+      await query.refetch();
+      await flush();
+      expect(calls).toBe(1);
+
+      // Wait for staleTime (50ms) to pass
+      await new Promise((r) => setTimeout(r, 60));
+      await query.refetch();
+      await flush();
+      expect(calls).toBe(2);
+    } finally {
+      dispose();
+    }
+  });
+
+  test("gcTime automatically deletes unused entries from cache", async () => {
+    let dispose = () => {};
+    const client = new QueryClient({ gcTime: 30 });
+    let calls = 0;
+
+    createRoot((rootDispose) => {
+      dispose = rootDispose;
+      createComponent(QueryClientContext.Provider, {
+        value: client,
+        get children() {
+          useSolidQuery({
+            queryKey: "gc-test",
+            queryFn: async () => {
+              calls += 1;
+              return "data";
+            },
+          });
+          return null;
+        },
+      });
+    });
+
+    try {
+      await flush();
+      await flush();
+      expect(calls).toBe(1);
+      expect(client.getCache("gc-test")).toBe("data");
+
+      // Unmount the component to trigger GC timer
+      dispose();
+
+      // Wait 15ms - should still be in cache (gcTime is 30ms)
+      await new Promise((r) => setTimeout(r, 15));
+      expect(client.getCache("gc-test")).toBe("data");
+
+      // Wait remaining time - should be deleted from cache
+      await new Promise((r) => setTimeout(r, 25));
+      expect(client.getCache("gc-test")).toBeUndefined();
+    } finally {
+      // already disposed
+    }
+  });
+
+  test("request deduplication batches multiple concurrent queries", async () => {
+    let dispose = () => {};
+    const client = new QueryClient();
+    const deferred = defer<string>();
+    let calls = 0;
+
+    let query1: any;
+    let query2: any;
+
+    createRoot((rootDispose) => {
+      dispose = rootDispose;
+      createComponent(QueryClientContext.Provider, {
+        value: client,
+        get children() {
+          query1 = useSolidQuery({
+            queryKey: "dedup-test",
+            queryFn: async () => {
+              calls += 1;
+              return deferred.promise;
+            },
+          });
+          query2 = useSolidQuery({
+            queryKey: "dedup-test",
+            queryFn: async () => {
+              calls += 1;
+              return deferred.promise;
+            },
+          });
+          return null;
+        },
+      });
+    });
+
+    try {
+      await flush();
+      expect(calls).toBe(1); // Only 1 queryFn call instead of 2
+
+      deferred.resolve("result");
+      await flush();
+      await flush();
+
+      expect(query1.data).toBe("result");
+      expect(query2.data).toBe("result");
+    } finally {
+      dispose();
+    }
+  });
+
+  test("invalidateQueries marks cache stale and refetches active observers", async () => {
+    let dispose = () => {};
+    const client = new QueryClient({ staleTime: 10000 });
+    let calls = 0;
+    let query: any;
+
+    createRoot((rootDispose) => {
+      dispose = rootDispose;
+      createComponent(QueryClientContext.Provider, {
+        value: client,
+        get children() {
+          query = useSolidQuery({
+            queryKey: "invalidate-test",
+            queryFn: async () => {
+              calls += 1;
+              return `count:${calls}`;
+            },
+          });
+          return null;
+        },
+      });
+    });
+
+    try {
+      await flush();
+      await flush();
+      expect(calls).toBe(1);
+
+      // Invalidate the query key
+      client.invalidateQueries("invalidate-test");
+      await flush();
+      await flush();
+
+      // Active observer should be refetched automatically
+      expect(calls).toBe(2);
+      expect(query.data).toBe("count:2");
+    } finally {
+      dispose();
+    }
+  });
+
+  test("deterministic query keys handle object sorting", () => {
+    const client = new QueryClient();
+    client.setCache(hashKey(["users", { a: 1, b: 2 }]), "data");
+
+    // Switching key order should still retrieve from cache
+    const key1 = ["users", { b: 2, a: 1 }];
+    const clientEntry = client.getCache(hashKey(key1));
+    expect(clientEntry).toBe("data");
+
+    // Now let's test useSolidQuery using deterministic keys
+    let dispose = () => {};
+    let query: any;
+    let calls = 0;
+
+    createRoot((rootDispose) => {
+      dispose = rootDispose;
+      createComponent(QueryClientContext.Provider, {
+        value: client,
+        get children() {
+          query = useSolidQuery({
+            queryKey: () => ["users", { b: 2, a: 1 }],
+            queryFn: async () => {
+              calls += 1;
+              return "fetched-data";
+            },
+            staleTime: 10000,
+          });
+          return null;
+        },
+      });
+    });
+
+    try {
+      // Should find the value "data" in the cache since keys sort to the same string
+      expect(query.data).toBe("data");
+      expect(calls).toBe(0);
     } finally {
       dispose();
     }
