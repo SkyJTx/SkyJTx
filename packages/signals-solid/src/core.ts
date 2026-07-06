@@ -208,6 +208,25 @@ export function useReactive<T extends object>(
   return state;
 }
 
+/**
+ * Creates a reactive effect that automatically tracks dependencies and runs when they change.
+ * Returns an EffectManager to pause, resume, or stop the effect.
+ *
+ * @param effect - A callback function that executes when dependencies update. Can return a cleanup function.
+ * @param options - Optional configuration, such as a name for debugging.
+ * @returns An EffectManager object to control the effect lifecycle.
+ * @example
+ * const count = useSignal(0);
+ * const manager = useEffect(() => {
+ *   console.log("Count changed:", count.value);
+ *   return () => console.log("Cleaning up previous run");
+ * });
+ *
+ * manager.pause();  // Pause reactivity
+ * count.value = 1;  // Does not trigger the effect
+ * manager.resume(); // Resume reactivity, effect will run again
+ * manager.stop();   // Dispose of the effect permanently
+ */
 export function useEffect<T = void>(
   effect: Callback<void, Cleanup<T> | T>,
   options?: {
@@ -284,6 +303,24 @@ export function useEffect<T = void>(
   };
 }
 
+/**
+ * Creates a watcher that tracks a specific getter source and runs a callback only when the source value changes.
+ * Avoids executing on the initial run unless manually handled, and supports custom equality comparison.
+ *
+ * @param source - A getter function that returns the value to watch.
+ * @param effect - A callback function invoked when the source value changes, receiving the new and previous values.
+ * @param options - Optional configuration including name and a custom equality check.
+ * @returns An EffectManager object to control the watcher's lifecycle.
+ * @example
+ * const count = useSignal(0);
+ * const watcher = useWatch(
+ *   () => count.value,
+ *   ({ value, prev }) => {
+ *     console.log(`Changed from ${prev} to ${value}`);
+ *   }
+ * );
+ * count.value = 5; // Logs: "Changed from 0 to 5"
+ */
 export function useWatch<T, Q = void>(
   source: Getter<T>,
   effect: Callback<{ value: T; prev: T }, Cleanup<Q> | Q>,

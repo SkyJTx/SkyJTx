@@ -112,6 +112,13 @@ export function isWritableComputed(value: any): value is WritableComputed<any> {
   );
 }
 
+/**
+ * Checks if a value is an EffectManager.
+ * An EffectManager must be an object containing callable "stop", "pause", and "resume" methods.
+ *
+ * @param value - The value to check.
+ * @returns True if the value is an EffectManager, false otherwise.
+ */
 export function isEffectManager(value: any): value is EffectManager {
   return (
     isObject(value) &&

@@ -1,15 +1,15 @@
 {
   "name": "@skyjt/signals-solid",
-  "version": "0.1.0",
+  "version": "0.1.2",
   "description": "SolidJS signal helpers with a Vue-like API.",
   "type": "module",
   "main": "./dist/index.js",
   "module": "./dist/index.js",
-  "types": "./src/index.ts",
+  "types": "./dist/index.d.ts",
   "exports": {
-    ".": {
-      "types": "./src/index.ts",
-      "import": "./dist/index.js"
+    "import": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
     }
   },
   "files": [
@@ -40,9 +40,7 @@
   ],
   "scripts": {
     "clean": "rimraf dist",
-    "build:js": "bun build ./src/index.ts --outdir ./dist --format esm --sourcemap --external solid-js --external solid-js/web --external solid-js/store",
-    "build:types": "bunx tsc -p tsconfig.build.json",
-    "build": "bun run build:js && bun run build:types",
+    "build": "tsup",
     "prepublishOnly": "bun run build"
   },
   "peerDependencies": {
@@ -51,6 +49,10 @@
   "devDependencies": {
     "bun-types": "^1.3.11",
     "rimraf": "^5.0.5",
+    "tsup": "^8.1.0",
+    "tsup-preset-solid": "^2.2.0",
     "typescript": "^5.5.4"
-  }
+  },
+  "browser": {},
+  "typesVersions": {}
 }

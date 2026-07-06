@@ -22,13 +22,29 @@ declare global {
   }
 }
 
+/**
+ * Represents an entry in the query cache.
+ *
+ * @template T - The type of data stored in this cache entry.
+ */
 export interface CacheEntry<T = any> {
+  /** The cached data value. */
   data: T;
+  /** Timestamp when this entry was last updated. */
   updatedAt: number;
+  /** Timeout ID for garbage collection scheduling. */
   gcTimeout?: any;
+  /** The duration in milliseconds before this cache entry is garbage collected. */
   gcTime?: number;
 }
 
+/**
+ * Produces a stable, deterministic string representation of any value.
+ * Objects will have their keys sorted alphabetically.
+ *
+ * @param value - The value to stringify.
+ * @returns A deterministic string representation of the value.
+ */
 export function stableStringify(value: any): string {
   if (value === null) return "null";
   if (value === undefined) return "undefined";
@@ -49,19 +65,44 @@ export function stableStringify(value: any): string {
   return JSON.stringify(value);
 }
 
+/**
+ * Hashes/serializes a query key into a consistent string representation.
+ * If the key is already a string, it returns the string directly.
+ * Otherwise, it uses {@link stableStringify}.
+ *
+ * @param key - The query key to hash.
+ * @returns A string representation of the query key.
+ */
 export function hashKey(key: any): string {
   if (typeof key === "string") return key;
   return stableStringify(key);
 }
 
+/**
+ * The core client class that manages cache entries, active query promises, and observers.
+ * Provides APIs to interact with the cache directly and triggers refetching on cache invalidation.
+ */
 export class QueryClient {
+  /** The primary storage map for query cache entries. */
   public cache = new Map<string, CacheEntry>();
+  /** Store for hydrated initial data received from server-side rendering. */
   public initialData = new Map<string, any>();
+  /** Map of in-flight fetch promises to deduplicate concurrent requests. */
   public inFlightPromises = new Map<string, Promise<any>>();
+  /** Map of observers listening to updates for specific query keys. */
   public observers = new Map<string, Set<() => void>>();
+  /** Default duration in milliseconds before cached data is considered stale. */
   public staleTime: number;
+  /** Default duration in milliseconds before inactive cache entries are garbage collected. */
   public gcTime: number;
 
+  /**
+   * Creates an instance of QueryClient.
+   *
+   * @param options - Configuration options for the client.
+   * @param options.staleTime - Default duration in milliseconds before data is considered stale. Defaults to 0.
+   * @param options.gcTime - Default duration in milliseconds before inactive cache entries are deleted. Defaults to 5 minutes.
+   */
   constructor(options?: { staleTime?: number; gcTime?: number }) {
     this.staleTime = options?.staleTime ?? 0;
     this.gcTime = options?.gcTime ?? 5 * 60 * 1000;
@@ -75,10 +116,23 @@ export class QueryClient {
     }
   }
 
+  /**
+   * Retrieves the initial state/data for a key (usually from SSR hydration) and removes it from initialData storage.
+   *
+   * @param key - The hashed query key.
+   * @returns The initial data if available, or undefined.
+   */
   getInitialData(key: string) {
     return this.initialData.get(key);
   }
 
+  /**
+   * Stores data in the query cache and sets up garbage collection timeouts if there are no active observers.
+   *
+   * @param key - The hashed query key.
+   * @param data - The data to store.
+   * @param gcTime - Custom garbage collection duration for this specific cache entry.
+   */
   setCache(key: string, data: any, gcTime?: number) {
     const existing = this.cache.get(key);
     if (existing?.gcTimeout) {
@@ -103,14 +157,32 @@ export class QueryClient {
     });
   }
 
+  /**
+   * Retrieves the cached data for a key.
+   *
+   * @param key - The hashed query key.
+   * @returns The cached data if found, or undefined.
+   */
   getCache(key: string) {
     return this.cache.get(key)?.data;
   }
 
+  /**
+   * Retrieves the raw cache entry object for a key, including metadata like updatedAt.
+   *
+   * @param key - The hashed query key.
+   * @returns The cache entry object if found, or undefined.
+   */
   getCacheEntry(key: string) {
     return this.cache.get(key);
   }
 
+  /**
+   * Registers an observer callback for a query key. Clears any pending garbage collection timeout.
+   *
+   * @param key - The hashed query key.
+   * @param onUpdate - Callback function triggered when query data is modified or invalidated.
+   */
   addObserver(key: string, onUpdate: () => void) {
     let list = this.observers.get(key);
     if (!list) {
@@ -126,6 +198,12 @@ export class QueryClient {
     }
   }
 
+  /**
+   * Unregisters an observer callback. Schedules garbage collection if no observers remain.
+   *
+   * @param key - The hashed query key.
+   * @param onUpdate - The callback function to unregister.
+   */
   removeObserver(key: string, onUpdate: () => void) {
     const list = this.observers.get(key);
     if (list) {
@@ -146,6 +224,12 @@ export class QueryClient {
     }
   }
 
+  /**
+   * Invalidates cached queries matching the query key. Marks the cached entry as stale
+   * and triggers registered observers to perform a refetch.
+   *
+   * @param key - The query key or array key to invalidate.
+   */
   invalidateQueries(key: string[] | string) {
     const keyStr = hashKey(key);
     const entry = this.cache.get(keyStr);
@@ -161,6 +245,12 @@ export class QueryClient {
     }
   }
 
+  /**
+   * Extracts all cached data into a plain JSON-serializable record of key-data pairs.
+   * Typically used during server-side rendering (SSR) to serialize the client state.
+   *
+   * @returns A plain object mapping query key hashes to cached data.
+   */
   extractState() {
     const raw: Record<string, any> = {};
     for (const [key, val] of this.cache.entries()) {
@@ -170,16 +260,46 @@ export class QueryClient {
   }
 }
 
+/**
+ * React Context containing the {@link QueryClient} instance.
+ */
 export const QueryClientContext = createContext<QueryClient>();
 
+/**
+ * Hook to execute and subscribe to a reactive query with initial data options.
+ *
+ * @template TData - The expected response data type.
+ * @template TError - The expected error type.
+ * @param options - Configuration options requiring an initialData field.
+ * @returns A reactive query result containing data, loading state, and helper functions.
+ */
 export function useSolidQuery<TData, TError = unknown>(
   options: UseQueryOptionsWithInitialData<TData, TError>,
 ): UseQueryResult<TData, TError, true>;
 
+/**
+ * Hook to execute and subscribe to a reactive query without initial data options.
+ *
+ * @template TData - The expected response data type.
+ * @template TError - The expected error type.
+ * @param options - Configuration options where initialData is undefined or omitted.
+ * @returns A reactive query result containing data, loading state, and helper functions.
+ */
 export function useSolidQuery<TData, TError = unknown>(
   options: UseQueryOptionsWithoutInitialData<TData, TError>,
 ): UseQueryResult<TData, TError, false>;
 
+/**
+ * Main implementation of the useSolidQuery hook.
+ * Resolves the query client from context, initializes state using Solid's createResource,
+ * and maintains observers to automatically refetch when invalidation occurs.
+ *
+ * @template TData - The expected response data type.
+ * @template TError - The expected error type.
+ * @param options - Configuration options for the query.
+ * @returns A reactive query object.
+ * @throws Error if called outside a `<QueriesProvider>` context.
+ */
 export function useSolidQuery<TData, TError = unknown>(
   options: UseQueryOptions<TData, TError>,
 ) {
@@ -295,6 +415,15 @@ export function useSolidQuery<TData, TError = unknown>(
   }) as UseQueryResult<TData, TError, false | true>;
 }
 
+/**
+ * Hook to manage asynchronous mutations (create, update, delete requests).
+ *
+ * @template TVariables - The variables type accepted by the mutation function.
+ * @template TData - The expected result data type.
+ * @template TError - The expected error type.
+ * @param options - Configuration options containing the mutation function and event callbacks.
+ * @returns A reactive mutation object containing triggers (mutate, mutateAsync) and status flags.
+ */
 export function useSolidMutation<TVariables, TData, TError = unknown>(
   options: UseMutationOptions<TVariables, TData, TError>,
 ) {
@@ -345,3 +474,4 @@ export function useSolidMutation<TVariables, TData, TError = unknown>(
     },
   });
 }
+

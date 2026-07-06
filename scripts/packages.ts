@@ -10,13 +10,13 @@ const packages = [
   },
 ];
 
-type Action = "clean" | "build" | "test" | "pack" | "publish";
+type Action = "clean" | "build" | "test" | "pack" | "publish" | "bump";
 
 const action = process.argv[2] as Action | undefined;
 
 const usage = () => {
   console.log(
-    "Usage: bun run scripts/packages.ts <clean|build|test|pack|publish>",
+    "Usage: bun run scripts/packages.ts <clean|build|test|pack|publish|bump> [patch|minor|major]",
   );
 };
 
@@ -104,6 +104,83 @@ const publishIfNeeded = async () => {
   }
 };
 
+const bumpVersion = (version: string, type: "patch" | "minor" | "major"): string => {
+  const parts = version.split(".").map(Number);
+  if (parts.length !== 3 || parts.some(isNaN)) {
+    throw new Error(`Invalid version format: ${version}`);
+  }
+  let [major, minor, patch] = parts;
+  if (type === "major") {
+    major += 1;
+    minor = 0;
+    patch = 0;
+  } else if (type === "minor") {
+    minor += 1;
+    patch = 0;
+  } else {
+    patch += 1;
+  }
+  return `${major}.${minor}.${patch}`;
+};
+
+const bumpVersions = async (type: "patch" | "minor" | "major" = "patch") => {
+  console.log(`[packages] Bumping package versions (${type})...`);
+  const pkgConfigs: { path: string; name: string; oldVersion: string; newVersion: string; json: any }[] = [];
+
+  for (const pkg of packages) {
+    const text = await Bun.file(`${pkg.path}/package.json`).text();
+    const json = JSON.parse(text);
+    const oldVersion = json.version;
+    if (!oldVersion) {
+      console.error(`[packages] Missing version in ${pkg.path}/package.json`);
+      process.exit(1);
+    }
+    const newVersion = bumpVersion(oldVersion, type);
+    pkgConfigs.push({
+      path: pkg.path,
+      name: json.name,
+      oldVersion,
+      newVersion,
+      json,
+    });
+  }
+
+  const nameToNewVersion = new Map<string, string>();
+  for (const config of pkgConfigs) {
+    nameToNewVersion.set(config.name, config.newVersion);
+  }
+
+  for (const config of pkgConfigs) {
+    config.json.version = config.newVersion;
+
+    if (config.json.dependencies) {
+      for (const dep of Object.keys(config.json.dependencies)) {
+        if (nameToNewVersion.has(dep)) {
+          config.json.dependencies[dep] = `^${nameToNewVersion.get(dep)}`;
+        }
+      }
+    }
+    if (config.json.devDependencies) {
+      for (const dep of Object.keys(config.json.devDependencies)) {
+        if (nameToNewVersion.has(dep)) {
+          config.json.devDependencies[dep] = `^${nameToNewVersion.get(dep)}`;
+        }
+      }
+    }
+    if (config.json.peerDependencies) {
+      for (const dep of Object.keys(config.json.peerDependencies)) {
+        if (nameToNewVersion.has(dep)) {
+          config.json.peerDependencies[dep] = `^${nameToNewVersion.get(dep)}`;
+        }
+      }
+    }
+
+    const indent = 2;
+    await Bun.write(`${config.path}/package.json`, JSON.stringify(config.json, null, indent) + "\n");
+    console.log(`[packages] ${config.name}: ${config.oldVersion} -> ${config.newVersion}`);
+  }
+};
+
 const main = async () => {
   switch (action) {
     case "clean":
@@ -121,6 +198,16 @@ const main = async () => {
     case "publish":
       await publishIfNeeded();
       break;
+    case "bump": {
+      const bumpType = (process.argv[3] || "patch") as "patch" | "minor" | "major";
+      if (!["patch", "minor", "major"].includes(bumpType)) {
+        console.error(`[packages] Invalid bump type: ${bumpType}`);
+        usage();
+        process.exit(1);
+      }
+      await bumpVersions(bumpType);
+      break;
+    }
     default:
       usage();
       process.exit(1);
