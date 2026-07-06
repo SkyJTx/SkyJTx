@@ -18,6 +18,7 @@ export type IconName =
   | "external-link"
   | "chevron-left"
   | "chevron-right"
+  | "chevron-down"
   | "x"
   | "file-text"
   | "image"
@@ -129,6 +130,9 @@ export function Icon(props: IconProps) {
         </Match>
         <Match when={local.name === "chevron-right"}>
           <polyline points="9 18 15 12 9 6" />
+        </Match>
+        <Match when={local.name === "chevron-down"}>
+          <polyline points="6 9 12 15 18 9" />
         </Match>
         <Match when={local.name === "x"}>
           <line x1="18" y1="6" x2="6" y2="18" />

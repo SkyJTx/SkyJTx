@@ -18,22 +18,14 @@ export const CarouselTrack = styled("div")<{ $offset: number; $isDragging: boole
   will-change: transform;
 `;
 
-export const CarouselSlide = styled("div")`
-  flex: 0 0 100%;
+export const CarouselSlide = styled("div")<{ $width: number }>`
+  flex: 0 0 ${(p) => p.$width}%;
   min-width: 0;
   padding: 0 0.5rem;
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
   height: auto;
-
-  @media (min-width: 768px) {
-    flex: 0 0 50%;
-  }
-
-  @media (min-width: 1200px) {
-    flex: 0 0 50%;
-  }
 `;
 
 export const NavRow = styled("div")`

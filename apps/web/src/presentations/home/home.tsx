@@ -1,8 +1,8 @@
 import { useTheme } from "solid-styled-components";
 import { SocialLinks } from "~/components/SocialLinks";
+import { ScrollIndicator } from "~/components/ScrollIndicator";
 import { useHomeController } from "./home.controller";
 import * as S from "./styles";
-import { Icon } from "~/components/Icon";
 
 /**
  * The primary landing/home page presentation for the personal portfolio.
@@ -34,10 +34,7 @@ export function HomePresentation() {
             </S.SocialLinksWrapper>
           </S.HeroLeft>
         </S.HeroContent>
-        <S.ScrollIndicator theme={theme} onClick={c.handleScrollDown}>
-          <span>Scroll Down</span>
-          <Icon name="arrow-down" size={18} />
-        </S.ScrollIndicator>
+        <ScrollIndicator label="Scroll Down" onClick={c.handleScrollDown} />
       </S.HeroSection>
     </S.HomeWrapper>
   );

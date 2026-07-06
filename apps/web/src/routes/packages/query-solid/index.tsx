@@ -6,12 +6,13 @@ const delayedServerIncrement = action(async (newValue: number) => {
   "use server";
   const delay = (ms: number) =>
     new Promise((resolve) => setTimeout(resolve, ms));
-  await delay(1000);
-  console.log("Server incremented value:", newValue);
+  await delay(500);
+  console.log("Server incremented value:", newValue + 1);
+  await delay(500);
   return newValue + 1;
 });
 
-export default function Home() {
+export default function QuerySolidPage() {
   const query = useSolidQuery({
     queryKey: "count",
     async queryFn() {
@@ -37,6 +38,7 @@ export default function Home() {
       <Title>Solid Start</Title>
       <h1>Welcome to Solid Start!</h1>
       <button
+        type="button"
         disabled={mutation.isPending}
         onClick={() => {
           mutation.mutate(query.data);
@@ -57,8 +59,9 @@ const delayedServerIncrement = action(async (newValue: number) => {
   "use server";
   const delay = (ms: number) =>
     new Promise((resolve) => setTimeout(resolve, ms));
-  await delay(1000);
-  console.log("Server incremented value:", newValue);
+  await delay(500);
+  console.log("Server incremented value:", newValue + 1);
+  await delay(500);
   return newValue + 1;
 });
 

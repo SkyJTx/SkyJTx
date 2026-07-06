@@ -1,7 +1,7 @@
 import { Show, For } from "solid-js";
 import { useTheme } from "solid-styled-components";
 import { useComputed } from "@skyjt/signals-solid";
-import { Box } from "~/components/Box";
+import { Card } from "~/components/Card";
 import { ImageCarousel } from "~/components/ImageCarousel";
 import { PdfPreview } from "~/components/PdfPreview";
 import { Icon } from "~/components/Icon";
@@ -20,51 +20,49 @@ export function ProjectCard(props: ProjectCardProps) {
   const hasImages = useComputed(() => props.project.images.length > 0);
   const hasPdf = useComputed(() => Boolean(props.project.pdfUrl));
 
+  const MediaComponent = () => (
+    <>
+      <Show when={hasImages()}>
+        <ImageCarousel
+          images={props.project.images}
+          projectName={props.project.title}
+          projectDate={props.project.date}
+        />
+      </Show>
+      <Show when={!hasImages() && hasPdf()}>
+        <PdfPreview
+          url={props.project.pdfUrl!}
+          title={props.project.title}
+          date={props.project.date}
+        />
+      </Show>
+    </>
+  );
+
+  const ActionsComponent = () => (
+    <Show when={props.project.links.length > 0}>
+      <For each={props.project.links}>
+        {(link) => (
+          <S.LinkButton
+            theme={theme}
+            href={link.url}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <Icon name={link.icon} size={14} />
+            {link.label}
+          </S.LinkButton>
+        )}
+      </For>
+    </Show>
+  );
+
   return (
-    <Box padding="1rem" style={{ height: "100%" }}>
-      <S.CardContainer>
-        <S.MediaSection>
-          <Show when={hasImages()}>
-            <ImageCarousel
-              images={props.project.images}
-              projectName={props.project.title}
-              projectDate={props.project.date}
-            />
-          </Show>
-          <Show when={!hasImages() && hasPdf()}>
-            <PdfPreview
-              url={props.project.pdfUrl!}
-              title={props.project.title}
-              date={props.project.date}
-            />
-          </Show>
-        </S.MediaSection>
-
-        <S.ContentSection>
-          <S.CardTitle theme={theme}>{props.project.title}</S.CardTitle>
-          <S.CardDescription theme={theme}>
-            {props.project.description}
-          </S.CardDescription>
-
-          <Show when={props.project.links.length > 0}>
-            <S.LinksRow>
-              <For each={props.project.links}>
-                {(link) => (
-                  <S.LinkButton
-                    theme={theme}
-                    href={link.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    <Icon name={link.icon} size={14} />
-                    {link.label}
-                  </S.LinkButton>
-                )}
-              </For>
-            </S.LinksRow>
-          </Show>
-        </S.ContentSection>
-      </S.CardContainer>
-    </Box>
+    <Card
+      media={<MediaComponent />}
+      title={props.project.title}
+      description={props.project.description}
+      actions={<ActionsComponent />}
+    />
   );
 }

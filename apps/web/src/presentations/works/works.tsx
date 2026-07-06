@@ -2,10 +2,12 @@ import { Show } from "solid-js";
 import { BrandTitle, BrandSubtitle } from "~/components/Brand";
 import { Box } from "~/components/Box";
 import { SegmentButton } from "~/components/SegmentButton";
+import { Section } from "~/components/Section";
+import { Placeholder } from "~/components/Placeholder";
+import { ContentFadeIn } from "~/components/ContentFadeIn";
 import { useWorksController, type WorksSegment } from "./works.controller";
 import { WorksCarousel } from "./WorksCarousel";
 import * as S from "./styles";
-import { useTheme } from "solid-styled-components";
 
 const SEGMENTS = [
   { value: "software" as const, label: "Software Development" },
@@ -17,41 +19,39 @@ const SEGMENTS = [
  */
 export function WorksPresentation() {
   const controller = useWorksController();
-  const theme = useTheme();
 
   return (
-    <S.SectionWrapper theme={theme} id="Works">
-      <BrandTitle>My Works</BrandTitle>
-      <BrandSubtitle>Selected projects and experiments</BrandSubtitle>
+    <div id="Works">
+      <Section>
+        <BrandTitle>My Works</BrandTitle>
+        <BrandSubtitle>Selected projects and experiments</BrandSubtitle>
 
-      <S.SegmentRow>
-        <SegmentButton
-          <WorksSegment>
-          segments={SEGMENTS}
-          value={controller.activeSegment.value}
-          onChange={(v) => {
-            controller.activeSegment.value = v;
-          }}
-        />
-      </S.SegmentRow>
+        <S.SegmentRow>
+          <SegmentButton
+            <WorksSegment>
+            segments={SEGMENTS}
+            value={controller.activeSegment.value}
+            onChange={(v) => {
+              controller.activeSegment.value = v;
+            }}
+          />
+        </S.SegmentRow>
 
-      <S.ContentArea>
-        <Show when={controller.activeSegment.value === "software"}>
-          <WorksCarousel projects={controller.projectsQuery.data ?? []} />
-        </Show>
+        <ContentFadeIn>
+          <Show when={controller.activeSegment.value === "software"}>
+            <WorksCarousel projects={controller.projectsQuery.data ?? []} />
+          </Show>
 
-        <Show when={controller.activeSegment.value === "music"}>
-          <Box>
-            <S.PlaceholderWrapper>
-              <S.PlaceholderTitle theme={theme}>Coming Soon</S.PlaceholderTitle>
-              <S.PlaceholderDescription theme={theme}>
-                Music compositions and arrangements are being prepared. Check
-                back soon for updates.
-              </S.PlaceholderDescription>
-            </S.PlaceholderWrapper>
-          </Box>
-        </Show>
-      </S.ContentArea>
-    </S.SectionWrapper>
+          <Show when={controller.activeSegment.value === "music"}>
+            <Box>
+              <Placeholder 
+                title="Coming Soon" 
+                description="Music compositions and arrangements are being prepared. Check back soon for updates."
+              />
+            </Box>
+          </Show>
+        </ContentFadeIn>
+      </Section>
+    </div>
   );
 }

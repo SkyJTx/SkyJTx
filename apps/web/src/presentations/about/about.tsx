@@ -1,4 +1,6 @@
 import { useTheme } from "solid-styled-components";
+import { Section } from "~/components/Section";
+import { ContentFadeIn } from "~/components/ContentFadeIn";
 import { useAboutController } from "./about.controller";
 import * as S from "./styles";
 import { Icon } from "~/components/Icon";
@@ -11,8 +13,9 @@ export function AboutPresentation() {
   const theme = useTheme();
 
   return (
-    <S.SectionWrapper id="About" theme={theme}>
-      <S.ContentBox>
+    <div id="About">
+      <Section>
+        <ContentFadeIn>
         <S.AboutBox>
           <S.AboutContainer>
             <S.AvatarWrapper>
@@ -58,8 +61,9 @@ export function AboutPresentation() {
             </S.TextContent>
           </S.AboutContainer>
         </S.AboutBox>
-      </S.ContentBox>
-    </S.SectionWrapper>
+        </ContentFadeIn>
+      </Section>
+    </div>
   );
 }
 
