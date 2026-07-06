@@ -1,4 +1,4 @@
-import { JSX, Show } from "solid-js";
+import { children, JSX, Show } from "solid-js";
 import { useTheme } from "solid-styled-components";
 import { Box } from "~/components/Box";
 import * as S from "./styles";
@@ -13,12 +13,14 @@ export interface CardProps {
 
 export function Card(props: CardProps) {
   const theme = useTheme();
+  const media = children(() => props.media);
+  const actions = children(() => props.actions);
 
   return (
     <Box padding="1rem" style={{ height: "100%" }}>
       <S.CardContainer>
-        <Show when={props.media}>
-          <S.MediaSection>{props.media}</S.MediaSection>
+        <Show when={media()}>
+          <S.MediaSection>{media()}</S.MediaSection>
         </Show>
 
         <S.ContentSection>
@@ -30,11 +32,11 @@ export function Card(props: CardProps) {
               {props.description}
             </S.CardDescription>
           </Show>
-          
+
           {props.children}
 
-          <Show when={props.actions}>
-            <S.ActionsRow>{props.actions}</S.ActionsRow>
+          <Show when={actions()}>
+            <S.ActionsRow>{actions()}</S.ActionsRow>
           </Show>
         </S.ContentSection>
       </S.CardContainer>
