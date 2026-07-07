@@ -1,8 +1,9 @@
-import { Show, createEffect, onCleanup, createSignal } from "solid-js";
+import { Show, onCleanup } from "solid-js";
 import { Portal } from "solid-js/web";
 import { useTheme } from "solid-styled-components";
 import { Icon, IconName } from "~/components/Icon";
 import { IconButton } from "~/components/Button";
+import { useSignal, useEffect, useComputed } from "@skyjt/signals-solid";
 import * as S from "./styles";
 
 export interface FilePreviewProps {
@@ -34,9 +35,9 @@ function detectFileType(url: string): FileType {
  */
 export function FilePreview(props: FilePreviewProps) {
   const theme = useTheme();
-  const [copied, setCopied] = createSignal(false);
+  const copied = useSignal(false);
 
-  createEffect(() => {
+  const previewEffect = useEffect(() => {
     if (props.isOpen) {
       const handleKeyDown = (e: KeyboardEvent) => {
         if (e.key === "Escape") {
@@ -45,13 +46,14 @@ export function FilePreview(props: FilePreviewProps) {
       };
 
       document.addEventListener("keydown", handleKeyDown);
-      onCleanup(() => {
+      return () => {
         document.removeEventListener("keydown", handleKeyDown);
-      });
+      };
     }
   });
+  onCleanup(() => previewEffect.stop());
 
-  const fileType = () => {
+  const fileType = useComputed(() => {
     const detected = detectFileType(props.url);
     if (detected === "unknown") {
       // Fallback: If it's a supabase URL or has a token, it might not have clear extension.
@@ -60,11 +62,11 @@ export function FilePreview(props: FilePreviewProps) {
       return "image";
     }
     return detected;
-  };
+  });
 
-  const getHeaderIcon = (): IconName => {
-    return fileType() === "pdf" ? "file-text" : "image";
-  };
+  const getHeaderIcon = useComputed<IconName>(() => {
+    return fileType.value === "pdf" ? "file-text" : "image";
+  });
 
   const handleSave = async (e: MouseEvent) => {
     e.preventDefault();
@@ -109,9 +111,9 @@ export function FilePreview(props: FilePreviewProps) {
 
     try {
       await navigator.clipboard.writeText(props.url);
-      setCopied(true);
+      copied.value = true;
       setTimeout(() => {
-        setCopied(false);
+        copied.value = false;
       }, 2000);
     } catch (err) {
       console.error("Failed to copy link:", err);
@@ -131,7 +133,7 @@ export function FilePreview(props: FilePreviewProps) {
           <S.Header theme={theme}>
             <S.MetaSection>
               <S.IconContainer theme={theme}>
-                <Icon name={getHeaderIcon()} size={20} />
+                <Icon name={getHeaderIcon.value} size={20} />
               </S.IconContainer>
               <S.TextContainer>
                 <S.FileName theme={theme}>{props.name}</S.FileName>
@@ -172,7 +174,7 @@ export function FilePreview(props: FilePreviewProps) {
           </S.Header>
 
           <S.Viewport onClick={handleOverlayClick}>
-            <Show when={fileType() === "image"}>
+            <Show when={fileType.value === "image"}>
               <S.ImageWrapper onClick={(e) => e.stopPropagation()}>
                 <S.Image
                   theme={theme}
@@ -182,7 +184,7 @@ export function FilePreview(props: FilePreviewProps) {
               </S.ImageWrapper>
             </Show>
 
-            <Show when={fileType() === "pdf"}>
+            <Show when={fileType.value === "pdf"}>
               <S.PdfWrapper theme={theme} onClick={(e) => e.stopPropagation()}>
                 <S.PdfIframe
                   src={`${props.url}#toolbar=1`}

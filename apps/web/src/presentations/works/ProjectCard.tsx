@@ -20,16 +20,16 @@ export function ProjectCard(props: ProjectCardProps) {
   const hasImages = useComputed(() => props.project.images.length > 0);
   const hasPdf = useComputed(() => Boolean(props.project.pdfUrl));
 
-  const MediaComponent = () => (
+  const media = (
     <>
-      <Show when={hasImages()}>
+      <Show when={hasImages.value}>
         <ImageCarousel
           images={props.project.images}
           projectName={props.project.title}
           projectDate={props.project.date}
         />
       </Show>
-      <Show when={!hasImages() && hasPdf()}>
+      <Show when={!hasImages.value && hasPdf.value}>
         <PdfPreview
           url={props.project.pdfUrl!}
           title={props.project.title}
@@ -39,7 +39,7 @@ export function ProjectCard(props: ProjectCardProps) {
     </>
   );
 
-  const ActionsComponent = () => (
+  const actions = (
     <Show when={props.project.links.length > 0}>
       <For each={props.project.links}>
         {(link) => (
@@ -59,10 +59,10 @@ export function ProjectCard(props: ProjectCardProps) {
 
   return (
     <Card
-      media={<MediaComponent />}
+      media={media}
       title={props.project.title}
       description={props.project.description}
-      actions={<ActionsComponent />}
+      actions={actions}
     />
   );
 }

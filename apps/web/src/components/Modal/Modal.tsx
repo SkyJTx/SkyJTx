@@ -1,8 +1,9 @@
-import { Show, createEffect, onCleanup, JSX } from "solid-js";
+import { Show, onCleanup, JSX } from "solid-js";
 import { Portal } from "solid-js/web";
 import { useTheme } from "solid-styled-components";
 import { Icon } from "~/components/Icon";
 import { ModalController } from "./ModalController";
+import { useEffect } from "@skyjt/signals-solid";
 import * as S from "./styles";
 
 export interface ModalProps {
@@ -20,7 +21,7 @@ export interface ModalProps {
 export function Modal(props: ModalProps) {
   const theme = useTheme();
 
-  createEffect(() => {
+  const manager = useEffect(() => {
     if (props.controller.isOpen) {
       const handleKeyDown = (e: KeyboardEvent) => {
         if (e.key === "Escape") {
@@ -30,11 +31,12 @@ export function Modal(props: ModalProps) {
       };
 
       document.addEventListener("keydown", handleKeyDown);
-      onCleanup(() => {
+      return () => {
         document.removeEventListener("keydown", handleKeyDown);
-      });
+      };
     }
   });
+  onCleanup(() => manager.stop());
 
   const handleOverlayClick = (e: MouseEvent) => {
     if (e.target === e.currentTarget) {

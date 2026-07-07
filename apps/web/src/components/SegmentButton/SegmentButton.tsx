@@ -1,6 +1,6 @@
-import { For, createEffect, onMount } from "solid-js";
+import { For, onCleanup } from "solid-js";
 import { useTheme } from "solid-styled-components";
-import { useSignal } from "@skyjt/signals-solid";
+import { useSignal, useEffect } from "@skyjt/signals-solid";
 import * as S from "./styles";
 
 export interface Segment<T extends string> {
@@ -40,8 +40,8 @@ export function SegmentButton<T extends string>(
     }
   };
 
-  onMount(updateIndicator);
-  createEffect(updateIndicator);
+  const indicatorEffect = useEffect(updateIndicator);
+  onCleanup(() => indicatorEffect.stop());
 
   return (
     <S.SegmentContainer theme={theme} ref={containerRef}>
