@@ -25,4 +25,5 @@ Thumbs.db
 
 *.env
 
-.plan/*
+.plan/**
+.agents/**
