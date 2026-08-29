@@ -1,24 +1,5 @@
 {
   "name": "skyjt",
-  "scripts": {
-    "packages:clean": "bun run scripts/packages.ts clean",
-    "packages:build": "bun run scripts/packages.ts build",
-    "packages:test": "bun run scripts/packages.ts test",
-    "packages:pack": "bun run scripts/packages.ts pack",
-    "packages:bump": "bun run scripts/packages.ts bump",
-    "packages:publish:dry": "bun run scripts/packages.ts pack",
-    "packages:publish": "bun run scripts/packages.ts publish",
-    "web:dev": "bun --cwd apps/web dev",
-    "web:build": "bun --cwd apps/web build",
-    "web:start": "bun --cwd apps/web start",
-    "web:preview": "bun --cwd apps/web preview"
-  },
-  "dependencies": {
-    "solid-js": "^1.8.15"
-  },
-  "overrides": {
-    "solid-js": "^1.8.15"
-  },
   "workspaces": [
     "apps/*",
     "packages/*"
