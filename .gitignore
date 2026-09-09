@@ -55,3 +55,8 @@ Thumbs.db
 .agents
 .secrets
 .tasks
+.tasks/**
+
+# Turbo
+.turbo
+.turbo/**
