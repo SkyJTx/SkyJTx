@@ -1,0 +1,22 @@
+{
+  "name": "skyjtx",
+  "type": "module",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "build": "turbo run build",
+    "dev": "turbo run dev",
+    "lint": "turbo run lint",
+    "test": "turbo run test"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "turbo": "^2.10.12"
+  },
+  "peerDependencies": {
+    "typescript": "^7"
+  }
+}
