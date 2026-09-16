@@ -1,4 +1,4 @@
-import type { ParentProps } from "solid-js";
+import { Loading, type ParentProps } from "solid-js";
 import type { JSX } from "@solidjs/web";
 import { Router, TypedLink } from "./router";
 import "./App.css";
@@ -21,7 +21,9 @@ export default function App(): JSX.Element {
               User 42
             </TypedLink>
           </nav>
-          <main class="content-container">{props.children}</main>
+          <Loading fallback={<main class="content-container">Loading...</main>}>
+            <main class="content-container">{props.children}</main>
+          </Loading>
         </div>
       )}
     </Router>

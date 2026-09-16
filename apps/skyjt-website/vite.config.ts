@@ -1,5 +1,5 @@
 import { defineConfig } from "vite";
-import { fileRoutes } from "filesystem-routing/vite";
+import { typedRoutes } from "@skyjt/typed-routes/vite";
 import solid from "@solidjs/vite-plugin";
 
 export default defineConfig({
@@ -10,7 +10,7 @@ export default defineConfig({
       diagnostics: true,
       extensions: [".jsx", ".tsx"],
     }),
-    fileRoutes({ types: true }),
+    typedRoutes(),
   ],
   server: {
     port: 3000,

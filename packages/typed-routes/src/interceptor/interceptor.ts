@@ -80,6 +80,10 @@ export function interceptFileRoutes<const TManifest extends readonly unknown[]>(
           },
         });
       };
+      if ("preload" in RawComp && typeof (RawComp as { preload?: unknown }).preload === "function") {
+        const rawPreload = (RawComp as { preload: () => unknown }).preload;
+        (component as unknown as { preload: () => unknown }).preload = () => rawPreload();
+      }
     }
 
     let preload = config.preload;
