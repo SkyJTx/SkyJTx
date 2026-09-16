@@ -3,7 +3,11 @@ import solid from '@solidjs/vite-plugin';
 
 export default defineConfig({
   plugins: [
-    solid({ start: true, ssr: true, diagnostics: true }),
+    solid({
+      start: {},
+      ssr: true,
+      diagnostics: true
+    }),
   ],
   server: {
     port: 3000,
