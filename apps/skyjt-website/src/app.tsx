@@ -1,35 +1,29 @@
-import { createSignal } from 'solid-js';
-import logo from './logo.svg';
-import './App.css';
+import type { ParentProps } from "solid-js";
+import type { JSX } from "@solidjs/web";
+import { Router, TypedLink } from "./router";
+import "./App.css";
 
-/**
- * The main app component. This is the root of the client-side application and is
- * responsible for rendering the app's UI. You can customize this file to add your
- * own components, routes, or other functionality.
- *
- * Note: This file is only used in client-side rendering (CSR) mode. If you are
- * using server-side rendering (SSR) mode, this file will not be used.
- */
-export default function App() {
-  const [count, setCount] = createSignal(0);
-
+export default function App(): JSX.Element {
   return (
-    <header class="header">
-      <img src={logo} class="logo" alt="Solid logo" />
-      <p>
-        Edit <code>src/App.tsx</code> and save to reload.
-      </p>
-      <button class="increment" onClick={() => setCount(count() + 1)}>
-        Clicks: {count()}
-      </button>
-      <a
-        class="link"
-        href="https://v2.solidjs.com/"
-        target="_blank"
-        rel="noopener noreferrer"
-      >
-        Learn Solid
-      </a>
-    </header>
+    <Router>
+      {(props: ParentProps) => (
+        <div class="app-layout">
+          <nav class="site-nav">
+            <TypedLink to="/" activeClass="active">
+              Home
+            </TypedLink>
+            <TypedLink
+              to="/users/:id"
+              params={{ id: 42 }}
+              search={{ tab: "profile" }}
+              activeClass="active"
+            >
+              User 42
+            </TypedLink>
+          </nav>
+          <main class="content-container">{props.children}</main>
+        </div>
+      )}
+    </Router>
   );
 }

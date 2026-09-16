@@ -1,0 +1,86 @@
+import { createContext, createMemo, useContext, type ParentProps } from "solid-js";
+import type { JSX } from "@solidjs/web";
+import { useParams, useLocation, useSearchParams } from "@solidjs/router";
+import type { RouteConfig, RouteValidationContextValue } from "../types/route-definition";
+import { RouteValidationError } from "../types/route-definition";
+import { validateData } from "../schema/validator-adapter";
+import { normalizeSearchParams } from "../schema/coercion";
+
+const RouteValidationContext = createContext<RouteValidationContextValue<unknown, unknown, unknown, unknown> | undefined>(undefined);
+
+/**
+ * Solid 2 reactive provider managing memoized validated route parameters and search state.
+ */
+export function RouteValidationProvider<TParams, TSearch, TState, THash, TData>(
+  props: ParentProps<{ config?: RouteConfig<TParams, TSearch, TState, THash, TData> }>,
+): JSX.Element {
+  const rawParams = useParams();
+  const [searchParams] = useSearchParams();
+  const location = useLocation();
+
+  const params = createMemo<TParams>(() => {
+    const res = validateData<TParams>(props.config?.params, rawParams);
+    if (!res.success && props.config?.onError) {
+      props.config.onError({
+        error: new RouteValidationError("params", res.issues ?? []),
+        rawParams,
+        rawSearch: searchParams,
+      });
+    }
+    return res.data as TParams;
+  });
+
+  const search = createMemo<TSearch>(() => {
+    const normalized = normalizeSearchParams(searchParams);
+    const res = validateData<TSearch>(props.config?.search, normalized);
+    if (!res.success && props.config?.onError) {
+      props.config.onError({
+        error: new RouteValidationError("search", res.issues ?? []),
+        rawParams,
+        rawSearch: searchParams,
+      });
+    }
+    return res.data as TSearch;
+  });
+
+  const state = createMemo<TState | undefined>(() => {
+    if (!props.config?.state) {
+      return location.state as TState | undefined;
+    }
+    const res = validateData<TState>(props.config.state, location.state);
+    return res.data;
+  });
+
+  const hash = createMemo<THash | undefined>(() => {
+    if (!props.config?.hash) {
+      return location.hash as unknown as THash | undefined;
+    }
+    const res = validateData<THash>(props.config.hash, location.hash);
+    return res.data;
+  });
+
+  const contextValue: RouteValidationContextValue<TParams, TSearch, TState, THash> = {
+    params,
+    search,
+    state,
+    hash,
+  };
+
+  return (
+    <RouteValidationContext value={contextValue}>
+      {props.children}
+    </RouteValidationContext>
+  );
+}
+
+/**
+ * Accesses the active RouteValidationContext instance.
+ */
+export function useRouteValidationContext<
+  TParams = unknown,
+  TSearch = unknown,
+  TState = unknown,
+  THash = unknown,
+>(): RouteValidationContextValue<TParams, TSearch, TState, THash> | undefined {
+  return useContext(RouteValidationContext) as RouteValidationContextValue<TParams, TSearch, TState, THash> | undefined;
+}
