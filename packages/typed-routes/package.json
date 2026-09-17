@@ -10,6 +10,30 @@
       "types": "./src/index.ts",
       "import": "./src/index.ts"
     },
+    "./adapters": {
+      "types": "./src/adapters/runtime/index.ts",
+      "import": "./src/adapters/runtime/index.ts"
+    },
+    "./adapters/bun": {
+      "types": "./src/adapters/runtime/bun.ts",
+      "import": "./src/adapters/runtime/bun.ts"
+    },
+    "./adapters/node": {
+      "types": "./src/adapters/runtime/node.ts",
+      "import": "./src/adapters/runtime/node.ts"
+    },
+    "./adapters/cloudflare": {
+      "types": "./src/adapters/runtime/cloudflare.ts",
+      "import": "./src/adapters/runtime/cloudflare.ts"
+    },
+    "./adapters/vercel": {
+      "types": "./src/adapters/runtime/vercel.ts",
+      "import": "./src/adapters/runtime/vercel.ts"
+    },
+    "./adapters/aws-lambda": {
+      "types": "./src/adapters/runtime/aws-lambda.ts",
+      "import": "./src/adapters/runtime/aws-lambda.ts"
+    },
     "./vite": {
       "types": "./src/vite/index.ts",
       "import": "./src/vite/index.ts"
@@ -34,6 +58,7 @@
     "@solidjs/vite-plugin": "^3.0.0-next.40",
     "@solidjs/web": "^2.0.0-rc.7",
     "@testing-library/jest-dom": "^6.10.0",
+    "@types/node": "^22.10.0",
     "filesystem-routing": "0.2.1",
     "jsdom": "^25.0.1",
     "oxlint": "~1.79.0",
