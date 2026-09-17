@@ -1,16 +1,20 @@
 import { defineConfig } from "vite";
 import { typedRoutes } from "@skyjt/typed-routes/vite";
 import solid from "@solidjs/vite-plugin";
+import { nitro } from "nitro/vite";
 
 export default defineConfig({
   plugins: [
     solid({
-      start: {},
+      start: {
+        middleware: "src/middleware.ts",
+      },
       ssr: true,
       diagnostics: true,
       extensions: [".jsx", ".tsx"],
     }),
     typedRoutes(),
+    nitro(),
   ],
   server: {
     port: 3000,

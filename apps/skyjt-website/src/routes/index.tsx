@@ -2,7 +2,7 @@ import { Title } from "@solidjs/meta";
 import type { JSX } from "@solidjs/web";
 import { TypedLink } from "../router";
 
-export default function Home(): JSX.Element {
+export default function Home(): JSX.Element {  
   return (
     <div class="home-view">
       <Title>SkyJT Website</Title>

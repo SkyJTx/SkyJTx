@@ -40,3 +40,10 @@ export { buildUrl } from "./router/path-builder";
 export { createTypedRouter, type TypedRouterConfig } from "./router/create-typed-router";
 export { TypedLink } from "./components/typed-link";
 export { useTypedNavigate } from "./hooks/use-typed-navigate";
+
+export {
+  createTypedMiddleware,
+  HTTP_QUERY_METHOD,
+  ACCEPT_QUERY_HEADER,
+  type TypedMiddlewareOptions,
+} from "./middleware/typed-middleware";
