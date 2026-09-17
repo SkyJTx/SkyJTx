@@ -1,12 +1,12 @@
 import { pageRoutes } from "virtual:file-routes";
-import { createTypedRouter, interceptFileRoutes } from "@skyjt/typed-routes";
+import { createRouter, interceptFileRoutes } from "@skyjt/typed-routes";
 
 export const {
   Router,
-  TypedLink,
-  useTypedNavigate,
+  Link,
+  useNavigate,
   paths,
   routes,
-} = createTypedRouter<typeof pageRoutes>({
+} = createRouter<typeof pageRoutes>({
   routes: interceptFileRoutes(pageRoutes),
 });

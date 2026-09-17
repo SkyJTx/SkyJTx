@@ -9,17 +9,17 @@ import { RouteValidationError } from "../types/route-definition";
 import { validateData } from "../schema/validator-adapter";
 import { normalizeSearchParams } from "../schema/coercion";
 
-/**
- * HTTP Method string for the RFC 10008 QUERY method.
- */
-export const HTTP_QUERY_METHOD = "QUERY";
+export type HttpMethod =
+  | "HEAD"
+  | "GET"
+  | "POST"
+  | "PUT"
+  | "PATCH"
+  | "DELETE"
+  | "QUERY"
+  | "OPTIONS";
 
-/**
- * Standard header indicating acceptable request media types for QUERY requests.
- */
-export const ACCEPT_QUERY_HEADER = "Accept-Query";
-
-const EXTENDED_HTTP_KEYS = [
+const httpHandlerKeys = [
   "$HEAD",
   "$GET",
   "$POST",
@@ -30,22 +30,23 @@ const EXTENDED_HTTP_KEYS = [
   "$OPTIONS",
 ] as const;
 
-const DUMMY_HANDLER_REF = { require: () => ({}) };
+export type HttpMethodKey = (typeof httpHandlerKeys)[number];
+
+const placeholderHandler = { require: () => ({}) };
 
 /**
- * Normalizes routes so that endpoints exporting extended HTTP methods such as QUERY (RFC 10008)
- * or OPTIONS are indexed by radix matcher even when legacy methods ($GET, $POST, etc.) are absent.
+ * Normalizes routes so methods like QUERY and OPTIONS are indexed by radix matcher when other HTTP methods are absent.
  */
 function normalizeRoutesForMatcher(routes: readonly FileRouteHandlers[]): readonly FileRouteHandlers[] {
   return routes.map((route) => {
-    const hasLegacyHttp = Boolean(
+    const hasStandardHttp = Boolean(
       route.$HEAD || route.$GET || route.$POST || route.$PUT || route.$PATCH || route.$DELETE,
     );
-    const hasExtendedHttp = Boolean(route.$QUERY || (route as Record<string, unknown>).$OPTIONS);
-    if (!hasLegacyHttp && hasExtendedHttp) {
+    const hasAdditionalHttp = Boolean(route.$QUERY || (route as Record<string, unknown>).$OPTIONS);
+    if (!hasStandardHttp && hasAdditionalHttp) {
       return {
         ...route,
-        $HEAD: DUMMY_HANDLER_REF,
+        $HEAD: placeholderHandler,
       };
     }
     return route;
@@ -53,20 +54,19 @@ function normalizeRoutesForMatcher(routes: readonly FileRouteHandlers[]): readon
 }
 
 /**
- * Options for configuring typed fetch middleware.
+ * Options for request middleware.
  */
-export interface TypedMiddlewareOptions {
+export interface MiddlewareOptions {
   /**
-   * Leading base path stripped from the URL prior to matching.
+   * Base path stripped from URLs prior to matching.
    */
   base?: string;
   /**
-   * Custom supplier for the active API request event.
+   * Custom supplier for the request event.
    */
   getEvent?: () => APIEvent;
   /**
-   * Custom callback invoked upon schema validation failure.
-   * If a Response is returned, it will be answered to the client.
+   * Callback invoked on validation failure. Returning a Response terminates the chain.
    */
   onValidationError?: (args: {
     error: RouteValidationError;
@@ -97,12 +97,11 @@ function toResponse(result: unknown): Response {
 }
 
 /**
- * Creates a fetch-style request middleware that validates API route parameters and search queries
- * against compile-time route schemas, falling through to the next handler for pages.
+ * Creates fetch middleware that validates request parameters and search queries against route schemas.
  */
-export function createTypedMiddleware(
+export function createMiddleware(
   routes: readonly FileRouteHandlers[],
-  options: TypedMiddlewareOptions = {},
+  options: MiddlewareOptions = {},
 ): (request: Request, next: (request?: Request) => Response | Promise<Response>) => Promise<Response> {
   const normalizedRoutes = normalizeRoutesForMatcher(routes);
   const match = createAPIMatcher(normalizedRoutes);
@@ -119,7 +118,7 @@ export function createTypedMiddleware(
         : undefined;
 
     if (config) {
-      for (const key of EXTENDED_HTTP_KEYS) {
+      for (const key of httpHandlerKeys) {
         const handlerRef = (route as Record<string, unknown>)[key];
         if (handlerRef && typeof handlerRef === "object") {
           handlerToConfig.set(handlerRef, config);

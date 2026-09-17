@@ -2,9 +2,9 @@ import type { Plugin, PluginOption } from "vite";
 import { fileRoutes, type FileRoutesOptions } from "filesystem-routing/vite";
 
 /**
- * Default HTTP methods scanned by the typedRoutes Vite plugin, including RFC 10008 QUERY.
+ * Default HTTP methods scanned for route handlers.
  */
-export const DEFAULT_HTTP_METHODS: readonly string[] = [
+export const defaultHttpMethods: readonly string[] = [
   "HEAD",
   "GET",
   "POST",
@@ -15,18 +15,15 @@ export const DEFAULT_HTTP_METHODS: readonly string[] = [
   "QUERY",
 ];
 
-/**
- * Options for configuring typedRoutes Vite plugin.
- */
-export type TypedRoutesPluginOptions = FileRoutesOptions;
+export type RoutesPluginOptions = FileRoutesOptions;
 
 /**
- * Vite plugin configuring file-system routing and Solid SSR options.
+ * Vite plugin configuring file routes and SSR defaults.
  */
-export function typedRoutes(options?: TypedRoutesPluginOptions): PluginOption[] {
+export function routes(options?: RoutesPluginOptions): PluginOption[] {
   const httpMethods =
     options?.httpMethods === true || options?.httpMethods === undefined
-      ? [...DEFAULT_HTTP_METHODS]
+      ? [...defaultHttpMethods]
       : options.httpMethods;
 
   const fsPlugins = fileRoutes({

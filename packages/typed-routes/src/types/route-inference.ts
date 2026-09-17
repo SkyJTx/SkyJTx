@@ -110,7 +110,7 @@ export type RouteSearchFor<TManifest extends readonly unknown[], Path extends st
 /**
  * Navigation options contract bound to route parameters and search schema.
  */
-export type TypedNavigationArgs<TParams, TSearch, TState> =
+export type NavigationArgs<TParams, TSearch, TState> =
   ([keyof TParams] extends [never]
     ? { params?: never }
     : { params: TParams }) &
@@ -124,12 +124,10 @@ export type TypedNavigationArgs<TParams, TSearch, TState> =
   };
 
 /**
- * Typed Link component props.
+ * Link component props.
  */
-export type TypedLinkProps<TManifest extends readonly unknown[], Path extends ExtractRoutePaths<TManifest>> =
-  TypedNavigationArgs<RouteParamsFor<TManifest, Path>, RouteSearchFor<TManifest, Path>, unknown> &
+export type LinkProps<TManifest extends readonly unknown[], Path extends ExtractRoutePaths<TManifest>> =
+  NavigationArgs<RouteParamsFor<TManifest, Path>, RouteSearchFor<TManifest, Path>, unknown> &
   Omit<JSX.AnchorHTMLAttributes<HTMLAnchorElement>, "href"> & {
     to: Path;
-    activeClass?: string;
-    inactiveClass?: string;
   };

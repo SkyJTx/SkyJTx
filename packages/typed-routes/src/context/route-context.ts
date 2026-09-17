@@ -9,7 +9,7 @@ import { normalizeSearchParams } from "../schema/coercion";
 const RouteValidationContext = createContext<RouteValidationContextValue<unknown, unknown, unknown, unknown> | undefined>(undefined);
 
 /**
- * Solid 2 reactive provider managing memoized validated route parameters and search state.
+ * Context provider supplying validated route parameters and search queries.
  */
 export function RouteValidationProvider<TParams, TSearch, TState, THash, TData>(
   props: ParentProps<{ config?: RouteConfig<TParams, TSearch, TState, THash, TData> }>,
@@ -75,7 +75,7 @@ export function RouteValidationProvider<TParams, TSearch, TState, THash, TData>(
 }
 
 /**
- * Accesses the active RouteValidationContext instance.
+ * Returns the current route validation context.
  */
 export function useRouteValidationContext<
   TParams = unknown,

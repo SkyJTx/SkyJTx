@@ -65,7 +65,7 @@ function createBuiltinSchema<Output, Input = unknown>(
 }
 
 /**
- * Zero-dependency, URL-coercing schema builder.
+ * Built-in schema constructors with automatic primitive coercion.
  */
 export const schema = {
   string(): BuiltinSchema<string, unknown> {

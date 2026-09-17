@@ -1,8 +1,8 @@
 import { describe, it, expect } from "vitest";
-import { normalizeSearchParams } from "../src/schema/coercion";
-import { buildUrl } from "../src/router/path-builder";
-import { validateData } from "../src/schema/validator-adapter";
-import { schema } from "../src/schema/builtin";
+import { normalizeSearchParams } from "~/schema/coercion";
+import { buildUrl } from "~/router/path-builder";
+import { validateData } from "~/schema/validator-adapter";
+import { schema } from "~/schema/builtin";
 
 describe("Search Parameter Normalization and Parsing", () => {
   it("normalizes single scalar search keys", () => {
@@ -51,3 +51,4 @@ describe("Search Parameter Normalization and Parsing", () => {
     expect(url).toBe("/users/42?tab=profile&tag=alpha&tag=beta#section-1");
   });
 });
+

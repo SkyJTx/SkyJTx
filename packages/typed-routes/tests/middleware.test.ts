@@ -1,19 +1,10 @@
 import { describe, it, expect, vi } from "vitest";
-import {
-  createTypedMiddleware,
-  HTTP_QUERY_METHOD,
-  ACCEPT_QUERY_HEADER,
-} from "../src/middleware/typed-middleware";
-import { defineRoute } from "../src/router/define-route";
-import { schema } from "../src/schema/builtin";
+import { createMiddleware } from "~/middleware/middleware";
+import { defineRoute } from "~/router/define-route";
+import { schema } from "~/schema/builtin";
 import type { APIEvent } from "filesystem-routing/api";
 
-describe("Type-Safe Fetch Middleware (createTypedMiddleware)", () => {
-  it("exports HTTP QUERY standard constants", () => {
-    expect(HTTP_QUERY_METHOD).toBe("QUERY");
-    expect(ACCEPT_QUERY_HEADER).toBe("Accept-Query");
-  });
-
+describe("Request Middleware (createMiddleware)", () => {
   it("dispatches API route and coerces validated parameters and query params", async () => {
     const userRoute = defineRoute({
       params: schema.object({
@@ -45,7 +36,7 @@ describe("Type-Safe Fetch Middleware (createTypedMiddleware)", () => {
       },
     ] as const;
 
-    const middleware = createTypedMiddleware(routes as never);
+    const middleware = createMiddleware(routes as never);
     const nextMock = vi.fn().mockResolvedValue(new Response("Page HTML"));
 
     const request = new Request("http://localhost:3000/api/users/42?tab=settings");
@@ -83,7 +74,7 @@ describe("Type-Safe Fetch Middleware (createTypedMiddleware)", () => {
       },
     ] as const;
 
-    const middleware = createTypedMiddleware(routes as never);
+    const middleware = createMiddleware(routes as never);
     const nextMock = vi.fn();
 
     const request = new Request("http://localhost:3000/api/users/not-a-number");
@@ -120,7 +111,7 @@ describe("Type-Safe Fetch Middleware (createTypedMiddleware)", () => {
       },
     ] as const;
 
-    const middleware = createTypedMiddleware(routes as never);
+    const middleware = createMiddleware(routes as never);
     const nextMock = vi.fn();
 
     const request = new Request("http://localhost:3000/api/items?limit=abc");
@@ -144,7 +135,7 @@ describe("Type-Safe Fetch Middleware (createTypedMiddleware)", () => {
       },
     ] as const;
 
-    const middleware = createTypedMiddleware(routes as never);
+    const middleware = createMiddleware(routes as never);
     const nextMock = vi.fn().mockResolvedValue(new Response("Rendered Page HTML", { status: 200 }));
 
     const request = new Request("http://localhost:3000/about");
@@ -177,7 +168,7 @@ describe("Type-Safe Fetch Middleware (createTypedMiddleware)", () => {
       },
     ] as const;
 
-    const middleware = createTypedMiddleware(routes as never, {
+    const middleware = createMiddleware(routes as never, {
       onValidationError: ({ error }) => {
         return new Response(`Custom Error: ${error.target}`, { status: 422 });
       },
@@ -190,7 +181,7 @@ describe("Type-Safe Fetch Middleware (createTypedMiddleware)", () => {
     expect(await response.text()).toBe("Custom Error: params");
   });
 
-  it("dispatches RFC 10008 QUERY method with validated params, search, and body payload", async () => {
+  it("dispatches QUERY request with validated params, search, and body payload", async () => {
     const queryRoute = defineRoute({
       params: schema.object({
         category: schema.string(),
@@ -223,7 +214,7 @@ describe("Type-Safe Fetch Middleware (createTypedMiddleware)", () => {
       },
     ] as const;
 
-    const middleware = createTypedMiddleware(routes as never);
+    const middleware = createMiddleware(routes as never);
     const nextMock = vi.fn();
 
     const request = new Request("http://localhost:3000/api/search/books?sort=desc", {
@@ -254,7 +245,7 @@ describe("Type-Safe Fetch Middleware (createTypedMiddleware)", () => {
       },
     ] as const;
 
-    const middleware = createTypedMiddleware(routes as never);
+    const middleware = createMiddleware(routes as never);
     const nextMock = vi.fn().mockResolvedValue(new Response("Fallback to Next", { status: 200 }));
 
     const queryRequest = new Request("http://localhost:3000/api/query-only", {
@@ -296,7 +287,7 @@ describe("Type-Safe Fetch Middleware (createTypedMiddleware)", () => {
       },
     ] as const;
 
-    const middleware = createTypedMiddleware(routes as never);
+    const middleware = createMiddleware(routes as never);
     const nextMock = vi.fn();
 
     const request = new Request("http://localhost:3000/api/filter/invalid-version", {

@@ -1,8 +1,8 @@
 import { describe, it, expect } from "vitest";
 import { createRoot, createSignal, createMemo, type Accessor } from "solid-js";
-import { defineRoute } from "../src/router/define-route";
-import { schema } from "../src/schema/builtin";
-import { validateData } from "../src/schema/validator-adapter";
+import { defineRoute } from "~/router/define-route";
+import { schema } from "~/schema/builtin";
+import { validateData } from "~/schema/validator-adapter";
 
 describe("Fine-Grained Reactive Unwrapping", () => {
   it("updates params accessor reactively without remounting or state teardown", async () => {
@@ -40,3 +40,4 @@ describe("Fine-Grained Reactive Unwrapping", () => {
     expect(componentState.initializedAt).toBeDefined();
   });
 });
+

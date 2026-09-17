@@ -1,9 +1,16 @@
 import { defineConfig } from "vite";
-import { typedRoutes } from "@skyjt/typed-routes/vite";
+import { fileURLToPath, URL } from "node:url";
+import { routes } from "@skyjt/typed-routes/vite";
 import solid from "@solidjs/vite-plugin";
 import { nitro } from "nitro/vite";
 
 export default defineConfig({
+  resolve: {
+    alias: {
+      "~": fileURLToPath(new URL("./src", import.meta.url)),
+      "@": fileURLToPath(new URL("./src", import.meta.url)),
+    },
+  },
   plugins: [
     solid({
       start: {
@@ -13,7 +20,7 @@ export default defineConfig({
       diagnostics: true,
       extensions: [".jsx", ".tsx"],
     }),
-    typedRoutes(),
+    routes(),
     nitro(),
   ],
   server: {

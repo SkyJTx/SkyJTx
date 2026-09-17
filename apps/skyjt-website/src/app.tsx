@@ -1,6 +1,6 @@
 import { Loading, type ParentProps } from "solid-js";
 import type { JSX } from "@solidjs/web";
-import { Router, TypedLink } from "./router";
+import { Router, Link } from "~/router";
 import "./App.css";
 
 export default function App(): JSX.Element {
@@ -9,17 +9,16 @@ export default function App(): JSX.Element {
       {(props: ParentProps) => (
         <div class="app-layout">
           <nav class="site-nav">
-            <TypedLink to="/" activeClass="active">
+            <Link to="/">
               Home
-            </TypedLink>
-            <TypedLink
+            </Link>
+            <Link
               to="/users/:id"
               params={{ id: 42 }}
               search={{ tab: "profile" }}
-              activeClass="active"
             >
               User 42
-            </TypedLink>
+            </Link>
           </nav>
           <Loading fallback={<main class="content-container">Loading...</main>}>
             <main class="content-container">{props.children}</main>

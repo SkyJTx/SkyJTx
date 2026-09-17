@@ -3,7 +3,7 @@ import type { Location } from "@solidjs/router";
 import type { TypeValidator } from "./type-validator";
 
 /**
- * Route validation and preload configuration contract.
+ * Route configuration defining schemas, preloading, and error handling.
  */
 export interface RouteConfig<
   TParams = unknown,
@@ -26,7 +26,7 @@ export interface RouteConfig<
 }
 
 /**
- * Reactive context value providing accessors for validated route state.
+ * Route validation context accessors.
  */
 export interface RouteValidationContextValue<
   TParams = unknown,
@@ -41,7 +41,7 @@ export interface RouteValidationContextValue<
 }
 
 /**
- * Bound route definition instance with type-safe reactive hooks.
+ * Route hooks and configuration bound to route schemas.
  */
 export interface DefinedRouteObject<
   TParams = unknown,
@@ -57,7 +57,7 @@ export interface DefinedRouteObject<
 }
 
 /**
- * Error raised during route parameter or search validation failure.
+ * Error thrown on route validation failure.
  */
 export class RouteValidationError extends Error {
   public readonly target: "params" | "search" | "state" | "hash";

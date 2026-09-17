@@ -1,6 +1,5 @@
 /**
- * Standard Schema V1 shared specification interface.
- * Compatible with Valibot, ArkType, and modern Zod.
+ * Standard Schema V1 interface.
  */
 export interface StandardSchemaV1<Input = unknown, Output = Input> {
   readonly "~standard": {
@@ -55,7 +54,7 @@ export interface TypeBoxSchema<Output = unknown> {
 export type FunctionValidator<Output = unknown> = (value: never) => Output;
 
 /**
- * Universal polymorphic type validator representation.
+ * Polymorphic type validator representation.
  */
 export type TypeValidator<Output = unknown, Input = unknown> =
   | StandardSchemaV1<Input, Output>

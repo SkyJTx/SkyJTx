@@ -2,8 +2,8 @@ import { describe, it, expect } from "vitest";
 import { z } from "zod";
 import * as v from "valibot";
 import { Type } from "@sinclair/typebox";
-import { validateData } from "../src/schema/validator-adapter";
-import { schema } from "../src/schema/builtin";
+import { validateData } from "~/schema/validator-adapter";
+import { schema } from "~/schema/builtin";
 
 describe("Universal Validator Adapter", () => {
   it("validates and coerces using built-in schema", () => {
@@ -98,3 +98,4 @@ describe("Universal Validator Adapter", () => {
     expect(failRes.success).toBe(false);
   });
 });
+

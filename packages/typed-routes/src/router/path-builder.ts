@@ -1,5 +1,5 @@
 /**
- * Serializes a route pattern and options into a fully formed URL path string.
+ * Builds a URL pathname, search query, and hash from a route pattern and parameters.
  */
 export function buildUrl(
   pattern: string,

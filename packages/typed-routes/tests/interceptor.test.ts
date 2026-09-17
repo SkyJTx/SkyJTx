@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from "vitest";
-import { interceptFileRoutes } from "../src/interceptor/interceptor";
-import { defineRoute } from "../src/router/define-route";
-import { schema } from "../src/schema/builtin";
+import { interceptFileRoutes } from "~/interceptor/interceptor";
+import { defineRoute } from "~/router/define-route";
+import { schema } from "~/schema/builtin";
 
 describe("Route Manifest Interceptor", () => {
   it("intercepts file route manifest and executes validated preload", async () => {
@@ -102,3 +102,4 @@ describe("Route Manifest Interceptor", () => {
     expect(onErrorMock.mock.calls[0][0].error.target).toBe("params");
   });
 });
+

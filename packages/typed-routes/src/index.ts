@@ -22,8 +22,8 @@ export type {
   ExtractRoutePaths,
   RouteParamsFor,
   RouteSearchFor,
-  TypedNavigationArgs,
-  TypedLinkProps,
+  NavigationArgs,
+  LinkProps,
   FindRouteEntry,
 } from "./types/route-inference";
 
@@ -37,13 +37,13 @@ export { interceptFileRoutes, type FileRouteEntry, type FileRouteLazyRef, type F
 
 export { defineRoute } from "./router/define-route";
 export { buildUrl } from "./router/path-builder";
-export { createTypedRouter, type TypedRouterConfig } from "./router/create-typed-router";
-export { TypedLink } from "./components/typed-link";
-export { useTypedNavigate } from "./hooks/use-typed-navigate";
+export { createRouter, type RouterConfig } from "./router/create-router";
+export { Link } from "./components/link";
+export { useNavigate } from "./hooks/use-navigate";
 
 export {
-  createTypedMiddleware,
-  HTTP_QUERY_METHOD,
-  ACCEPT_QUERY_HEADER,
-  type TypedMiddlewareOptions,
-} from "./middleware/typed-middleware";
+  createMiddleware,
+  type HttpMethod,
+  type HttpMethodKey,
+  type MiddlewareOptions,
+} from "./middleware/middleware";

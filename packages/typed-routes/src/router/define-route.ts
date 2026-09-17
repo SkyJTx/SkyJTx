@@ -7,8 +7,7 @@ import { validateData } from "../schema/validator-adapter";
 import { normalizeSearchParams } from "../schema/coercion";
 
 /**
- * Path-agnostic route schema definition helper.
- * Attaches validation contracts and generates strongly-typed reactive hooks without path coupling.
+ * Defines route parameter, search, state, and hash validation schemas.
  */
 export function defineRoute<
   P extends TypeValidator<unknown, unknown> | undefined = undefined,
