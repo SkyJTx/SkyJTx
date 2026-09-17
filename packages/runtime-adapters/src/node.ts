@@ -1,7 +1,7 @@
 import type { IncomingMessage, ServerResponse } from "node:http";
 import { createServer, type Server } from "node:http";
 import { createReadStream, existsSync, statSync } from "node:fs";
-import { join } from "node:path";
+import { normalize, resolve } from "node:path";
 import { Readable } from "node:stream";
 import type { NodeAdapterOptions, StandardServerHandler } from "./types";
 
@@ -38,7 +38,7 @@ export function nodeRequestToWebRequest(req: IncomingMessage): Request {
 }
 
 /**
- * Streams a Web Standard Response into a Node.js ServerResponse.
+ * Streams a Web Standard Response into a Node.js ServerResponse with backpressure handling.
  */
 export async function sendWebResponseToNodeResponse(
   webResponse: Response,
@@ -56,17 +56,21 @@ export async function sendWebResponseToNodeResponse(
     return;
   }
 
-  const reader = webResponse.body.getReader();
-  try {
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
-      nodeResponse.write(value);
-    }
-    nodeResponse.end();
-  } catch (error) {
-    nodeResponse.destroy(error instanceof Error ? error : new Error(String(error)));
-  }
+  await new Promise<void>((resolvePromise, rejectPromise) => {
+    const nodeStream = Readable.fromWeb(webResponse.body as import("node:stream/web").ReadableStream);
+    nodeStream.on("error", (err) => {
+      nodeResponse.destroy(err);
+      rejectPromise(err);
+    });
+    nodeResponse.on("error", (err) => {
+      nodeStream.destroy(err);
+      rejectPromise(err);
+    });
+    nodeResponse.on("finish", () => {
+      resolvePromise();
+    });
+    nodeStream.pipe(nodeResponse);
+  });
 }
 
 /**
@@ -77,16 +81,17 @@ export function createNodeMiddleware(
   options?: NodeAdapterOptions,
 ): (req: IncomingMessage, res: ServerResponse, next?: () => void) => Promise<void> {
   const staticDir = options?.staticDir ?? "./dist/client";
+  const resolvedBaseDir = resolve(process.cwd(), staticDir);
 
   return async (req: IncomingMessage, res: ServerResponse, next?: () => void): Promise<void> => {
     const rawUrl = req.url || "/";
     const pathname = rawUrl.split("?")[0];
 
-    if (pathname !== "/" && !pathname.includes("..")) {
-      const sanitized = pathname.startsWith("/") ? pathname.slice(1) : pathname;
-      const targetFilePath = join(process.cwd(), staticDir, sanitized);
+    if (pathname !== "/") {
+      const sanitized = normalize(pathname).replace(/^(\.\.[/\\])+/, "");
+      const targetFilePath = resolve(resolvedBaseDir, sanitized.startsWith("/") ? sanitized.slice(1) : sanitized);
 
-      if (existsSync(targetFilePath) && statSync(targetFilePath).isFile()) {
+      if (targetFilePath.startsWith(resolvedBaseDir) && existsSync(targetFilePath) && statSync(targetFilePath).isFile()) {
         if (options?.maxAge !== undefined) {
           res.setHeader("Cache-Control", `public, max-age=${options.maxAge}`);
         }

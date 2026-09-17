@@ -1,5 +1,6 @@
 import { useLocation } from "@solidjs/router";
-import type { JSX } from "@solidjs/web";
+import { Dynamic, type JSX } from "@solidjs/web";
+import { createComponent } from "solid-js";
 import type { ExtractRoutePaths, RouteParamsFor, RouteSearchFor } from "../types/route-inference";
 import { buildUrl } from "../router/path-builder";
 
@@ -57,15 +58,19 @@ export function TypedLink<
     return classes.length > 0 ? classes.join(" ") : undefined;
   };
 
-  return (
-    <a
-      href={href()}
-      class={computedClass()}
-      target={props.target}
-      rel={props.rel}
-      onClick={props.onClick}
-    >
-      {props.children}
-    </a>
-  );
+  return createComponent(Dynamic, {
+    component: "a",
+    get href() {
+      return href();
+    },
+    get class() {
+      return computedClass();
+    },
+    target: props.target,
+    rel: props.rel,
+    onClick: props.onClick,
+    get children() {
+      return props.children;
+    },
+  });
 }

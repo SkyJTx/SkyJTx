@@ -1,3 +1,4 @@
+import { normalize, resolve } from "node:path";
 import type { BunAdapterOptions, StandardServerHandler } from "./types";
 
 declare const Bun: {
@@ -24,6 +25,7 @@ export function createBunHandler(
   options?: BunAdapterOptions,
 ): (request: Request) => Promise<Response> {
   const staticDir = options?.staticDir ?? "./dist/client";
+  const resolvedBaseDir = resolve(staticDir);
 
   return async (request: Request): Promise<Response> => {
     const url = new URL(request.url);
@@ -31,20 +33,21 @@ export function createBunHandler(
     if (
       typeof Bun !== "undefined" &&
       typeof Bun.file === "function" &&
-      url.pathname !== "/" &&
-      !url.pathname.includes("..")
+      url.pathname !== "/"
     ) {
-      const sanitizedPath = url.pathname.startsWith("/") ? url.pathname.slice(1) : url.pathname;
-      const normalizedBase = staticDir.endsWith("/") ? staticDir : `${staticDir}/`;
-      const targetPath = `${normalizedBase}${sanitizedPath}`;
-      const asset = Bun.file(targetPath);
+      const sanitized = normalize(url.pathname).replace(/^(\.\.[/\\])+/, "");
+      const targetPath = resolve(resolvedBaseDir, sanitized.startsWith("/") ? sanitized.slice(1) : sanitized);
 
-      if (await asset.exists()) {
-        const response = new Response(asset as unknown as BodyInit);
-        if (options?.maxAge !== undefined) {
-          response.headers.set("Cache-Control", `public, max-age=${options.maxAge}`);
+      if (targetPath.startsWith(resolvedBaseDir)) {
+        const asset = Bun.file(targetPath);
+
+        if (await asset.exists()) {
+          const response = new Response(asset as unknown as BodyInit);
+          if (options?.maxAge !== undefined) {
+            response.headers.set("Cache-Control", `public, max-age=${options.maxAge}`);
+          }
+          return response;
         }
-        return response;
       }
     }
 

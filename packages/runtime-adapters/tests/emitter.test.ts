@@ -1,12 +1,12 @@
 import { describe, it, expect, beforeAll, afterAll, vi } from "vitest";
 import { mkdirSync, rmSync, existsSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
-import { emitRuntimeAdapter } from "../../src/vite/index";
-import { defineRuntimeAdapter } from "../../src/adapters/runtime/custom";
-import type { CustomAdapterContext } from "../../src/adapters/runtime/types";
+import { emitRuntimeAdapter } from "../src/vite/index";
+import { defineRuntimeAdapter } from "../src/custom";
+import type { CustomAdapterContext } from "../src/types";
 
 describe("Vite Runtime Adapter Emitter", () => {
-  const tempDir = join(process.cwd(), "tests", "runtime-adapters", `.temp-emitter-${Date.now()}`);
+  const tempDir = join(process.cwd(), "tests", `.temp-emitter-${Date.now()}`);
 
   beforeAll(() => {
     mkdirSync(tempDir, { recursive: true });
@@ -28,8 +28,8 @@ describe("Vite Runtime Adapter Emitter", () => {
     expect(existsSync(workerPath)).toBe(true);
 
     const content = readFileSync(workerPath, "utf8");
-    expect(content).toContain("env.ASSETS.fetch");
-    expect(content).toContain("server.fetch");
+    expect(content).toContain("createCloudflarePagesHandler");
+    expect(content).toContain("@skyjt/runtime-adapters/cloudflare");
   });
 
   it("emits Bun server entrypoint in dist/server/index.js", async () => {
@@ -38,8 +38,8 @@ describe("Vite Runtime Adapter Emitter", () => {
     expect(existsSync(bunPath)).toBe(true);
 
     const content = readFileSync(bunPath, "utf8");
-    expect(content).toContain("Bun.serve");
-    expect(content).toContain("Bun.file");
+    expect(content).toContain("startBunServer");
+    expect(content).toContain("@skyjt/runtime-adapters/bun");
   });
 
   it("emits Node.js server entrypoint in dist/server/index.js", async () => {
@@ -48,8 +48,8 @@ describe("Vite Runtime Adapter Emitter", () => {
     expect(existsSync(nodePath)).toBe(true);
 
     const content = readFileSync(nodePath, "utf8");
-    expect(content).toContain("createServer");
-    expect(content).toContain("sendWebResponse");
+    expect(content).toContain("createNodeServer");
+    expect(content).toContain("@skyjt/runtime-adapters/node");
   });
 
   it("emits Vercel Edge entrypoint in api/index.js", async () => {
@@ -58,6 +58,7 @@ describe("Vite Runtime Adapter Emitter", () => {
     expect(existsSync(vercelPath)).toBe(true);
 
     const content = readFileSync(vercelPath, "utf8");
+    expect(content).toContain("createVercelEdgeHandler");
     expect(content).toContain('runtime: "edge"');
   });
 
@@ -68,6 +69,7 @@ describe("Vite Runtime Adapter Emitter", () => {
 
     const content = readFileSync(lambdaPath, "utf8");
     expect(content).toContain("createLambdaHandler");
+    expect(content).toContain("@skyjt/runtime-adapters/aws-lambda");
   });
 
   it("executes custom inline function adapter with correct context", async () => {

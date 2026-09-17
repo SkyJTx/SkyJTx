@@ -1,10 +1,11 @@
 import { describe, it, expect, vi } from "vitest";
 import type { IncomingMessage, ServerResponse } from "node:http";
+import { PassThrough } from "node:stream";
 import {
   nodeRequestToWebRequest,
   sendWebResponseToNodeResponse,
   createNodeMiddleware,
-} from "../../src/adapters/runtime/node";
+} from "../src/node";
 
 describe("Node.js Runtime Adapter", () => {
   it("converts IncomingMessage to Web Standard Request", () => {
@@ -26,24 +27,18 @@ describe("Node.js Runtime Adapter", () => {
   });
 
   it("pipes Web Standard Response to ServerResponse", async () => {
-    const writtenChunks: string[] = [];
     const mockHeaders = new Map<string, string>();
-    let isEnded = false;
+    const passThrough = new PassThrough();
+    const chunks: Buffer[] = [];
+    passThrough.on("data", (c) => chunks.push(c));
 
-    const mockRes = {
+    const mockRes = Object.assign(passThrough, {
       statusCode: 0,
       statusMessage: "",
       setHeader(key: string, val: string) {
         mockHeaders.set(key, val);
       },
-      write(chunk: unknown) {
-        writtenChunks.push(new TextDecoder().decode(chunk as Uint8Array));
-      },
-      end() {
-        isEnded = true;
-      },
-      destroy: vi.fn(),
-    } as unknown as ServerResponse;
+    }) as unknown as ServerResponse;
 
     const webResponse = new Response("Hello from Web Stream", {
       status: 201,
@@ -56,8 +51,7 @@ describe("Node.js Runtime Adapter", () => {
     expect(mockRes.statusCode).toBe(201);
     expect(mockRes.statusMessage).toBe("Created");
     expect(mockHeaders.get("content-type")).toBe("text/plain");
-    expect(writtenChunks.join("")).toBe("Hello from Web Stream");
-    expect(isEnded).toBe(true);
+    expect(Buffer.concat(chunks).toString("utf8")).toBe("Hello from Web Stream");
   });
 
   it("dispatches request through server.fetch in createNodeMiddleware", async () => {
@@ -73,15 +67,17 @@ describe("Node.js Runtime Adapter", () => {
       method: "GET",
     } as unknown as IncomingMessage;
 
-    let isEnded = false;
-    const mockRes = {
+    const passThrough = new PassThrough();
+    const mockRes = Object.assign(passThrough, {
       statusCode: 0,
+      statusMessage: "",
       setHeader: vi.fn(),
-      write: vi.fn(),
-      end: () => {
-        isEnded = true;
-      },
-    } as unknown as ServerResponse;
+    }) as unknown as ServerResponse;
+
+    let isEnded = false;
+    passThrough.on("finish", () => {
+      isEnded = true;
+    });
 
     await middleware(mockReq, mockRes);
 

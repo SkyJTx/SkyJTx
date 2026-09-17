@@ -2,7 +2,7 @@ import { describe, it, expect, vi } from "vitest";
 import {
   createCloudflarePagesHandler,
   createCloudflareWorkerHandler,
-} from "../../src/adapters/runtime/cloudflare";
+} from "../src/cloudflare";
 
 describe("Cloudflare Runtime Adapter", () => {
   describe("Pages Handler", () => {

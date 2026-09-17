@@ -1,10 +1,10 @@
 import { describe, it, expect, vi } from "vitest";
-import type { APIGatewayV2Event } from "../../src/adapters/runtime/types";
+import type { APIGatewayV2Event } from "../src/types";
 import {
   lambdaEventToWebRequest,
   webResponseToLambdaResult,
   createLambdaHandler,
-} from "../../src/adapters/runtime/aws-lambda";
+} from "../src/aws-lambda";
 
 describe("AWS Lambda Runtime Adapter", () => {
   it("converts API Gateway v2 event to Web Standard Request", async () => {
@@ -69,7 +69,7 @@ describe("AWS Lambda Runtime Adapter", () => {
       headers: {
         "content-type": "text/html; charset=utf-8",
         "set-cookie": "token=abc; Path=/",
-        "x-powered-by": "typed-routes",
+        "x-powered-by": "runtime-adapters",
       },
     });
 
@@ -79,7 +79,7 @@ describe("AWS Lambda Runtime Adapter", () => {
     expect(result.body).toBe("<h1>Hello World</h1>");
     expect(result.isBase64Encoded).toBe(false);
     expect(result.headers?.["content-type"]).toBe("text/html; charset=utf-8");
-    expect(result.headers?.["x-powered-by"]).toBe("typed-routes");
+    expect(result.headers?.["x-powered-by"]).toBe("runtime-adapters");
     expect(result.cookies).toContain("token=abc; Path=/");
   });
 

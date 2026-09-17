@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from "vitest";
-import { createVercelEdgeHandler, vercelEdgeConfig } from "../../src/adapters/runtime/vercel";
+import { createVercelEdgeHandler, vercelEdgeConfig } from "../src/vercel";
 
 describe("Vercel Edge Runtime Adapter", () => {
   it("exports runtime edge config", () => {

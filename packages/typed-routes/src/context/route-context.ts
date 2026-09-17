@@ -1,4 +1,4 @@
-import { createContext, createMemo, useContext, type ParentProps } from "solid-js";
+import { createContext, createComponent, createMemo, useContext, type ParentProps } from "solid-js";
 import type { JSX } from "@solidjs/web";
 import { useParams, useLocation, useSearchParams } from "@solidjs/router";
 import type { RouteConfig, RouteValidationContextValue } from "../types/route-definition";
@@ -66,11 +66,12 @@ export function RouteValidationProvider<TParams, TSearch, TState, THash, TData>(
     hash,
   };
 
-  return (
-    <RouteValidationContext value={contextValue}>
-      {props.children}
-    </RouteValidationContext>
-  );
+  return createComponent(RouteValidationContext, {
+    value: contextValue,
+    get children() {
+      return props.children;
+    },
+  });
 }
 
 /**

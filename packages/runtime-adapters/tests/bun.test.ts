@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from "vitest";
-import { createBunHandler } from "../../src/adapters/runtime/bun";
+import { createBunHandler } from "../src/bun";
 
 describe("Bun Runtime Adapter", () => {
   it("delegates to server.fetch when requesting root path", async () => {
