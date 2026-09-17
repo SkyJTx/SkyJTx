@@ -20,7 +20,9 @@ export default defineConfig({
       diagnostics: true,
       extensions: [".jsx", ".tsx"],
     }),
-    routes(),
+    routes({
+      codeSplitting: true,
+    }),
     nitro(),
   ],
   server: {

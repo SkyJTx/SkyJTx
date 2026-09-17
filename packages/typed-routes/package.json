@@ -28,21 +28,21 @@
     "solid-js": "^2.0.0-rc.6 || ^2.0.0-rc.7"
   },
   "devDependencies": {
-    "@sinclair/typebox": "^0.34.47",
-    "@solidjs/router": "^2.0.0-next.23",
+    "@sinclair/typebox": "^0.34.52",
+    "@solidjs/router": "^2.0.0-next.24",
     "@solidjs/testing-library": "^1.0.0-beta.3",
-    "@solidjs/vite-plugin": "^3.0.0-next.40",
-    "@solidjs/web": "^2.0.0-rc.7",
+    "@solidjs/vite-plugin": "^3.0.0-next.43",
+    "@solidjs/web": "^2.0.0-rc.8",
     "@testing-library/jest-dom": "^6.10.0",
-    "@types/node": "^22.10.0",
+    "@types/node": "^22.20.3",
     "filesystem-routing": "0.2.1",
     "jsdom": "^25.0.1",
     "oxlint": "~1.79.0",
-    "solid-js": "^2.0.0-rc.7",
+    "solid-js": "^2.0.0-rc.8",
     "typescript": "^5.9.3",
-    "valibot": "^1.2.1",
-    "vite": "^8.2.2",
-    "vitest": "^5.0.0",
-    "zod": "^3.24.2"
+    "valibot": "^1.5.0",
+    "vite": "^8.3.0",
+    "vitest": "^5.0.1",
+    "zod": "^3.25.76"
   }
 }
