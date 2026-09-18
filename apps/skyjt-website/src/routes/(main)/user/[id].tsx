@@ -1,4 +1,4 @@
-import { defineRoute, schema } from "@skyjt/typed-routes";
+import { defineRoute, schema, InferOutput } from "@skyjt/typed-routes";
 import { query, revalidate } from "@solidjs/router";
 import { createMemo, Loading, onSettled } from "solid-js";
 
@@ -27,12 +27,16 @@ const loadUserData = query(async (id: number) => {
   return data as { id: number; name: string };
 }, "user-data-query");
 
+const routeSchema = schema.object({
+  id: schema.number(),
+});
+
 export const route = defineRoute({
-  params: schema.object({
-    id: schema.number()
-  }),
+  params: routeSchema,
   preload: async ({ params }) => loadUserData(params.id),
 });
+
+export type UserRouteParams = InferOutput<typeof routeSchema>;
 
 export default function UserRoute() {
   const params = route.useParams();
