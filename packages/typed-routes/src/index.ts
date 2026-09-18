@@ -1,4 +1,4 @@
-export type {
+﻿export type {
   StandardSchemaV1,
   StandardSchemaResult,
   ZodLikeSchema,
@@ -27,7 +27,18 @@ export type {
   FindRouteEntry,
 } from "./types/route-inference";
 
-export { schema, type BuiltinSchema } from "./schema/builtin";
+export {
+  schema,
+  type SchemaFactory,
+  type BuiltinSchema,
+  type BuiltinStringSchema,
+  type BuiltinObjectSchema,
+  type CleanObjectShape,
+  type InferShape,
+  type InferTuple,
+  type InferUnion,
+  type InferOutputFromSchema,
+} from "./schema/builtin";
 export { coercePrimitive, coerceRecord, normalizeSearchParams } from "./schema/coercion";
 export { validateData, isStandardSchema, isZodSchema, isTypeBoxSchema } from "./schema/validator-adapter";
 

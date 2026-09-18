@@ -4,6 +4,7 @@ import { createMemo, Loading, onSettled } from "solid-js";
 
 const loadUserData = query(async (id: number) => {
   "use server";
+
   const res = await new Promise<{
     ok: boolean;
     json: () => Promise<unknown>;
@@ -11,7 +12,11 @@ const loadUserData = query(async (id: number) => {
     setTimeout(() => {
       resolve({
         ok: true,
-        json: () => Promise.resolve({ id, name: "User " + id + " at " + new Date().toLocaleTimeString() }),
+        json: () => Promise.resolve({
+          id,
+          name: "User " + id,
+          fetch_at: new Date().toISOString(),
+        }),
       });
     }, 500);
   });
@@ -20,11 +25,9 @@ const loadUserData = query(async (id: number) => {
     throw new Error(`Failed to fetch user data for id ${id}`);
   }
 
-  console.log("Fetched user data for id", id);
-
   const data = await res.json();
 
-  return data as { id: number; name: string };
+  return data as { id: number; name: string; fetch_at: string };
 }, "user-data-query");
 
 const routeSchema = schema.object({
@@ -59,7 +62,8 @@ export default function UserRoute() {
     <div>
       <Loading fallback={<p>Loading user data...</p>}>
         <p>User ID: {params().id}</p>
-        <p>User Name: {userData()?.name}</p>
+        <p>User Name: {userData().name}</p>
+        <p>User Fetched At: {userData().fetch_at}</p>
       </Loading>
     </div>
   );
