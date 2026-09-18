@@ -3,6 +3,7 @@ import { fileURLToPath, URL } from "node:url";
 import { routes } from "@skyjt/typed-routes/vite";
 import solid from "@solidjs/vite-plugin";
 import { nitro } from "nitro/vite";
+import tailwindcss from "@tailwindcss/vite";
 
 export default defineConfig({
   resolve: {
@@ -24,6 +25,7 @@ export default defineConfig({
       codeSplitting: true,
     }),
     nitro(),
+    tailwindcss(),
   ],
   server: {
     port: 3000,
