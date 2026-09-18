@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Standard Schema V1 interface.
  */
 export interface StandardSchemaV1<Input = unknown, Output = Input> {
@@ -99,10 +99,16 @@ export interface ValidationIssue {
 }
 
 /**
- * Standardized result structure returned by the validator adapter.
+ * Discriminated result representation for schema validation execution.
  */
-export interface ValidationResult<T> {
-  success: boolean;
-  data?: T;
-  issues?: ValidationIssue[];
-}
+export type ValidationResult<T> =
+  | {
+      readonly success: true;
+      readonly data: T;
+      readonly issues?: never;
+    }
+  | {
+      readonly success: false;
+      readonly data?: never;
+      readonly issues: ReadonlyArray<ValidationIssue>;
+    };

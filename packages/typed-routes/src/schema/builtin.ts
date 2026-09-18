@@ -1,5 +1,19 @@
-﻿import type { StandardSchemaV1, StandardSchemaResult } from "../types/type-validator";
+﻿import type { StandardSchemaV1, StandardSchemaResult, ValidationResult, ValidationIssue } from "../types/type-validator";
 import { coercePrimitive } from "./coercion";
+import { validateData } from "./validator-adapter";
+
+/**
+ * Error thrown when schema validation fails during parse.
+ */
+export class SchemaValidationError extends Error {
+  public readonly issues: ReadonlyArray<ValidationIssue>;
+
+  public constructor(issues: ReadonlyArray<ValidationIssue>) {
+    super(`Validation failed: ${issues.map((i) => i.message).join("; ")}`);
+    this.name = "SchemaValidationError";
+    this.issues = issues;
+  }
+}
 
 /**
  * Standard Schema issue representation.
@@ -57,6 +71,8 @@ export interface BuiltinSchema<Output = unknown, Input = unknown> extends Standa
     };
   };
   encode(value?: unknown): unknown;
+  parse(value: unknown): Output;
+  safeParse(value: unknown): ValidationResult<Output>;
   optional(): BuiltinSchema<Output | undefined, Input>;
   nullable(): BuiltinSchema<Output | null, Input>;
   nullish(): BuiltinSchema<Output | null | undefined, Input>;
@@ -177,6 +193,16 @@ function createBuiltinSchema<Output, Input = unknown>(
         return encodeFn(value as Output);
       }
       return value;
+    },
+    safeParse(value: unknown): ValidationResult<Output> {
+      return validateData(schemaInstance, value);
+    },
+    parse(value: unknown): Output {
+      const result = schemaInstance.safeParse(value);
+      if (!result.success) {
+        throw new SchemaValidationError(result.issues);
+      }
+      return result.data;
     },
     optional() {
       return createBuiltinSchema<Output | undefined, Input>(

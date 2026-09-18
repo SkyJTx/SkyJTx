@@ -240,11 +240,58 @@ describe("Bidirectional Codec and Universal Adapter Interoperability", () => {
     });
 
     expect(result.success).toBe(true);
-    if (result.success && result.data) {
+    if (result.success) {
       expect(result.data.id).toBe(99);
       expect(result.data.active).toBe(true);
       expect(result.data.filter).toBe("meropide");
       expect(result.data.created instanceof Date).toBe(true);
     }
+  });
+  it("promotes types automatically via discriminated union on success", () => {
+    const userSchema = schema.object({
+      id: schema.number(),
+      name: schema.string(),
+    });
+
+    const successResult = validateData(userSchema, { id: "1", name: "Duke" });
+    if (successResult.success) {
+      const data: { id: number; name: string } = successResult.data;
+      expect(data.id).toBe(1);
+      expect(data.name).toBe("Duke");
+    } else {
+      expect.fail("Expected validation to succeed");
+    }
+
+    const failureResult = validateData(userSchema, { id: "invalid", name: "Duke" });
+    if (!failureResult.success) {
+      expect(failureResult.issues.length).toBeGreaterThan(0);
+      expect(failureResult.issues[0]?.path).toBe("id");
+    } else {
+      expect.fail("Expected validation to fail");
+    }
+  });
+
+  it("supports schema.safeParse with discriminated result", () => {
+    const ageSchema = schema.number().refine((n) => n >= 18, "Must be adult");
+
+    const validSafe = ageSchema.safeParse("25");
+    expect(validSafe.success).toBe(true);
+    if (validSafe.success) {
+      const val: number = validSafe.data;
+      expect(val).toBe(25);
+    }
+
+    const invalidSafe = ageSchema.safeParse("15");
+    expect(invalidSafe.success).toBe(false);
+    if (!invalidSafe.success) {
+      expect(invalidSafe.issues[0]?.message).toBe("Must be adult");
+    }
+  });
+
+  it("supports schema.parse returning data or throwing SchemaValidationError", () => {
+    const idSchema = schema.number();
+    expect(idSchema.parse("500")).toBe(500);
+
+    expect(() => idSchema.parse("not-a-number")).toThrowError(/Validation failed/);
   });
 });

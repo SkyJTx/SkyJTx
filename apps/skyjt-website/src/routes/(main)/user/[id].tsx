@@ -1,6 +1,6 @@
-import { defineRoute, schema, InferOutput } from "@skyjt/typed-routes";
+import { defineRoute, schema, InferOutput, validateData } from "@skyjt/typed-routes";
 import { query, revalidate } from "@solidjs/router";
-import { createMemo, Loading, onSettled } from "solid-js";
+import { createMemo, Errored, Loading, onSettled } from "solid-js";
 
 const loadUserData = query(async (id: number) => {
   "use server";
@@ -15,7 +15,7 @@ const loadUserData = query(async (id: number) => {
         json: () => Promise.resolve({
           id,
           name: "User " + id,
-          fetch_at: new Date().toISOString(),
+          fetch_at: new Date(),
         }),
       });
     }, 500);
@@ -27,7 +27,19 @@ const loadUserData = query(async (id: number) => {
 
   const data = await res.json();
 
-  return data as { id: number; name: string; fetch_at: string };
+  const dataSchema = schema.object({
+    id: schema.bigint(),
+    name: schema.string().pattern(/^User \d+$/),
+    fetch_at: schema.date(),
+  });
+
+  const result = validateData(dataSchema, data);
+
+  if (!result.success) {
+    throw new Error(result.issues.map((issue) => issue.message).join(", ") || "Invalid user data");
+  }
+
+  return result.data;
 }, "user-data-query");
 
 const routeSchema = schema.object({
@@ -60,11 +72,13 @@ export default function UserRoute() {
 
   return (
     <div>
-      <Loading fallback={<p>Loading user data...</p>}>
-        <p>User ID: {params().id}</p>
-        <p>User Name: {userData().name}</p>
-        <p>User Fetched At: {userData().fetch_at}</p>
-      </Loading>
+      <Errored fallback={<p>Error occurred while fetching user data.</p>}>
+        <Loading fallback={<p>Loading user data...</p>}>
+          <p>User ID: {params().id}</p>
+          <p>User Name: {userData().name}</p>
+          <p>User Fetched At: {userData().fetch_at.toLocaleString()}</p>
+        </Loading>
+      </Errored>
     </div>
   );
 }

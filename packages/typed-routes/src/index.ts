@@ -29,6 +29,7 @@ export type {
 
 export {
   schema,
+  SchemaValidationError,
   type SchemaFactory,
   type BuiltinSchema,
   type BuiltinStringSchema,
