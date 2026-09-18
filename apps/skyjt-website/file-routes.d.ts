@@ -51,6 +51,13 @@ declare module "virtual:file-routes" {
       $$route?: undefined;
     },
     {
+      path: "/api/ping";
+      page: false;
+      $GET: FileRouteLazyRef<typeof import("./src/routes/api/ping")>;
+      $HEAD: FileRouteLazyRef<typeof import("./src/routes/api/ping")>;
+      $$route?: undefined;
+    },
+    {
       path: "/(main)/user/:id";
       page: true;
       $component: FileRouteLazyRef<typeof import("./src/routes/(main)/user/[id]")>;

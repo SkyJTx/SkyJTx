@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Standard Schema V1 interface.
  */
 export interface StandardSchemaV1<Input = unknown, Output = Input> {
@@ -29,7 +29,7 @@ export type StandardSchemaResult<Output> =
     };
 
 /**
- * Structural contract matching Zod schemas.
+ * Structural contract matching legacy Zod schemas lacking ~standard.
  */
 export interface ZodLikeSchema<Output = unknown, Input = unknown> {
   _output?: Output;
@@ -37,15 +37,6 @@ export interface ZodLikeSchema<Output = unknown, Input = unknown> {
   safeParse(value: unknown):
     | { success: true; data: Output }
     | { success: false; error: { issues?: ReadonlyArray<{ message: string; path?: (string | number)[] }> } | unknown };
-}
-
-/**
- * Structural contract matching TypeBox schemas.
- */
-export interface TypeBoxSchema<Output = unknown> {
-  static?: Output;
-  type?: string;
-  [key: string]: unknown;
 }
 
 /**
@@ -59,7 +50,6 @@ export type FunctionValidator<Output = unknown> = (value: never) => Output;
 export type TypeValidator<Output = unknown, Input = unknown> =
   | StandardSchemaV1<Input, Output>
   | ZodLikeSchema<Output, Input>
-  | TypeBoxSchema<Output>
   | FunctionValidator<Output>;
 
 /**
@@ -72,11 +62,9 @@ export type InferOutput<T> =
       ? O
       : T extends { _output: infer O }
         ? O
-        : T extends { static: infer O }
+        : T extends (...args: never[]) => infer O
           ? O
-          : T extends (...args: never[]) => infer O
-            ? O
-            : unknown;
+          : unknown;
 
 /**
  * Infers the input type from any supported validator shape.
@@ -112,3 +100,16 @@ export type ValidationResult<T> =
       readonly data?: never;
       readonly issues: ReadonlyArray<ValidationIssue>;
     };
+
+/**
+ * Error thrown when schema validation encounters issues during parse operations.
+ */
+export class SchemaValidationError extends Error {
+  public readonly issues: ReadonlyArray<ValidationIssue>;
+
+  public constructor(issues: ReadonlyArray<ValidationIssue>) {
+    super(`Validation failed: ${issues.map((i) => i.message).join("; ")}`);
+    this.name = "SchemaValidationError";
+    this.issues = issues;
+  }
+}

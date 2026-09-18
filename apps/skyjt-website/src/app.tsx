@@ -10,7 +10,7 @@ export default function App(): JSX.Element {
   return (
     <Router>
       {(props: ParentProps) => (
-        <Loading fallback={<main class="content-container">Loading...</main>}>
+        <Loading fallback={<main>Loading...</main>}>
           {props.children}
         </Loading>
       )}

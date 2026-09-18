@@ -1,6 +1,7 @@
-import { defineRoute, schema, InferOutput, validateData } from "@skyjt/typed-routes";
+import { defineRoute, InferOutput, validateData } from "@skyjt/typed-routes";
 import { query, revalidate } from "@solidjs/router";
 import { createMemo, Errored, Loading, onSettled } from "solid-js";
+import * as v from "valibot";
 
 const loadUserData = query(async (id: number) => {
   "use server";
@@ -27,10 +28,10 @@ const loadUserData = query(async (id: number) => {
 
   const data = await res.json();
 
-  const dataSchema = schema.object({
-    id: schema.bigint(),
-    name: schema.string().pattern(/^User \d+$/),
-    fetch_at: schema.date(),
+  const dataSchema = v.object({
+    id: v.pipe(v.number(), v.safeInteger(), v.minValue(1)),
+    name: v.pipe(v.string(), v.regex(/^[A-Za-z0-9 ]+$/)),
+    fetch_at: v.date(),
   });
 
   const result = validateData(dataSchema, data);
@@ -42,8 +43,8 @@ const loadUserData = query(async (id: number) => {
   return result.data;
 }, "user-data-query");
 
-const routeSchema = schema.object({
-  id: schema.number(),
+const routeSchema = v.object({
+  id: v.number(),
 });
 
 export const route = defineRoute({

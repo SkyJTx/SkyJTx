@@ -1,8 +1,8 @@
 import { describe, it, expect } from "vitest";
+import * as v from "valibot";
 import { normalizeSearchParams } from "~/schema/coercion";
 import { buildUrl } from "~/router/path-builder";
 import { validateData } from "~/schema/validator-adapter";
-import { schema } from "~/schema/builtin";
 
 describe("Search Parameter Normalization and Parsing", () => {
   it("normalizes single scalar search keys", () => {
@@ -23,9 +23,9 @@ describe("Search Parameter Normalization and Parsing", () => {
   });
 
   it("validates array search parameters through schema", () => {
-    const searchSchema = schema.object({
-      tab: schema.string(),
-      tag: schema.array(schema.string()),
+    const searchSchema = v.object({
+      tab: v.string(),
+      tag: v.array(v.string()),
     });
 
     const normalized = normalizeSearchParams("?tab=overview&tag=fontaine&tag=meropide");
@@ -51,4 +51,3 @@ describe("Search Parameter Normalization and Parsing", () => {
     expect(url).toBe("/users/42?tab=profile&tag=alpha&tag=beta#section-1");
   });
 });
-

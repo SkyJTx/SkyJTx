@@ -46,6 +46,21 @@ export function routes(options?: RoutesPluginOptions): PluginOption[] {
     },
   };
 
+  const normalizeVirtualRoutesPlugin: Plugin = {
+    name: "skyjt:typed-routes:normalize-virtual-routes",
+    enforce: "post",
+    transform(code, id) {
+      if (id === "virtual:file-routes" || id.includes("virtual:file-routes")) {
+        return {
+          code: code.replace(/"src":\s*"([^"]+)"/g, (_, srcPath: string) => {
+            return `"src": "${srcPath.replace(/\\\\/g, "/")}"`;
+          }),
+          map: null,
+        };
+      }
+    },
+  };
+
   const pluginsList = Array.isArray(fsPlugins) ? fsPlugins : [fsPlugins];
-  return [...pluginsList, ssrConfigPlugin];
+  return [...pluginsList, normalizeVirtualRoutesPlugin, ssrConfigPlugin];
 }

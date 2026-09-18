@@ -1,17 +1,17 @@
 import { describe, it, expect, vi } from "vitest";
 import { createMiddleware } from "~/middleware/middleware";
 import { defineRoute } from "~/router/define-route";
-import { schema } from "~/schema/builtin";
+import * as v from "valibot";
 import type { APIEvent } from "filesystem-routing/api";
 
 describe("Request Middleware (createMiddleware)", () => {
   it("dispatches API route and coerces validated parameters and query params", async () => {
     const userRoute = defineRoute({
-      params: schema.object({
-        id: schema.number(),
+      params: v.object({
+        id: v.number(),
       }),
-      search: schema.object({
-        tab: schema.string().optional(),
+      search: v.object({
+        tab: v.optional(v.string()),
       }),
     });
 
@@ -52,8 +52,8 @@ describe("Request Middleware (createMiddleware)", () => {
   it("automatically rejects invalid parameters with 400 Bad Request", async () => {
     const onErrorMock = vi.fn();
     const userRoute = defineRoute({
-      params: schema.object({
-        id: schema.number(),
+      params: v.object({
+        id: v.number(),
       }),
       onError: onErrorMock,
     });
@@ -90,8 +90,8 @@ describe("Request Middleware (createMiddleware)", () => {
 
   it("automatically rejects invalid search parameters with 400 Bad Request", async () => {
     const userRoute = defineRoute({
-      search: schema.object({
-        limit: schema.number(),
+      search: v.object({
+        limit: v.number(),
       }),
     });
 
@@ -147,8 +147,8 @@ describe("Request Middleware (createMiddleware)", () => {
 
   it("allows custom onValidationError response", async () => {
     const userRoute = defineRoute({
-      params: schema.object({
-        id: schema.number(),
+      params: v.object({
+        id: v.number(),
       }),
     });
 
@@ -183,11 +183,11 @@ describe("Request Middleware (createMiddleware)", () => {
 
   it("dispatches QUERY request with validated params, search, and body payload", async () => {
     const queryRoute = defineRoute({
-      params: schema.object({
-        category: schema.string(),
+      params: v.object({
+        category: v.string(),
       }),
-      search: schema.object({
-        sort: schema.string().optional(),
+      search: v.object({
+        sort: v.optional(v.string()),
       }),
     });
 
@@ -266,8 +266,8 @@ describe("Request Middleware (createMiddleware)", () => {
 
   it("enforces parameter validation on QUERY requests", async () => {
     const filterRoute = defineRoute({
-      params: schema.object({
-        version: schema.number(),
+      params: v.object({
+        version: v.number(),
       }),
     });
 
@@ -302,3 +302,4 @@ describe("Request Middleware (createMiddleware)", () => {
     expect(nextMock).not.toHaveBeenCalled();
   });
 });
+

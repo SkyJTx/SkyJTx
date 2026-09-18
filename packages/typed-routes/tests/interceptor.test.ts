@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from "vitest";
+import * as v from "valibot";
 import { interceptFileRoutes } from "~/interceptor/interceptor";
 import { defineRoute } from "~/router/define-route";
-import { schema } from "~/schema/builtin";
 
 describe("Route Manifest Interceptor", () => {
   it("intercepts file route manifest and executes validated preload", async () => {
@@ -11,11 +11,11 @@ describe("Route Manifest Interceptor", () => {
     });
 
     const userRoute = defineRoute({
-      params: schema.object({
-        id: schema.number(),
+      params: v.object({
+        id: v.number(),
       }),
-      search: schema.object({
-        tab: schema.string().optional(),
+      search: v.object({
+        tab: v.optional(v.string()),
       }),
       preload: preloadMock,
       onError: onErrorMock,
@@ -65,8 +65,8 @@ describe("Route Manifest Interceptor", () => {
     const onErrorMock = vi.fn();
 
     const userRoute = defineRoute({
-      params: schema.object({
-        id: schema.number(),
+      params: v.object({
+        id: v.number(),
       }),
       preload: () => "ok",
       onError: onErrorMock,
@@ -101,5 +101,25 @@ describe("Route Manifest Interceptor", () => {
     expect(onErrorMock).toHaveBeenCalledTimes(1);
     expect(onErrorMock.mock.calls[0][0].error.target).toBe("params");
   });
-});
 
+  it("normalizes Windows backslashes in lazy component module paths to POSIX forward slashes", () => {
+    const dummyComponent = () => "Dummy";
+    const manifest = [
+      {
+        path: "/profile",
+        page: true,
+        $component: {
+          src: "src\\routes\\(main)\\profile.tsx?pick=default&pick=$css&lang.tsx",
+          import: () => Promise.resolve({ default: dummyComponent }),
+        },
+      },
+    ] as const;
+
+    const intercepted = interceptFileRoutes(manifest);
+    expect(intercepted).toHaveLength(1);
+    expect(intercepted[0].component).toBeDefined();
+    expect(manifest[0].$component.src).toBe(
+      "src/routes/(main)/profile.tsx?pick=default&pick=$css&lang.tsx",
+    );
+  });
+});

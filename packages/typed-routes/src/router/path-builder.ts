@@ -1,3 +1,5 @@
+const PARAM_PATTERN = /(?::([a-zA-Z0-9_]+)\?|:([a-zA-Z0-9_]+)|\*([a-zA-Z0-9_]+)|\[\.\.\.([a-zA-Z0-9_]+)\]|\[([a-zA-Z0-9_]+)\])/g;
+
 /**
  * Builds a URL pathname, search query, and hash from a route pattern and parameters.
  */
@@ -9,30 +11,25 @@ export function buildUrl(
     hash?: string;
   },
 ): string {
-  let pathname = pattern;
   const params = options?.params ?? {};
 
-  pathname = pathname.replace(/(?::([a-zA-Z0-9_]+)\?|:([a-zA-Z0-9_]+)|\*([a-zA-Z0-9_]+)|\[\.\.\.([a-zA-Z0-9_]+)\]|\[([a-zA-Z0-9_]+)\])/g, (
-    _match,
-    optParam,
-    reqParam,
-    wildcardParam,
-    catchAllParam,
-    bracketParam,
-  ) => {
-    const key = optParam ?? reqParam ?? wildcardParam ?? catchAllParam ?? bracketParam;
-    if (!key) {
-      return "";
-    }
-    const val = params[key];
-    if (val === undefined || val === null) {
-      if (optParam) {
+  let pathname = pattern.replace(
+    PARAM_PATTERN,
+    (_match, optParam, reqParam, wildcardParam, catchAllParam, bracketParam) => {
+      const key = optParam ?? reqParam ?? wildcardParam ?? catchAllParam ?? bracketParam;
+      if (!key) {
         return "";
       }
-      return "";
-    }
-    return encodeURIComponent(String(val));
-  });
+      const val = params[key];
+      if (val === undefined || val === null) {
+        if (optParam) {
+          return "";
+        }
+        throw new Error(`Missing required path parameter: "${key}" for route pattern "${pattern}"`);
+      }
+      return encodeURIComponent(String(val));
+    },
+  );
 
   pathname = pathname.replace(/\/+/g, "/");
   if (pathname.length > 1 && pathname.endsWith("/")) {

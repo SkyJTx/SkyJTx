@@ -1,8 +1,7 @@
-﻿export type {
+export type {
   StandardSchemaV1,
   StandardSchemaResult,
   ZodLikeSchema,
-  TypeBoxSchema,
   FunctionValidator,
   TypeValidator,
   InferOutput,
@@ -10,6 +9,8 @@
   ValidationIssue,
   ValidationResult,
 } from "./types/type-validator";
+
+export { SchemaValidationError } from "./types/type-validator";
 
 export {
   RouteValidationError,
@@ -27,25 +28,17 @@ export type {
   FindRouteEntry,
 } from "./types/route-inference";
 
-export {
-  schema,
-  SchemaValidationError,
-  type SchemaFactory,
-  type BuiltinSchema,
-  type BuiltinStringSchema,
-  type BuiltinObjectSchema,
-  type CleanObjectShape,
-  type InferShape,
-  type InferTuple,
-  type InferUnion,
-  type InferOutputFromSchema,
-} from "./schema/builtin";
 export { coercePrimitive, coerceRecord, normalizeSearchParams } from "./schema/coercion";
-export { validateData, isStandardSchema, isZodSchema, isTypeBoxSchema } from "./schema/validator-adapter";
+export { validateData, isStandardSchema, isZodSchema } from "./schema/validator-adapter";
 
 export { RouteValidationProvider, useRouteValidationContext } from "./context/route-context";
 
-export { interceptFileRoutes, type FileRouteEntry, type FileRouteLazyRef, type FileRouteEagerRef } from "./interceptor/interceptor";
+export {
+  interceptFileRoutes,
+  type FileRouteEntry,
+  type FileRouteLazyRef,
+  type FileRouteEagerRef,
+} from "./interceptor/interceptor";
 
 export { defineRoute } from "./router/define-route";
 export { buildUrl } from "./router/path-builder";

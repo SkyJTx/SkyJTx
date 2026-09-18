@@ -22,6 +22,7 @@
         "@solidjs/router": "^2.0.0-next.24",
         "@solidjs/web": "^2.0.0-rc.8",
         "solid-js": "^2.0.0-rc.8",
+        "valibot": "^1.5.0",
       },
       "devDependencies": {
         "@solidjs/diagnostics": "^2.0.0-rc.8",

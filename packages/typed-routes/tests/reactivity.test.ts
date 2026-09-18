@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { createRoot, createSignal, createMemo, type Accessor } from "solid-js";
+import * as v from "valibot";
 import { defineRoute } from "~/router/define-route";
-import { schema } from "~/schema/builtin";
 import { validateData } from "~/schema/validator-adapter";
 
 describe("Fine-Grained Reactive Unwrapping", () => {
@@ -13,8 +13,8 @@ describe("Fine-Grained Reactive Unwrapping", () => {
 
     createRoot(() => {
       const userRoute = defineRoute({
-        params: schema.object({
-          id: schema.number(),
+        params: v.object({
+          id: v.number(),
         }),
       });
 
@@ -40,4 +40,3 @@ describe("Fine-Grained Reactive Unwrapping", () => {
     expect(componentState.initializedAt).toBeDefined();
   });
 });
-
