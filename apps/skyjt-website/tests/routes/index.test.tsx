@@ -1,6 +1,6 @@
 import { render } from "@solidjs/testing-library";
 import { describe, expect, it } from "vitest";
-import Home from "./(main)/index";
+import Home from "~/routes/(main)/index";
 
 describe("Home route", () => {
   it("renders home heading and link", () => {
