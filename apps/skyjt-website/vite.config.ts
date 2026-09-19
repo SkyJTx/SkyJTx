@@ -3,6 +3,7 @@ import { fileURLToPath, URL } from "node:url";
 import { routes } from "@skyjt/typed-routes/vite";
 import solid from "@solidjs/vite-plugin";
 import { nitro } from "nitro/vite";
+import { aot } from "elysia/plugin/aot/vite";
 import tailwindcss from "@tailwindcss/vite";
 
 export default defineConfig({
@@ -26,6 +27,12 @@ export default defineConfig({
     }),
     nitro(),
     tailwindcss(),
+    {
+      ...aot("src/server/index.ts"),
+      apply(_config, env) {
+        return Boolean(env.isSsrBuild);
+      }
+    },
   ],
   server: {
     port: 3000,

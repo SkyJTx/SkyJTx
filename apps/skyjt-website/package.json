@@ -36,6 +36,7 @@
     "@solidjs/meta": "^1.0.0-next.2",
     "@solidjs/router": "^2.0.0-next.24",
     "@solidjs/web": "^2.0.0-rc.8",
+    "elysia": "^2.0.0-beta.16",
     "solid-js": "^2.0.0-rc.8",
     "valibot": "^1.5.0"
   }
