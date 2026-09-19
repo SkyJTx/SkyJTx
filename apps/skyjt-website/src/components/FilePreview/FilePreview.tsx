@@ -1,4 +1,4 @@
-import type { JSX } from "@solidjs/web";
+﻿import type { JSX } from "@solidjs/web";
 import {
   createSignal,
   createMemo,
@@ -75,7 +75,7 @@ export function FilePreview(props: FilePreviewProps): JSX.Element {
       }}
     >
       <Dialog.Portal>
-        <Dialog.Overlay class="fixed inset-0 bg-neutral/80 backdrop-blur-md z-50 transition-opacity duration-200" />
+        <Dialog.Overlay class="fixed inset-0 bg-neutral/80 backdrop-blur-md z-50 animate-fade-in transition-opacity duration-200" />
         <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
           <Dialog.Content class="bg-base-100 border border-base-300 rounded-box shadow-2xl max-w-4xl w-full max-h-[90vh] flex flex-col overflow-hidden animate-scale-in">
             {/* Header */}

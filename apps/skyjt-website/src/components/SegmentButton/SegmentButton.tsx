@@ -1,5 +1,5 @@
-import type { JSX } from "@solidjs/web";
-import { For, createMemo } from "solid-js";
+﻿import type { JSX } from "@solidjs/web";
+import { For, createMemo, createSignal, onSettled } from "solid-js";
 import type { SegmentButtonProps } from "./SegmentButton.types";
 
 /**
@@ -9,6 +9,11 @@ export function SegmentButton<T extends string | number>(
   props: SegmentButtonProps<T>
 ): JSX.Element {
   let containerRef: HTMLDivElement | undefined;
+  const [hasMounted, setHasMounted] = createSignal(false);
+
+  onSettled(() => {
+    setHasMounted(true);
+  });
 
   const activeIndex = createMemo(() => {
     const idx = props.options.findIndex((opt) => opt.value === props.value);
@@ -62,7 +67,12 @@ export function SegmentButton<T extends string | number>(
       {/* Sliding Highlight Pill */}
       <div class="absolute inset-1 pointer-events-none" aria-hidden="true">
         <div
-          class="h-full rounded-lg bg-base-100 shadow-xs transition-transform duration-300 ease-out border border-base-content/5"
+          class={[
+            "h-full rounded-lg bg-base-100 shadow-xs border border-base-content/5",
+            hasMounted()
+              ? "transition-transform duration-300 ease-[cubic-bezier(0.2,0.8,0.2,1)]"
+              : "",
+          ]}
           style={{
             width: `${100 / optionCount()}%`,
             transform: `translateX(${activeIndex() * 100}%)`,
@@ -82,7 +92,7 @@ export function SegmentButton<T extends string | number>(
               aria-label={option.ariaLabel ?? option.label}
               tabindex={isSelected() ? 0 : -1}
               class={[
-                "relative z-10 flex-1 flex items-center justify-center gap-1.5 rounded-lg font-medium transition-colors duration-200 cursor-pointer focus-visible:outline-2 focus-visible:outline-primary",
+                "relative z-10 flex-1 flex items-center justify-center gap-1.5 rounded-lg font-medium transition-all duration-200 cursor-pointer active:scale-[0.98] focus-visible:outline-2 focus-visible:outline-primary select-none",
                 props.size === "sm" ? "py-1 px-2 text-xs" : "py-1.5 px-3 text-sm",
                 isSelected()
                   ? "text-primary font-semibold"

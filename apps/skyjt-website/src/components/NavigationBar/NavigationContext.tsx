@@ -15,6 +15,7 @@ export interface NavigationContextValue {
   activeSection: Accessor<string>;
   setActiveSection: Setter<string>;
   scrollToSection: (section: string) => void;
+  isProgrammaticScroll: Accessor<boolean>;
 }
 
 const NavigationContext = createContext<NavigationContextValue | null>(null, {
@@ -26,10 +27,28 @@ const NavigationContext = createContext<NavigationContextValue | null>(null, {
  */
 export function NavigationProvider(props: ParentProps): JSX.Element {
   const [activeSection, setActiveSection] = createSignal("Home");
+  const [isProgrammaticScroll, setIsProgrammaticScroll] = createSignal(false);
+  let scrollLockTimeout: ReturnType<typeof setTimeout> | null = null;
 
   const scrollToSection = (section: string) => {
+    setIsProgrammaticScroll(true);
     setActiveSection(section);
-    if (typeof document !== "undefined") {
+
+    if (scrollLockTimeout) {
+      clearTimeout(scrollLockTimeout);
+    }
+
+    if (typeof window !== "undefined") {
+      const unlock = () => {
+        setIsProgrammaticScroll(false);
+        window.removeEventListener("scrollend", unlock);
+      };
+
+      if ("onscrollend" in window) {
+        window.addEventListener("scrollend", unlock, { once: true });
+      }
+      scrollLockTimeout = setTimeout(unlock, 800);
+
       const el = document.getElementById(section);
       if (el) {
         el.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -38,7 +57,14 @@ export function NavigationProvider(props: ParentProps): JSX.Element {
   };
 
   return (
-    <NavigationContext value={{ activeSection, setActiveSection, scrollToSection }}>
+    <NavigationContext
+      value={{
+        activeSection,
+        setActiveSection,
+        scrollToSection,
+        isProgrammaticScroll,
+      }}
+    >
       {props.children}
     </NavigationContext>
   );

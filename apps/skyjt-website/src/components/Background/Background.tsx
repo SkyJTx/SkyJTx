@@ -165,7 +165,7 @@ export function Background(props: ParentProps): JSX.Element {
   });
 
   return (
-    <div class="relative min-h-screen w-full bg-base-100 flex flex-col items-center justify-start overflow-x-hidden">
+    <div class="relative min-h-screen w-full bg-base-100 flex flex-col items-center justify-start overflow-visible">
       <canvas
         ref={(el) => {
           canvasRef = el;

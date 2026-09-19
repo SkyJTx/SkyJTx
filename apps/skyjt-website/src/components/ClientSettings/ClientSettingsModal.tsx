@@ -1,8 +1,9 @@
-import type { JSX } from "@solidjs/web";
+﻿import type { JSX } from "@solidjs/web";
 import { For, Show, onSettled } from "solid-js";
 import { useClientSettings } from "./ClientSettingsContext";
 import { PRESET_COLORS, type FontSize, type ThemeMode } from "./types";
 import { SegmentButton, type SegmentOption } from "~/components/SegmentButton";
+import { usePresence } from "~/utils/presence";
 
 /**
  * Properties for ClientSettingsModal.
@@ -71,6 +72,7 @@ const FONT_SIZE_OPTIONS: readonly SegmentOption<FontSize>[] = [
  */
 export function ClientSettingsModal(props: ClientSettingsModalProps): JSX.Element {
   const settings = useClientSettings();
+  const presence = usePresence(() => props.isOpen, { exitDuration: 200 });
 
   const handleKeyDown = (event: KeyboardEvent) => {
     if (event.key === "Escape" && props.isOpen) {
@@ -88,9 +90,12 @@ export function ClientSettingsModal(props: ClientSettingsModalProps): JSX.Elemen
   });
 
   return (
-    <Show when={props.isOpen}>
+    <Show when={presence.isMounted()}>
       <div
-        class="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 print:hidden"
+        class={[
+          "fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 print:hidden transition-opacity duration-200 ease-out",
+          presence.isVisible() ? "opacity-100" : "opacity-0 pointer-events-none",
+        ]}
         onClick={(e) => {
           if (e.target === e.currentTarget) {
             props.onClose();
@@ -101,7 +106,12 @@ export function ClientSettingsModal(props: ClientSettingsModalProps): JSX.Elemen
           role="dialog"
           aria-modal="true"
           aria-labelledby="client-settings-title"
-          class="relative w-full max-w-md bg-base-200 border border-base-content/15 rounded-2xl shadow-2xl p-6 flex flex-col gap-6 max-h-[90vh] overflow-y-auto"
+          class={[
+            "relative w-full max-w-md bg-base-200 border border-base-content/15 rounded-2xl shadow-2xl p-6 flex flex-col gap-6 max-h-[90vh] overflow-y-auto transition-all duration-200 ease-out",
+            presence.isVisible()
+              ? "opacity-100 scale-100 translate-y-0"
+              : "opacity-0 scale-95 translate-y-2.5",
+          ]}
         >
           {/* Header */}
           <div class="flex items-center justify-between border-b border-base-content/10 pb-3">

@@ -12,7 +12,7 @@ export function HomePresentation(): JSX.Element {
   return (
     <section
       id="Home"
-      class="min-h-[calc(100vh-4rem)] w-full flex flex-col justify-between items-center px-4 sm:px-8 py-12 text-center"
+      class="min-h-screen min-h-dvh w-full flex flex-col justify-between items-center px-4 sm:px-8 py-16 text-center scroll-mt-16"
     >
       <div class="flex-1 flex flex-col items-center justify-center max-w-3xl mx-auto gap-6 animate-fade-in">
         <h1 class="text-4xl sm:text-6xl font-extrabold tracking-tight text-base-content">

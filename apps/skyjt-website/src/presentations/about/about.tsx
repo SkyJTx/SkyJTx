@@ -10,9 +10,9 @@ export function AboutPresentation(): JSX.Element {
   const c = useAboutController();
 
   return (
-    <section id="About" class="w-full max-w-4xl mx-auto px-4 sm:px-8 py-20 animate-fade-in">
-      <div class="card bg-base-200/50 backdrop-blur-md border border-base-300 shadow-xl rounded-box p-6 sm:p-10">
-        <div class="flex flex-col md:flex-row items-center gap-8 md:gap-12">
+    <section id="About" class="min-h-screen min-h-dvh w-full max-w-4xl mx-auto px-4 sm:px-8 py-20 flex flex-col items-center justify-center scroll-mt-16 animate-fade-in">
+      <div class="card bg-base-200/50 backdrop-blur-md border border-base-300 shadow-xl rounded-box p-6 sm:p-10 w-full overflow-visible">
+        <div class="flex flex-col md:flex-row items-center gap-8 md:gap-12 w-full">
           {/* Avatar with Kobalte Image */}
           <div class="shrink-0">
             <Image class="relative">
@@ -28,7 +28,7 @@ export function AboutPresentation(): JSX.Element {
           </div>
 
           {/* Text Content */}
-          <div class="flex-1 flex flex-col text-center md:text-left">
+          <div class="flex-1 min-w-0 flex flex-col text-center md:text-left w-full">
             <h2 class="text-2xl sm:text-3xl font-extrabold text-base-content tracking-tight">
               About Me
             </h2>
@@ -43,26 +43,26 @@ export function AboutPresentation(): JSX.Element {
             <div class="divider my-4" />
 
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm text-base-content/80">
-              <div class="flex items-center justify-center md:justify-start gap-2.5">
+              <div class="flex items-center justify-center md:justify-start gap-2.5 min-w-0">
                 <Icon name="location" size={16} class="text-primary shrink-0" />
-                <span>{c.location}</span>
+                <span class="truncate">{c.location}</span>
               </div>
 
-              <div class="flex items-center justify-center md:justify-start gap-2.5">
+              <div class="flex items-center justify-center md:justify-start gap-2.5 min-w-0">
                 <Icon name="mail" size={16} class="text-primary shrink-0" />
                 <a
                   href={`mailto:${c.email}`}
-                  class="link link-hover text-base-content hover:text-primary transition-colors"
+                  class="link link-hover text-base-content hover:text-primary transition-colors break-all"
                 >
                   {c.email}
                 </a>
               </div>
 
-              <div class="flex items-center justify-center md:justify-start gap-2.5">
+              <div class="flex items-center justify-center md:justify-start gap-2.5 min-w-0">
                 <Icon name="phone" size={16} class="text-primary shrink-0" />
                 <a
                   href={`tel:${c.phone.replace(/\s+/g, "")}`}
-                  class="link link-hover text-base-content hover:text-primary transition-colors"
+                  class="link link-hover text-base-content hover:text-primary transition-colors break-all"
                 >
                   {c.phone}
                 </a>

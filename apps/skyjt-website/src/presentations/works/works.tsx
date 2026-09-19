@@ -12,7 +12,7 @@ export function WorksPresentation(): JSX.Element {
   const c = useWorksController();
 
   return (
-    <section id="Works" class="w-full max-w-6xl mx-auto px-4 sm:px-8 py-20 animate-fade-in">
+    <section id="Works" class="min-h-screen min-h-dvh w-full max-w-6xl mx-auto px-4 sm:px-8 py-20 flex flex-col items-center justify-center scroll-mt-16 animate-fade-in">
       <BrandTitle>My Works</BrandTitle>
       <BrandSubtitle>Selected projects and experiments</BrandSubtitle>
 

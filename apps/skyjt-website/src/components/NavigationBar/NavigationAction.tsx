@@ -15,11 +15,11 @@ export function NavigationAction(props: NavigationActionProps): JSX.Element {
     <button
       type="button"
       aria-label="Open Client Settings"
-      class="btn btn-ghost btn-sm btn-square rounded-xl text-base-content/80 hover:text-base-content hover:bg-base-content/10 transition-colors duration-200 cursor-pointer"
+      class="btn btn-ghost btn-xs sm:btn-sm btn-square rounded-lg sm:rounded-xl text-base-content/80 hover:text-base-content hover:bg-base-content/10 transition-colors duration-200 cursor-pointer shrink-0"
       onClick={() => props.onOpenSettings()}
     >
       <svg
-        class="w-4 h-4"
+        class="w-3.5 h-3.5 sm:w-4 sm:h-4"
         viewBox="0 0 24 24"
         fill="none"
         stroke="currentColor"

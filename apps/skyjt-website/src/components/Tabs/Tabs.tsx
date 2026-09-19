@@ -1,4 +1,4 @@
-import type { JSX } from "@solidjs/web";
+﻿import type { JSX } from "@solidjs/web";
 import {
   createContext,
   useContext,
@@ -190,7 +190,7 @@ function TabsContent(props: TabsContentProps): JSX.Element {
         id={`panel-${props.value}`}
         aria-labelledby={`tab-${props.value}`}
         tabindex={0}
-        class={props.class}
+        class={["animate-fade-in", props.class]}
       >
         {props.children}
       </div>

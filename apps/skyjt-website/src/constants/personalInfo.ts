@@ -7,7 +7,7 @@ export const PERSONAL_INFO = {
   description: "Crafting high-performance web architectures and intelligent edge AI solutions.",
   location: "Bangkok, Thailand",
   email: "nattakarn.khumsupha.user1@outlook.com",
-  phone: "+66 92 426 7888",
+  phone: "+66 92 428 6788",
   githubUrl: "https://github.com/SkyJTx",
   linkedinUrl: "https://www.linkedin.com/in/nattakarn-khumsupha-85b871337/",
   musescoreUrl: "https://musescore.com/skyjtx",

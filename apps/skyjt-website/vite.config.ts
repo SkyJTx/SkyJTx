@@ -25,7 +25,9 @@ export default defineConfig({
     routes({
       codeSplitting: true,
     }),
-    nitro(),
+    nitro({
+      preset: "vercel",
+    }),
     tailwindcss(),
     {
       ...aot("src/server/index.ts"),

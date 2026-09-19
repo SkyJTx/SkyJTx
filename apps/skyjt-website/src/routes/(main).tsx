@@ -8,7 +8,7 @@ function MainLayoutContent(props: RouteSectionProps): JSX.Element {
   const sections = ["Home", "About", "Works", "Contacts"] as const;
 
   return (
-    <div class="min-h-screen bg-base-100 text-base-content font-sans flex flex-col relative overflow-x-hidden">
+    <div class="min-h-screen bg-base-100 text-base-content font-sans flex flex-col relative overflow-visible">
       <Background>
         <div class="w-full min-h-screen flex flex-col">
           <NavigationBar
