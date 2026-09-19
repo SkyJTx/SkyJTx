@@ -26,7 +26,12 @@ export default defineConfig({
       codeSplitting: true,
     }),
     nitro({
-      preset: "vercel-edge",
+      preset: "vercel",
+      vercel: {
+        functions: {
+          runtime: "edge",
+        },
+      }
     }),
     tailwindcss(),
     {
