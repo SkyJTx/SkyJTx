@@ -1,13 +1,22 @@
 import { render } from "@solidjs/testing-library";
 import { describe, expect, it } from "vitest";
+import { NavigationProvider } from "~/components/NavigationBar";
 import Home from "~/routes/(main)/index";
 
 describe("Home route", () => {
-  it("renders home heading and link", () => {
-    const { getByRole, getByText } = render(() => <Home />);
-    expect(getByRole("heading", { level: 1 }).textContent).toBe("SkyJT Website");
-    expect(getByText("View User 42")).toBeDefined();
-    const link = getByRole("link");
-    expect(link.getAttribute("href")).toBe("/user/42");
+  it("renders portfolio hero, about, works, and contacts sections", () => {
+    const { getByRole, getByText } = render(() => (
+      <NavigationProvider>
+        <Home />
+      </NavigationProvider>
+    ));
+
+    expect(getByRole("heading", { level: 1 }).textContent).toBe("Nattakarn Khumsupha");
+    expect(getByText("About Me")).toBeDefined();
+    expect(getByText("My Works")).toBeDefined();
+    expect(getByText("Get in Touch")).toBeDefined();
+    expect(getByText("RuamMitr")).toBeDefined();
+    expect(getByText("Software Development")).toBeDefined();
+    expect(getByText("Music")).toBeDefined();
   });
 });
