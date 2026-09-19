@@ -2,7 +2,7 @@ import { Errored, Loading, type ParentProps } from "solid-js";
 import type { JSX } from "@solidjs/web";
 import { Router } from "~/router";
 import { ClientSettingsProvider } from "~/components/ClientSettings";
-import "./App.css";
+import "./app.css";
 
 /**
  * Root application component configuring global client settings, the router shell, and loading fallback.
