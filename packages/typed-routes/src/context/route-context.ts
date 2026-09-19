@@ -6,7 +6,9 @@ import { RouteValidationError } from "../types/route-definition";
 import { validateData } from "../schema/validator-adapter";
 import { normalizeSearchParams } from "../schema/coercion";
 
-const RouteValidationContext = createContext<RouteValidationContextValue<unknown, unknown, unknown, unknown> | undefined>(undefined);
+const RouteValidationContext = createContext<RouteValidationContextValue<unknown, unknown, unknown, unknown> | null>(null, {
+  name: "RouteValidationContext",
+});
 
 /**
  * Context provider supplying validated route parameters and search queries.
@@ -83,5 +85,6 @@ export function useRouteValidationContext<
   TState = unknown,
   THash = unknown,
 >(): RouteValidationContextValue<TParams, TSearch, TState, THash> | undefined {
-  return useContext(RouteValidationContext) as RouteValidationContextValue<TParams, TSearch, TState, THash> | undefined;
+  const ctx = useContext(RouteValidationContext);
+  return (ctx ?? undefined) as RouteValidationContextValue<TParams, TSearch, TState, THash> | undefined;
 }

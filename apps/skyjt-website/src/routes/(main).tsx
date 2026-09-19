@@ -16,7 +16,7 @@ function MainLayoutContent(props: RouteSectionProps): JSX.Element {
             activeSection={nav.activeSection()}
             onSelectSection={nav.scrollToSection}
           />
-          <main class="flex-1 w-full flex flex-col items-center">
+          <main class="flex-1 w-full flex flex-col items-center pt-16">
             {props.children}
           </main>
         </div>

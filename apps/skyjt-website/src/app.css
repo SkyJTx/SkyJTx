@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&family=Public+Sans:wght@300;400;500;600;700&display=swap");
+﻿@import url("https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&family=Public+Sans:wght@300;400;500;600;700&display=swap");
 @import "tailwindcss";
 @plugin "daisyui" {
   themes: light-seed --default, dark-seed --prefersdark;
@@ -109,4 +109,10 @@ body {
   font-family: var(--font-sans);
   background-color: var(--color-base-100);
   color: var(--color-base-content);
+}
+
+@media print {
+  .no-screenshot {
+    display: none !important;
+  }
 }

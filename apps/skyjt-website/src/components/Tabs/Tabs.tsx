@@ -14,7 +14,9 @@ interface TabsContextValue {
   triggers: () => Map<string, HTMLButtonElement>;
 }
 
-const TabsContext = createContext<TabsContextValue>();
+const TabsContext = createContext<TabsContextValue | null>(null, {
+  name: "TabsContext",
+});
 
 function useTabs(): TabsContextValue {
   const ctx = useContext(TabsContext);

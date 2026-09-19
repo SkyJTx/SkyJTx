@@ -17,7 +17,9 @@ export interface NavigationContextValue {
   scrollToSection: (section: string) => void;
 }
 
-const NavigationContext = createContext<NavigationContextValue>();
+const NavigationContext = createContext<NavigationContextValue | null>(null, {
+  name: "NavigationContext",
+});
 
 /**
  * Provides active section tracking and smooth scrolling methods across views.
