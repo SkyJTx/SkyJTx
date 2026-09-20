@@ -46,19 +46,62 @@ export function Background(props: ParentProps): JSX.Element {
     let height = 0;
     let time = 0;
 
-    const resizeCanvas = () => {
-      if (!canvas) return;
-      const rect = canvas.getBoundingClientRect();
+    let primaryRgb: RGB = { r: 79, g: 70, b: 229 };
+    let secondaryRgb: RGB = { r: 109, g: 120, b: 189 };
+
+    const updateColors = () => {
+      if (typeof document === "undefined") return;
+      const style = getComputedStyle(document.documentElement);
+      const primaryHex = style.getPropertyValue("--seed").trim() || "#4f46e5";
+      primaryRgb = parseRgbColor(primaryHex);
+      secondaryRgb = {
+        r: Math.min(255, primaryRgb.r + 30),
+        g: Math.min(255, primaryRgb.g + 50),
+        b: Math.max(0, primaryRgb.b - 40),
+      };
+    };
+
+    updateColors();
+
+    const mutationObserver = new MutationObserver(() => {
+      updateColors();
+    });
+    mutationObserver.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ["style", "data-theme"],
+    });
+
+    const updateDimensions = (newWidth: number, newHeight: number) => {
+      if (newWidth <= 0 || newHeight <= 0) return;
+      if (width === newWidth && height === newHeight) return;
       const dpr = window.devicePixelRatio || 1;
-      width = rect.width;
-      height = rect.height;
-      canvas.width = width * dpr;
-      canvas.height = height * dpr;
+      width = newWidth;
+      height = newHeight;
+      canvas.width = Math.round(width * dpr);
+      canvas.height = Math.round(height * dpr);
+      ctx.resetTransform?.();
       ctx.scale(dpr, dpr);
     };
 
-    window.addEventListener("resize", resizeCanvas);
-    resizeCanvas();
+    const initialWidth = window.innerWidth || 300;
+    const initialHeight = window.innerHeight || 150;
+    updateDimensions(initialWidth, initialHeight);
+
+    const resizeObserver = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        const entryWidth = entry.contentRect.width || entry.target.clientWidth;
+        const entryHeight = entry.contentRect.height || entry.target.clientHeight;
+        if (entryWidth > 0 && entryHeight > 0) {
+          updateDimensions(entryWidth, entryHeight);
+        }
+      }
+    });
+    resizeObserver.observe(canvas);
+
+    const handleResize = () => {
+      updateDimensions(window.innerWidth, window.innerHeight);
+    };
+    window.addEventListener("resize", handleResize);
 
     const cols = 50;
     const rows = 45;
@@ -123,15 +166,6 @@ export function Background(props: ParentProps): JSX.Element {
 
       projectedPoints.sort((a, b) => b.z - a.z);
 
-      const style = getComputedStyle(document.documentElement);
-      const primaryHex = style.getPropertyValue("--seed").trim() || "#4f46e5";
-      const primaryRgb = parseRgbColor(primaryHex);
-      const secondaryRgb: RGB = {
-        r: Math.min(255, primaryRgb.r + 30),
-        g: Math.min(255, primaryRgb.g + 50),
-        b: Math.max(0, primaryRgb.b - 40),
-      };
-
       const minZ = viewerDistance - (rows / 2) * spacing;
       const maxZ = viewerDistance + (rows / 2) * spacing;
 
@@ -159,7 +193,9 @@ export function Background(props: ParentProps): JSX.Element {
     draw();
 
     return () => {
-      window.removeEventListener("resize", resizeCanvas);
+      window.removeEventListener("resize", handleResize);
+      resizeObserver.disconnect();
+      mutationObserver.disconnect();
       cancelAnimationFrame(animationFrameId);
     };
   });
