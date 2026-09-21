@@ -11,6 +11,6 @@ export const PERSONAL_INFO = {
   githubUrl: "https://github.com/SkyJTx",
   linkedinUrl: "https://www.linkedin.com/in/nattakarn-khumsupha-85b871337/",
   musescoreUrl: "https://musescore.com/skyjtx",
-  resumeUrl: "https://kmqwwvhddlqvdmvnqved.supabase.co/storage/v1/object/public/skyjt-website-storage/CV%20Resume%20v2.pdf",
-  myselfPhotoUrl: "https://kmqwwvhddlqvdmvnqved.supabase.co/storage/v1/object/public/skyjt-website-storage/MyPic2.jpg",
+  resumeUrl: "https://kmqwwvhddlqvdmvnqved.supabase.co/storage/v1/object/public/skyjt-website-storage/CV%20Resume.pdf",
+  myselfPhotoUrl: "https://kmqwwvhddlqvdmvnqved.supabase.co/storage/v1/object/public/skyjt-website-storage/MyPicture.jpg",
 } as const;

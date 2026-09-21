@@ -22,6 +22,10 @@ export interface NavigationMenuProps {
 export function NavigationMenu(props: NavigationMenuProps): JSX.Element {
   let navRef: HTMLElement | undefined;
   const buttonRefs = new Map<string, HTMLButtonElement>();
+  let rafId: number | undefined;
+  let isMounted = false;
+  let currentSection = "";
+
   const [indicatorStyle, setIndicatorStyle] = createSignal<{
     readonly left: number;
     readonly width: number;
@@ -32,8 +36,11 @@ export function NavigationMenu(props: NavigationMenuProps): JSX.Element {
     ready: false,
   });
 
-  const applyIndicator = (section: string) => {
-    if (typeof window === "undefined" || !navRef) return;
+  const measureAndApply = (section: string) => {
+    if (typeof window === "undefined" || !navRef || !isMounted) return;
+    if (document.readyState !== "complete") {
+      return;
+    }
     const btn = buttonRefs.get(section);
     if (btn) {
       const idx = props.sections.indexOf(section);
@@ -48,30 +55,75 @@ export function NavigationMenu(props: NavigationMenuProps): JSX.Element {
     }
   };
 
+  const scheduleIndicator = (section: string) => {
+    if (typeof window === "undefined") return;
+    if (rafId !== undefined) {
+      cancelAnimationFrame(rafId);
+    }
+    rafId = requestAnimationFrame(() => {
+      measureAndApply(section);
+    });
+  };
+
   createEffect(
     () => props.activeSection,
     (section) => {
-      applyIndicator(section);
+      currentSection = section;
+      if (isMounted) {
+        scheduleIndicator(section);
+      }
     }
   );
 
   onSettled(() => {
-    applyIndicator(props.activeSection);
-    if (typeof window !== "undefined") {
-      const handleResize = () => applyIndicator(props.activeSection);
-      window.addEventListener("resize", handleResize);
+    isMounted = true;
+    if (typeof window === "undefined") return;
 
-      let ro: ResizeObserver | undefined;
-      if (typeof ResizeObserver !== "undefined" && navRef) {
-        ro = new ResizeObserver(handleResize);
-        ro.observe(navRef);
-      }
+    const onPageReady = () => {
+      if (!isMounted) return;
+      scheduleIndicator(currentSection);
+    };
 
-      return () => {
-        window.removeEventListener("resize", handleResize);
-        ro?.disconnect();
-      };
+    if (document.readyState === "complete") {
+      scheduleIndicator(currentSection);
+    } else {
+      window.addEventListener("load", onPageReady, { once: true });
     }
+
+    if ("fonts" in document) {
+      document.fonts.ready.then(() => {
+        if (isMounted) {
+          scheduleIndicator(currentSection);
+        }
+      });
+    }
+
+    const handleResize = () => {
+      if (document.readyState === "complete") {
+        scheduleIndicator(currentSection);
+      }
+    };
+    window.addEventListener("resize", handleResize);
+
+    let ro: ResizeObserver | undefined;
+    if (typeof ResizeObserver !== "undefined" && navRef) {
+      ro = new ResizeObserver(() => {
+        if (document.readyState === "complete") {
+          scheduleIndicator(currentSection);
+        }
+      });
+      ro.observe(navRef);
+    }
+
+    return () => {
+      isMounted = false;
+      if (rafId !== undefined) {
+        cancelAnimationFrame(rafId);
+      }
+      window.removeEventListener("load", onPageReady);
+      window.removeEventListener("resize", handleResize);
+      ro?.disconnect();
+    };
   });
 
   return (
