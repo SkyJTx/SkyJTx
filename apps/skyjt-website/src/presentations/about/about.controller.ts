@@ -1,11 +1,11 @@
 import { createMemo } from "solid-js";
-import { fetchPersonalInfo } from "~/services";
+import { getPersonalInfoQuery } from "~/services";
 
 /**
  * Controller hook providing data and actions for the about presentation.
  */
 export function useAboutController() {
-  const personalInfo = createMemo(() => fetchPersonalInfo());
+  const personalInfo = createMemo(() => getPersonalInfoQuery());
 
   return {
     get fullName() {

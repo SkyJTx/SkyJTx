@@ -1,5 +1,5 @@
 import { createMemo, createSignal } from "solid-js";
-import { fetchWorksData } from "~/services";
+import { getWorksDataQuery } from "~/services";
 
 export type WorksSegment = "software" | "music";
 
@@ -8,7 +8,7 @@ export type WorksSegment = "software" | "music";
  */
 export function useWorksController() {
   const [activeSegment, setActiveSegment] = createSignal<WorksSegment>("software");
-  const projects = createMemo(() => fetchWorksData());
+  const projects = createMemo(() => getWorksDataQuery());
 
   return {
     activeSegment,

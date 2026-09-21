@@ -27,6 +27,9 @@ export default defineConfig({
     }),
     nitro({
       preset: "vercel",
+      routeRules: {
+        "/": { isr: 60 },
+      },
     }),
     tailwindcss(),
     {

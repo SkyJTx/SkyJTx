@@ -1,4 +1,6 @@
 import * as v from "valibot";
+import { getOwner, useContext } from "solid-js";
+import { query, RouterContext } from "@solidjs/router";
 import type {
   PersonalInfo,
   ProjectData,
@@ -30,7 +32,7 @@ export const NOT_FOUND_PROJECTS: readonly ProjectData[] = [];
  * Public Supabase storage bucket endpoints for runtime content loading.
  */
 const SUPABASE_BASE_URL =
-  "https://kmqwwvhddlqvdmvnqved.supabase.co/storage/v1/object/public/skyjt-website-storage/data";
+  "https://kmqwwvhddlqvdmvnqved.supabase.co/storage/v1/object/public/skyjt-website-storage/Data";
 export const SUPABASE_WORKS_URL = `${SUPABASE_BASE_URL}/worksData.json`;
 export const SUPABASE_PERSONAL_URL = `${SUPABASE_BASE_URL}/personalInfo.json`;
 
@@ -87,6 +89,35 @@ export const PersonalInfoSchema = v.object({
   myselfPhotoUrl: v.string(),
 });
 
+const CACHE_TTL_MS = 60 * 1000;
+
+interface CacheEntry<T> {
+  readonly data: T;
+  readonly timestamp: number;
+}
+
+let worksCache: CacheEntry<readonly ProjectData[]> | null = null;
+let personalCache: CacheEntry<PersonalInfo> | null = null;
+
+/**
+ * Clears in-memory portfolio data caches (used primarily in test suites).
+ */
+export function clearPortfolioCache(): void {
+  worksCache = null;
+  personalCache = null;
+}
+
+/**
+ * Inspects whether a valid Router context provider exists above the current owner.
+ */
+function hasRouterContext(): boolean {
+  try {
+    return Boolean(useContext(RouterContext));
+  } catch {
+    return false;
+  }
+}
+
 /**
  * Fetches JSON directly from remote Supabase storage bucket with safe fallback to Not Found.
  */
@@ -112,23 +143,58 @@ async function fetchFromSupabase<T>(
 }
 
 /**
- * Fetches portfolio projects exclusively from remote Supabase bucket.
+ * Fetches portfolio projects exclusively from remote Supabase bucket with in-memory TTL caching.
  */
 export async function fetchWorksData(): Promise<readonly ProjectData[]> {
-  return fetchFromSupabase(
+  if (worksCache && Date.now() - worksCache.timestamp < CACHE_TTL_MS) {
+    return worksCache.data;
+  }
+  const data = await fetchFromSupabase(
     SUPABASE_WORKS_URL,
     WorksDataSchema,
     NOT_FOUND_PROJECTS
   );
+  worksCache = { data, timestamp: Date.now() };
+  return data;
 }
 
 /**
- * Fetches personal profile metadata exclusively from remote Supabase bucket.
+ * Fetches personal profile metadata exclusively from remote Supabase bucket with in-memory TTL caching.
  */
 export async function fetchPersonalInfo(): Promise<PersonalInfo> {
-  return fetchFromSupabase(
+  if (personalCache && Date.now() - personalCache.timestamp < CACHE_TTL_MS) {
+    return personalCache.data;
+  }
+  const data = await fetchFromSupabase(
     SUPABASE_PERSONAL_URL,
     PersonalInfoSchema,
     NOT_FOUND_PERSONAL_INFO
   );
+  personalCache = { data, timestamp: Date.now() };
+  return data;
 }
+
+const rawWorksQuery = query(fetchWorksData, "works-data");
+const rawPersonalQuery = query(fetchPersonalInfo, "personal-info");
+
+/**
+ * Solid Router query for software projects with deduplication and SSR serialization.
+ */
+export function getWorksDataQuery(): Promise<readonly ProjectData[]> {
+  if (getOwner() && !hasRouterContext()) {
+    return fetchWorksData();
+  }
+  return rawWorksQuery();
+}
+getWorksDataQuery.key = rawWorksQuery.key;
+
+/**
+ * Solid Router query for personal profile metadata with deduplication and SSR serialization.
+ */
+export function getPersonalInfoQuery(): Promise<PersonalInfo> {
+  if (getOwner() && !hasRouterContext()) {
+    return fetchPersonalInfo();
+  }
+  return rawPersonalQuery();
+}
+getPersonalInfoQuery.key = rawPersonalQuery.key;

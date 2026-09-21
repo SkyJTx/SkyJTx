@@ -2,6 +2,9 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import {
   fetchWorksData,
   fetchPersonalInfo,
+  getWorksDataQuery,
+  getPersonalInfoQuery,
+  clearPortfolioCache,
   WorksDataSchema,
   PersonalInfoSchema,
   SUPABASE_WORKS_URL,
@@ -15,6 +18,7 @@ import * as v from "valibot";
 describe("portfolioData service", () => {
   beforeEach(() => {
     vi.restoreAllMocks();
+    clearPortfolioCache();
   });
 
   describe("schema validation", () => {
@@ -77,6 +81,32 @@ describe("portfolioData service", () => {
       expect(data[0]?.id).toBe("remote-p1");
     });
 
+    it("uses in-memory cache on consecutive calls within TTL", async () => {
+      const mockProjects: ProjectData[] = [
+        {
+          id: "cached-p1",
+          title: "Cached Project",
+          description: "Fetched once",
+          thumbnailUrl: "https://example.com/p1.jpg",
+          images: [],
+          links: [],
+        },
+      ];
+
+      const fetchSpy = vi.spyOn(globalThis, "fetch").mockResolvedValue(
+        new Response(JSON.stringify(mockProjects), {
+          status: 200,
+          headers: { "Content-Type": "application/json" },
+        })
+      );
+
+      const data1 = await fetchWorksData();
+      const data2 = await fetchWorksData();
+
+      expect(fetchSpy).toHaveBeenCalledTimes(1);
+      expect(data1).toEqual(data2);
+    });
+
     it("falls back to empty NOT_FOUND_PROJECTS when fetch fails", async () => {
       vi.spyOn(globalThis, "fetch").mockResolvedValue(
         new Response("Not Found", { status: 404 })
@@ -121,11 +151,49 @@ describe("portfolioData service", () => {
       expect(data.location).toBe("Tokyo, Japan");
     });
 
+    it("uses in-memory cache on consecutive calls within TTL", async () => {
+      const mockInfo = {
+        fullName: "Jane Doe",
+        tagline: "Software Architect",
+        description: "Building systems.",
+        location: "Tokyo, Japan",
+        email: "jane@example.com",
+        phone: "+81 00 000 0000",
+        githubUrl: "https://github.com/janedoe",
+        linkedinUrl: "https://linkedin.com/in/janedoe",
+        musescoreUrl: "https://musescore.com/janedoe",
+        resumeUrl: "https://example.com/cv.pdf",
+        myselfPhotoUrl: "https://example.com/me.jpg",
+      };
+
+      const fetchSpy = vi.spyOn(globalThis, "fetch").mockResolvedValue(
+        new Response(JSON.stringify(mockInfo), {
+          status: 200,
+          headers: { "Content-Type": "application/json" },
+        })
+      );
+
+      const data1 = await fetchPersonalInfo();
+      const data2 = await fetchPersonalInfo();
+
+      expect(fetchSpy).toHaveBeenCalledTimes(1);
+      expect(data1).toEqual(data2);
+    });
+
     it("falls back to NOT_FOUND_PERSONAL_INFO on network error", async () => {
       vi.spyOn(globalThis, "fetch").mockRejectedValue(new Error("Network failed"));
 
       const data = await fetchPersonalInfo();
       expect(data).toEqual(NOT_FOUND_PERSONAL_INFO);
+    });
+  });
+
+  describe("query integration", () => {
+    it("exports getWorksDataQuery and getPersonalInfoQuery", () => {
+      expect(typeof getWorksDataQuery).toBe("function");
+      expect(typeof getPersonalInfoQuery).toBe("function");
+      expect(getWorksDataQuery.key).toBe("works-data");
+      expect(getPersonalInfoQuery.key).toBe("personal-info");
     });
   });
 });

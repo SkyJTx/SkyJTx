@@ -1,10 +1,22 @@
 import type { JSX } from "@solidjs/web";
 import { Title } from "@solidjs/meta";
+import { defineRoute } from "@skyjt/typed-routes";
+import { getPersonalInfoQuery, getWorksDataQuery } from "~/services";
 import { HomePresentation } from "~/presentations/home";
 import { AboutPresentation } from "~/presentations/about";
 import { WorksPresentation } from "~/presentations/works";
 import { ContactsPresentation } from "~/presentations/contacts";
 import { useNavigation, useScrollspy } from "~/components/NavigationBar";
+
+/**
+ * Preloads portfolio data in parallel as soon as the main route is matched.
+ */
+export const route = defineRoute({
+  preload: () => {
+    getPersonalInfoQuery();
+    getWorksDataQuery();
+  },
+});
 
 /**
  * Primary portfolio view assembling presentation modules with active section scrollspy.
