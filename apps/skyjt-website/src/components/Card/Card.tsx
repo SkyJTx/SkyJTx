@@ -7,7 +7,7 @@ import { children, Show, type ParentProps } from "solid-js";
 export interface CardProps extends ParentProps {
   media?: JSX.Element;
   title?: string;
-  description?: string;
+  description?: JSX.Element | string;
   actions?: JSX.Element;
 }
 

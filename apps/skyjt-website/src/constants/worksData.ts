@@ -34,6 +34,45 @@ export interface ProjectData {
  */
 export const SOFTWARE_PROJECTS: readonly ProjectData[] = [
   {
+    id: "clean-food-good-router",
+    title: "Clean Food Good Router",
+    description:
+      "Clean food good router is the intelligence layer for the multi-model AI era. Instead of sending every request to one expensive model, it analyzes each user need and routes it to the best-fit AI engine based on speciality for quality, speed, and cost. This gives better overall answers, lower inference spend, and stronger governance through controlled model access. It also reduces vendor lock-in, letting teams adapt as providers and pricing change. In short, it turns fragmented AI usage into a scalable, policy-driven, ROI-focused system that improves product performance while protecting margins.",
+    thumbnailUrl:
+      "https://storage.googleapis.com/lablab-static-eu/images/submissions/r5hyxsttrmazqpnct6q1ggrq/z2dwmd52qsy3hgt1ecynqwjt_imageLink_xqmq4tqceok4fbnt3aebezar.jpg&w=640&q=75",
+    images: [
+      {
+        src: "https://kmqwwvhddlqvdmvnqved.supabase.co/storage/v1/object/public/skyjt-website-storage/AMD%20Hackathon%20Act%20II/Clean%20Food%20Good%20Router.png",
+        alt: "Clean Food Good Router Preview",
+      },
+    ],
+    links: [
+      {
+        label: "Source Code",
+        url: "https://github.com/PS-Open-Fruit/model-router",
+        icon: "github",
+      },
+      {
+        label: "LabLab Submission",
+        url: "https://lablab.ai/ai-hackathons/amd-developer-hackathon-act-ii/clean-food-good-silicon/clean-food-good-router",
+        icon: "external-link",
+      },
+      {
+        label: "Presentation",
+        url: "https://storage.googleapis.com/lablab-static-eu/presentations/submissions/r5hyxsttrmazqpnct6q1ggrq/r5hyxsttrmazqpnct6q1ggrq-1783871575269_l344t26cc50blle63ooio08x.pdf",
+        icon: "file-text",
+      },
+      {
+        label: "Certificate",
+        url: "https://kmqwwvhddlqvdmvnqved.supabase.co/storage/v1/object/public/skyjt-website-storage/AMD%20Hackathon%20Act%20II/AMD%20Developer%20Hackathon_%20ACT%20II-certificate.pdf",
+        icon: "file-text",
+      },
+    ],
+    pdfUrl:
+      "https://storage.googleapis.com/lablab-static-eu/presentations/submissions/r5hyxsttrmazqpnct6q1ggrq/r5hyxsttrmazqpnct6q1ggrq-1783871575269_l344t26cc50blle63ooio08x.pdf",
+    date: "July 2026 (Project Date)",
+  },
+  {
     id: "ruammitr",
     title: "RuamMitr",
     description:

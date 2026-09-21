@@ -1,6 +1,7 @@
 import type { JSX } from "@solidjs/web";
 import { For, Show } from "solid-js";
 import { Card } from "~/components/Card";
+import { ExpandableText } from "~/components/ExpandableText";
 import { ImageCarousel } from "~/components/ImageCarousel";
 import { Icon } from "~/components/Icon";
 import type { ProjectData } from "~/constants/worksData";
@@ -68,7 +69,7 @@ export function ProjectCard(props: ProjectCardProps): JSX.Element {
     <Card
       media={media()}
       title={props.project.title}
-      description={props.project.description}
+      description={<ExpandableText text={props.project.description} />}
       actions={actions()}
     />
   );

@@ -16,4 +16,16 @@ describe("Card component", () => {
     expect(getByText("A great project description")).toBeDefined();
     expect(getByRole("button", { name: "Visit" })).toBeDefined();
   });
+
+  it("renders card with rich JSX element description", () => {
+    const { getByRole, getByText } = render(() => (
+      <Card
+        title="JSX Description Project"
+        description={<span data-testid="custom-desc">Rich interactive description</span>}
+      />
+    ));
+
+    expect(getByRole("heading", { level: 3 }).textContent).toBe("JSX Description Project");
+    expect(getByText("Rich interactive description")).toBeDefined();
+  });
 });
