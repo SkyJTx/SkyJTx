@@ -4,7 +4,7 @@ import { Card } from "~/components/Card";
 import { ExpandableText } from "~/components/ExpandableText";
 import { ImageCarousel } from "~/components/ImageCarousel";
 import { Icon } from "~/components/Icon";
-import type { ProjectData } from "~/constants/worksData";
+import type { ProjectData } from "~/types";
 
 /**
  * Properties for ProjectCard component.
@@ -74,3 +74,4 @@ export function ProjectCard(props: ProjectCardProps): JSX.Element {
     />
   );
 }
+

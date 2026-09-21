@@ -2,7 +2,7 @@ import type { JSX } from "@solidjs/web";
 import { createSignal, For, Show } from "solid-js";
 import { Icon } from "~/components/Icon";
 import { FilePreview } from "~/components/FilePreview";
-import type { ProjectImage } from "~/constants/worksData";
+import type { ProjectImage } from "~/types";
 
 /**
  * Properties for ImageCarousel component.
@@ -104,3 +104,4 @@ export function ImageCarousel(props: ImageCarouselProps): JSX.Element {
     </div>
   );
 }
+

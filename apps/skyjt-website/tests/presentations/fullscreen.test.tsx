@@ -14,8 +14,9 @@ describe("Fullscreen and unclipped presentations", () => {
     expect(section?.classList.contains("min-h-dvh")).toBe(true);
   });
 
-  it("AboutPresentation has min-h-screen, min-h-dvh, and unclipped layout", () => {
-    const { container } = render(() => <AboutPresentation />);
+  it("AboutPresentation has min-h-screen, min-h-dvh, and unclipped layout", async () => {
+    const { container, findByText } = render(() => <AboutPresentation />);
+    await findByText("About Me");
     const section = container.querySelector("#About");
     expect(section).not.toBeNull();
     expect(section?.classList.contains("min-h-screen")).toBe(true);

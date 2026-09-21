@@ -1,4 +1,5 @@
 import type { JSX } from "@solidjs/web";
+import { Loading } from "solid-js";
 import { Tabs } from "~/components/Tabs";
 import { BrandTitle, BrandSubtitle } from "~/components/Brand";
 import { Card } from "~/components/Card";
@@ -6,9 +7,9 @@ import { useWorksController, type WorksSegment } from "./works.controller";
 import { WorksCarousel } from "./WorksCarousel";
 
 /**
- * Works portfolio presentation with accessible Tabs switching between Software Development and Music.
+ * Inner works presentation content reading projects from controller.
  */
-export function WorksPresentation(): JSX.Element {
+function WorksContent(): JSX.Element {
   const c = useWorksController();
 
   return (
@@ -48,5 +49,24 @@ export function WorksPresentation(): JSX.Element {
         </Tabs.Content>
       </Tabs>
     </section>
+  );
+}
+
+/**
+ * Works portfolio presentation with accessible Tabs wrapped in a Loading boundary.
+ */
+export function WorksPresentation(): JSX.Element {
+  return (
+    <Loading
+      fallback={
+        <section id="Works" class="min-h-screen min-h-dvh w-full max-w-6xl mx-auto px-4 sm:px-8 py-20 flex flex-col items-center justify-center scroll-mt-16">
+          <BrandTitle>My Works</BrandTitle>
+          <BrandSubtitle>Selected projects and experiments</BrandSubtitle>
+          <div class="skeleton h-64 w-full max-w-3xl rounded-box mt-8" />
+        </section>
+      }
+    >
+      <WorksContent />
+    </Loading>
   );
 }

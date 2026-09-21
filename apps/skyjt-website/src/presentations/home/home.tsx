@@ -1,12 +1,13 @@
 import type { JSX } from "@solidjs/web";
+import { Loading } from "solid-js";
 import { SocialLinks } from "~/components/SocialLinks";
 import { ScrollIndicator } from "~/components/ScrollIndicator";
 import { useHomeController } from "./home.controller";
 
 /**
- * The primary landing hero presentation for the portfolio.
+ * Inner content reading dynamic personal info from the controller.
  */
-export function HomePresentation(): JSX.Element {
+function HomeContent(): JSX.Element {
   const c = useHomeController();
 
   return (
@@ -40,5 +41,29 @@ export function HomePresentation(): JSX.Element {
         <ScrollIndicator label="Scroll Down" onClick={c.handleScrollDown} />
       </div>
     </section>
+  );
+}
+
+/**
+ * The primary landing hero presentation for the portfolio wrapped in a Loading boundary.
+ */
+export function HomePresentation(): JSX.Element {
+  return (
+    <Loading
+      fallback={
+        <section
+          id="Home"
+          class="min-h-screen min-h-dvh w-full flex flex-col justify-center items-center px-4 sm:px-8 py-16 text-center scroll-mt-16"
+        >
+          <div class="flex flex-col items-center gap-4 max-w-3xl mx-auto w-full">
+            <div class="skeleton h-12 w-64 rounded-box" />
+            <div class="skeleton h-6 w-96 rounded-box" />
+            <div class="skeleton h-4 w-80 rounded-box" />
+          </div>
+        </section>
+      }
+    >
+      <HomeContent />
+    </Loading>
   );
 }

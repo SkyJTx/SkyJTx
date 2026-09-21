@@ -1,9 +1,12 @@
-import { PERSONAL_INFO } from "~/constants/personalInfo";
+import { createMemo } from "solid-js";
+import { fetchPersonalInfo } from "~/services";
 
 /**
  * Controller hook providing data and interactions for the home presentation.
  */
 export function useHomeController() {
+  const personalInfo = createMemo(() => fetchPersonalInfo());
+
   const handleScrollDown = () => {
     const aboutEl = document.getElementById("About");
     if (aboutEl) {
@@ -12,7 +15,9 @@ export function useHomeController() {
   };
 
   return {
-    personalInfo: PERSONAL_INFO,
+    get personalInfo() {
+      return personalInfo();
+    },
     handleScrollDown,
   };
 }

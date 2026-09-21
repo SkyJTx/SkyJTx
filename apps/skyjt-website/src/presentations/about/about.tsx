@@ -1,19 +1,19 @@
 import type { JSX } from "@solidjs/web";
+import { Loading } from "solid-js";
 import { Image } from "@kobalte/core/image";
 import { Icon } from "~/components/Icon";
 import { useAboutController } from "./about.controller";
 
 /**
- * About section presentation highlighting personal background, credentials, and contact summary.
+ * Inner content reading profile details from the controller.
  */
-export function AboutPresentation(): JSX.Element {
+function AboutContent(): JSX.Element {
   const c = useAboutController();
 
   return (
     <section id="About" class="min-h-screen min-h-dvh w-full max-w-4xl mx-auto px-4 sm:px-8 py-20 flex flex-col items-center justify-center scroll-mt-16 animate-fade-in">
       <div class="card bg-base-200/50 backdrop-blur-md border border-base-300 shadow-xl rounded-box p-6 sm:p-10 w-full overflow-visible">
         <div class="flex flex-col md:flex-row items-center gap-8 md:gap-12 w-full">
-          {/* Avatar with Kobalte Image */}
           <div class="shrink-0">
             <Image class="relative">
               <Image.Img
@@ -27,7 +27,6 @@ export function AboutPresentation(): JSX.Element {
             </Image>
           </div>
 
-          {/* Text Content */}
           <div class="flex-1 min-w-0 flex flex-col text-center md:text-left w-full">
             <h2 class="text-2xl sm:text-3xl font-extrabold text-base-content tracking-tight">
               About Me
@@ -84,5 +83,26 @@ export function AboutPresentation(): JSX.Element {
         </div>
       </div>
     </section>
+  );
+}
+
+/**
+ * About section presentation highlighting personal background, credentials, and contact summary.
+ */
+export function AboutPresentation(): JSX.Element {
+  return (
+    <Loading
+      fallback={
+        <section id="About" class="min-h-screen min-h-dvh w-full max-w-4xl mx-auto px-4 sm:px-8 py-20 flex flex-col items-center justify-center scroll-mt-16">
+          <div class="card bg-base-200/50 backdrop-blur-md border border-base-300 shadow-xl rounded-box p-6 sm:p-10 w-full overflow-visible flex flex-col items-center gap-6">
+            <div class="skeleton w-36 h-36 rounded-full" />
+            <div class="skeleton h-8 w-48" />
+            <div class="skeleton h-4 w-full" />
+          </div>
+        </section>
+      }
+    >
+      <AboutContent />
+    </Loading>
   );
 }

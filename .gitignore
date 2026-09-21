@@ -60,3 +60,6 @@ Thumbs.db
 # Turbo
 .turbo
 .turbo/**
+# Local data export staging
+data/
+data/**

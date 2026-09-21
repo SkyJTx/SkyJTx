@@ -1,37 +1,72 @@
 import { render, fireEvent } from "@solidjs/testing-library";
 import { describe, expect, it } from "vitest";
 import { WorksPresentation } from "~/presentations/works";
+import { WorksCarousel } from "~/presentations/works/WorksCarousel";
+import type { ProjectData } from "~/types";
+
+const sampleProjects: ProjectData[] = [
+  {
+    id: "clean-food-good-router",
+    title: "Clean Food Good Router",
+    description:
+      "Clean food good router is the intelligence layer for the multi-model AI era. Instead of sending every request to one expensive model, it analyzes each user need and routes it to the best-fit AI engine based on speciality for quality, speed, and cost. This gives better overall answers, lower inference spend, and stronger governance through controlled model access. It also reduces vendor lock-in, letting teams adapt as providers and pricing change. In short, it turns fragmented AI usage into a scalable, policy-driven, ROI-focused system that improves product performance while protecting margins.",
+    thumbnailUrl: "https://example.com/cfgr-thumb.jpg",
+    images: [],
+    links: [],
+  },
+  {
+    id: "ruammitr",
+    title: "RuamMitr",
+    description: "A Super App developed in Flutter/Express.js.",
+    thumbnailUrl: "https://example.com/ruammitr.jpg",
+    images: [],
+    links: [],
+  },
+];
 
 describe("WorksPresentation", () => {
-  it("switches tabs between software and music", async () => {
-    const { getByRole, getByText } = render(() => <WorksPresentation />);
+  it("switches tabs between software and music with default state", async () => {
+    const { getByRole, getByText, findByText } = render(() => <WorksPresentation />);
 
-    expect(getByText("Software Development")).toBeDefined();
+    expect(await findByText("Software Development")).toBeDefined();
     expect(getByText("Music")).toBeDefined();
-    expect(getByText("RuamMitr")).toBeDefined();
-    expect(getByText("Clean Food Good Router")).toBeDefined();
+    expect(getByText("No Projects Found")).toBeDefined();
 
     const musicTab = getByRole("tab", { name: "Music" });
     await fireEvent.click(musicTab);
 
-    expect(getByText("Music compositions and arrangements are being prepared. Check back soon for updates.")).toBeDefined();
+    expect(
+      getByText(
+        "Music compositions and arrangements are being prepared. Check back soon for updates."
+      )
+    ).toBeDefined();
   });
 
-  it("truncates long work description with Show more toggle for Clean Food Good Router", async () => {
-    const { getByRole, getByText, queryByText } = render(() => <WorksPresentation />);
+  it("truncates long work description with Show more toggle in WorksCarousel", async () => {
+    const { getByRole, getByText, queryByText } = render(() => (
+      <WorksCarousel projects={sampleProjects} />
+    ));
+
+    expect(getByText("Clean Food Good Router")).toBeDefined();
+    expect(getByText("RuamMitr")).toBeDefined();
 
     const moreButton = getByRole("button", { name: /show more/i });
     expect(moreButton).toBeDefined();
     expect(moreButton.getAttribute("aria-expanded")).toBe("false");
 
     await fireEvent.click(moreButton);
-    expect(getByText(/In short, it turns fragmented AI usage into a scalable/i)).toBeDefined();
+    expect(
+      getByText(/In short, it turns fragmented AI usage into a scalable/i)
+    ).toBeDefined();
 
     const lessButton = getByRole("button", { name: /show less/i });
     expect(lessButton).toBeDefined();
     expect(lessButton.getAttribute("aria-expanded")).toBe("true");
 
     await fireEvent.click(lessButton);
-    expect(queryByText(/In short, it turns fragmented AI usage into a scalable/i)).toBeNull();
+    expect(
+      queryByText(/In short, it turns fragmented AI usage into a scalable/i)
+    ).toBeNull();
   });
 });
+
