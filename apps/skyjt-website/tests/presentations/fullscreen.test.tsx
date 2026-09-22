@@ -14,16 +14,17 @@ describe("Fullscreen and unclipped presentations", () => {
     expect(section?.classList.contains("min-h-dvh")).toBe(true);
   });
 
-  it("AboutPresentation has min-h-screen, min-h-dvh, and unclipped layout", async () => {
+  it("AboutPresentation has min-h-screen, min-h-dvh, and unclipped layout without cards", async () => {
     const { container, findByText } = render(() => <AboutPresentation />);
     await findByText("About Me");
     const section = container.querySelector("#About");
     expect(section).not.toBeNull();
     expect(section?.classList.contains("min-h-screen")).toBe(true);
     expect(section?.classList.contains("min-h-dvh")).toBe(true);
+    expect(section?.classList.contains("overflow-visible")).toBe(true);
 
-    const card = section?.querySelector(".card");
-    expect(card?.classList.contains("overflow-visible")).toBe(true);
+    // Confirms About is de-card-ified
+    expect(section?.querySelector(".card")).toBeNull();
 
     const emailLink = section?.querySelector('a[href^="mailto:"]');
     expect(emailLink?.classList.contains("break-all")).toBe(true);

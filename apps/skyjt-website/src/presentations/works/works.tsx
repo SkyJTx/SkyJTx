@@ -2,7 +2,7 @@ import type { JSX } from "@solidjs/web";
 import { Loading } from "solid-js";
 import { Tabs } from "~/components/Tabs";
 import { BrandTitle, BrandSubtitle } from "~/components/Brand";
-import { Card } from "~/components/Card";
+import { Icon } from "~/components/Icon";
 import { useWorksController, type WorksSegment } from "./works.controller";
 import { WorksCarousel } from "./WorksCarousel";
 
@@ -42,10 +42,15 @@ function WorksContent(): JSX.Element {
         </Tabs.Content>
 
         <Tabs.Content value="music" class="w-full max-w-lg mx-auto">
-          <Card
-            title="Coming Soon"
-            description="Music compositions and arrangements are being prepared. Check back soon for updates."
-          />
+          <div class="p-8 rounded-2xl border border-dashed border-base-300/80 bg-base-200/20 backdrop-blur-xs flex flex-col items-center gap-3 text-center">
+            <div class="p-3.5 rounded-full bg-primary/10 text-primary">
+              <Icon name="file-text" size={24} />
+            </div>
+            <h3 class="text-lg font-bold text-base-content tracking-tight">Coming Soon</h3>
+            <p class="text-sm text-base-content/70 leading-relaxed">
+              Music compositions and arrangements are being prepared. Check back soon for updates.
+            </p>
+          </div>
         </Tabs.Content>
       </Tabs>
     </section>

@@ -5,36 +5,36 @@ import { children, Show, type ParentProps } from "solid-js";
  * Properties for the Card component.
  */
 export interface CardProps extends ParentProps {
-  media?: JSX.Element;
-  title?: string;
-  description?: JSX.Element | string;
-  actions?: JSX.Element;
+  readonly media?: JSX.Element;
+  readonly title?: string;
+  readonly description?: JSX.Element | string;
+  readonly actions?: JSX.Element;
 }
 
 /**
- * DaisyUI Card component with media, content, and action sections.
+ * Modern surface component with media, content, and action sections.
  */
 export function Card(props: CardProps): JSX.Element {
   const media = children(() => props.media);
   const actions = children(() => props.actions);
 
   return (
-    <div class="card bg-base-200/50 backdrop-blur-md border border-base-300 shadow-xl rounded-box overflow-hidden flex flex-col h-full hover:border-primary/40 transition-all duration-300">
+    <div class="group bg-base-200/30 hover:bg-base-200/60 backdrop-blur-sm border border-base-300/60 hover:border-primary/40 rounded-2xl overflow-hidden flex flex-col h-full shadow-sm hover:shadow-md transition-all duration-300">
       <Show when={media()}>
-        <figure class="w-full relative overflow-hidden bg-base-300/40 aspect-video">
+        <figure class="w-full relative overflow-hidden bg-base-300/30 aspect-video">
           {media()}
         </figure>
       </Show>
 
-      <div class="card-body p-5 flex flex-col flex-1">
+      <div class="p-5 sm:p-6 flex flex-col flex-1">
         <Show when={props.title}>
-          <h3 class="card-title text-xl font-bold text-base-content tracking-tight">
+          <h3 class="text-xl font-bold text-base-content tracking-tight group-hover:text-primary transition-colors">
             {props.title}
           </h3>
         </Show>
 
         <Show when={props.description}>
-          <p class="text-sm text-base-content/80 leading-relaxed my-2 flex-1">
+          <p class="text-sm text-base-content/80 leading-relaxed my-2.5 flex-1">
             {props.description}
           </p>
         </Show>
@@ -42,7 +42,7 @@ export function Card(props: CardProps): JSX.Element {
         {props.children}
 
         <Show when={actions()}>
-          <div class="card-actions justify-end mt-4 pt-3 border-t border-base-300/60 flex flex-wrap gap-2">
+          <div class="mt-4 pt-3.5 border-t border-base-300/40 flex flex-wrap gap-2 justify-end">
             {actions()}
           </div>
         </Show>

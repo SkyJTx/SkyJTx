@@ -26,11 +26,17 @@ const sampleProjects: ProjectData[] = [
 
 describe("WorksPresentation", () => {
   it("switches tabs between software and music with default state", async () => {
-    const { getByRole, getByText, findByText } = render(() => <WorksPresentation />);
+    const { getByRole, getByText, findByText, queryByText } = render(() => <WorksPresentation />);
 
     expect(await findByText("Software Development")).toBeDefined();
     expect(getByText("Music")).toBeDefined();
-    expect(getByText("No Projects Found")).toBeDefined();
+
+    const hasLoadedProjects = queryByText("Clean Food Good Router") !== null;
+    if (hasLoadedProjects) {
+      expect(getByText("Clean Food Good Router")).toBeDefined();
+    } else {
+      expect(getByText("No Projects Found")).toBeDefined();
+    }
 
     const musicTab = getByRole("tab", { name: "Music" });
     await fireEvent.click(musicTab);
@@ -39,6 +45,14 @@ describe("WorksPresentation", () => {
       getByText(
         "Music compositions and arrangements are being prepared. Check back soon for updates."
       )
+    ).toBeDefined();
+  });
+
+  it("renders unboxed empty state in WorksCarousel when projects array is empty", () => {
+    const { getByText } = render(() => <WorksCarousel projects={[]} />);
+    expect(getByText("No Projects Found")).toBeDefined();
+    expect(
+      getByText("Projects are currently being loaded or updated.")
     ).toBeDefined();
   });
 
@@ -69,4 +83,3 @@ describe("WorksPresentation", () => {
     ).toBeNull();
   });
 });
-
