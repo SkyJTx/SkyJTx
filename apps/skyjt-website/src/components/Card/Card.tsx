@@ -16,6 +16,7 @@ export interface CardProps extends ParentProps {
  */
 export function Card(props: CardProps): JSX.Element {
   const media = children(() => props.media);
+  const description = children(() => props.description);
   const actions = children(() => props.actions);
 
   return (
@@ -33,9 +34,9 @@ export function Card(props: CardProps): JSX.Element {
           </h3>
         </Show>
 
-        <Show when={props.description}>
-          <p class="text-sm text-base-content/80 leading-relaxed my-2.5 flex-1">
-            {props.description}
+        <Show when={description()}>
+          <p class="text-sm text-base-content/80 leading-relaxed my-2 flex-1">
+            {description()}
           </p>
         </Show>
 

@@ -69,9 +69,12 @@ export function ProjectCard(props: ProjectCardProps): JSX.Element {
     <Card
       media={media()}
       title={props.project.title}
-      description={<ExpandableText text={props.project.description} />}
       actions={actions()}
-    />
+    >
+      <p class="text-sm text-base-content/80 leading-relaxed my-2 flex-1">
+        <ExpandableText text={props.project.description} />
+      </p>
+    </Card>
   );
 }
 

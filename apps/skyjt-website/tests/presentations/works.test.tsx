@@ -30,13 +30,8 @@ describe("WorksPresentation", () => {
 
     expect(await findByText("Software Development")).toBeDefined();
     expect(getByText("Music")).toBeDefined();
-
-    const hasLoadedProjects = queryByText("Clean Food Good Router") !== null;
-    if (hasLoadedProjects) {
-      expect(getByText("Clean Food Good Router")).toBeDefined();
-    } else {
-      expect(getByText("No Projects Found")).toBeDefined();
-    }
+    expect(getByText("Clean Food Good Router")).toBeDefined();
+    expect(getByText("RuamMitr")).toBeDefined();
 
     const musicTab = getByRole("tab", { name: "Music" });
     await fireEvent.click(musicTab);
