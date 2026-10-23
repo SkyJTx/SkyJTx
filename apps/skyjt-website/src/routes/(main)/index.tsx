@@ -1,7 +1,11 @@
 import type { JSX } from "@solidjs/web";
 import { Title } from "@solidjs/meta";
-import { defineRoute } from "@skyjt/typed-routes";
-import { getPersonalInfoQuery, getWorksDataQuery } from "~/services";
+import { defineRoute } from "@skyjt/typed-routes-solid";
+import {
+  getPersonalInfoQuery,
+  getWorksDataQuery,
+  getMusicWorksDataQuery,
+} from "~/services";
 import { HomePresentation } from "~/presentations/home";
 import { AboutPresentation } from "~/presentations/about";
 import { WorksPresentation } from "~/presentations/works";
@@ -15,6 +19,7 @@ export const route = defineRoute({
   preload: () => {
     getPersonalInfoQuery();
     getWorksDataQuery();
+    getMusicWorksDataQuery();
   },
 });
 

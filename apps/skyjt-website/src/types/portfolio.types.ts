@@ -30,6 +30,22 @@ export interface ProjectData {
 }
 
 /**
+ * Sheet music portfolio item scraped from MuseScore.
+ */
+export interface MusicWorkData {
+  id: string;
+  title: string;
+  scoreUrl: string;
+  thumbnailUrl: string;
+  partsCount?: string;
+  pagesCount?: string;
+  duration?: string;
+  date?: string;
+  views?: string;
+  instruments: string[];
+}
+
+/**
  * Global personal information and profile metadata structure.
  */
 export interface PersonalInfo {

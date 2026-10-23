@@ -4,37 +4,34 @@ import { query, RouterContext } from "@solidjs/router";
 import type {
   PersonalInfo,
   ProjectData,
+  MusicWorkData,
 } from "~/types";
+import {
+  SUPABASE_BASE_URL,
+  SUPABASE_WORKS_URL,
+  SUPABASE_PERSONAL_URL,
+  SUPABASE_MUSIC_WORKS_URL,
+  PORTFOLIO_CACHE_TTL_MS,
+  PORTFOLIO_QUERY_KEYS,
+  PROJECT_LINK_ICONS,
+  NOT_FOUND_PERSONAL_INFO,
+  NOT_FOUND_PROJECTS,
+  NOT_FOUND_MUSIC_WORKS,
+} from "~/constants";
 
-/**
- * Default fallback when personal info cannot be fetched from remote storage.
- */
-export const NOT_FOUND_PERSONAL_INFO: PersonalInfo = {
-  fullName: "Not Found",
-  tagline: "Profile Not Found",
-  description: "Profile information could not be loaded.",
-  location: "Not Found",
-  email: "notfound@example.com",
-  phone: "",
-  githubUrl: "",
-  linkedinUrl: "",
-  musescoreUrl: "",
-  resumeUrl: "",
-  myselfPhotoUrl: "",
+// Re-export constants for seamless backward compatibility
+export {
+  SUPABASE_BASE_URL,
+  SUPABASE_WORKS_URL,
+  SUPABASE_PERSONAL_URL,
+  SUPABASE_MUSIC_WORKS_URL,
+  PORTFOLIO_CACHE_TTL_MS,
+  PORTFOLIO_QUERY_KEYS,
+  PROJECT_LINK_ICONS,
+  NOT_FOUND_PERSONAL_INFO,
+  NOT_FOUND_PROJECTS,
+  NOT_FOUND_MUSIC_WORKS,
 };
-
-/**
- * Default fallback when projects cannot be fetched from remote storage.
- */
-export const NOT_FOUND_PROJECTS: readonly ProjectData[] = [];
-
-/**
- * Public Supabase storage bucket endpoints for runtime content loading.
- */
-const SUPABASE_BASE_URL =
-  "https://kmqwwvhddlqvdmvnqved.supabase.co/storage/v1/object/public/skyjt-website-storage/Data";
-export const SUPABASE_WORKS_URL = `${SUPABASE_BASE_URL}/worksData.json`;
-export const SUPABASE_PERSONAL_URL = `${SUPABASE_BASE_URL}/personalInfo.json`;
 
 /**
  * Schema for project link metadata.
@@ -42,7 +39,7 @@ export const SUPABASE_PERSONAL_URL = `${SUPABASE_BASE_URL}/personalInfo.json`;
 export const ProjectLinkSchema = v.object({
   label: v.string(),
   url: v.string(),
-  icon: v.picklist(["github", "external-link", "file-text"]),
+  icon: v.picklist(PROJECT_LINK_ICONS),
 });
 
 /**
@@ -73,6 +70,27 @@ export const ProjectDataSchema = v.object({
 export const WorksDataSchema = v.array(ProjectDataSchema);
 
 /**
+ * Schema validating sheet music items from untrusted JSON sources.
+ */
+export const MusicWorkDataSchema = v.object({
+  id: v.string(),
+  title: v.string(),
+  scoreUrl: v.string(),
+  thumbnailUrl: v.string(),
+  partsCount: v.optional(v.string()),
+  pagesCount: v.optional(v.string()),
+  duration: v.optional(v.string()),
+  date: v.optional(v.string()),
+  views: v.optional(v.string()),
+  instruments: v.array(v.string()),
+});
+
+/**
+ * Schema validating the sheet music collection.
+ */
+export const MusicWorksDataSchema = v.array(MusicWorkDataSchema);
+
+/**
  * Schema validating personal information attributes from untrusted JSON sources.
  */
 export const PersonalInfoSchema = v.object({
@@ -89,15 +107,24 @@ export const PersonalInfoSchema = v.object({
   myselfPhotoUrl: v.string(),
 });
 
-const CACHE_TTL_MS = 60 * 1000;
-
 interface CacheEntry<T> {
   readonly data: T;
   readonly timestamp: number;
 }
 
 let worksCache: CacheEntry<readonly ProjectData[]> | null = null;
-let personalCache: CacheEntry<PersonalInfo> | null = null;
+let personalCache: CacheEntry<Readonly<PersonalInfo>> | null = null;
+let musicCache: CacheEntry<readonly MusicWorkData[]> | null = null;
+
+/**
+ * Evaluates whether an in-memory cache entry exists and is within its freshness TTL window.
+ */
+function isCacheFresh<T>(
+  entry: CacheEntry<T> | null,
+  ttlMs = PORTFOLIO_CACHE_TTL_MS
+): entry is CacheEntry<T> {
+  return entry !== null && Date.now() - entry.timestamp < ttlMs;
+}
 
 /**
  * Clears in-memory portfolio data caches (used primarily in test suites).
@@ -105,6 +132,7 @@ let personalCache: CacheEntry<PersonalInfo> | null = null;
 export function clearPortfolioCache(): void {
   worksCache = null;
   personalCache = null;
+  musicCache = null;
 }
 
 /**
@@ -146,7 +174,7 @@ async function fetchFromSupabase<T>(
  * Fetches portfolio projects exclusively from remote Supabase bucket with in-memory TTL caching.
  */
 export async function fetchWorksData(): Promise<readonly ProjectData[]> {
-  if (worksCache && Date.now() - worksCache.timestamp < CACHE_TTL_MS) {
+  if (isCacheFresh(worksCache)) {
     return worksCache.data;
   }
   const data = await fetchFromSupabase(
@@ -161,8 +189,8 @@ export async function fetchWorksData(): Promise<readonly ProjectData[]> {
 /**
  * Fetches personal profile metadata exclusively from remote Supabase bucket with in-memory TTL caching.
  */
-export async function fetchPersonalInfo(): Promise<PersonalInfo> {
-  if (personalCache && Date.now() - personalCache.timestamp < CACHE_TTL_MS) {
+export async function fetchPersonalInfo(): Promise<Readonly<PersonalInfo>> {
+  if (isCacheFresh(personalCache)) {
     return personalCache.data;
   }
   const data = await fetchFromSupabase(
@@ -174,8 +202,25 @@ export async function fetchPersonalInfo(): Promise<PersonalInfo> {
   return data;
 }
 
-const rawWorksQuery = query(fetchWorksData, "works-data");
-const rawPersonalQuery = query(fetchPersonalInfo, "personal-info");
+/**
+ * Fetches music scores exclusively from remote Supabase bucket with in-memory TTL caching.
+ */
+export async function fetchMusicWorksData(): Promise<readonly MusicWorkData[]> {
+  if (isCacheFresh(musicCache)) {
+    return musicCache.data;
+  }
+  const data = await fetchFromSupabase(
+    SUPABASE_MUSIC_WORKS_URL,
+    MusicWorksDataSchema,
+    NOT_FOUND_MUSIC_WORKS
+  );
+  musicCache = { data, timestamp: Date.now() };
+  return data;
+}
+
+const rawWorksQuery = query(fetchWorksData, PORTFOLIO_QUERY_KEYS.WORKS);
+const rawPersonalQuery = query(fetchPersonalInfo, PORTFOLIO_QUERY_KEYS.PERSONAL);
+const rawMusicQuery = query(fetchMusicWorksData, PORTFOLIO_QUERY_KEYS.MUSIC);
 
 /**
  * Solid Router query for software projects with deduplication and SSR serialization.
@@ -191,10 +236,21 @@ getWorksDataQuery.key = rawWorksQuery.key;
 /**
  * Solid Router query for personal profile metadata with deduplication and SSR serialization.
  */
-export function getPersonalInfoQuery(): Promise<PersonalInfo> {
+export function getPersonalInfoQuery(): Promise<Readonly<PersonalInfo>> {
   if (getOwner() && !hasRouterContext()) {
     return fetchPersonalInfo();
   }
   return rawPersonalQuery();
 }
 getPersonalInfoQuery.key = rawPersonalQuery.key;
+
+/**
+ * Solid Router query for sheet music portfolio with deduplication and SSR serialization.
+ */
+export function getMusicWorksDataQuery(): Promise<readonly MusicWorkData[]> {
+  if (getOwner() && !hasRouterContext()) {
+    return fetchMusicWorksData();
+  }
+  return rawMusicQuery();
+}
+getMusicWorksDataQuery.key = rawMusicQuery.key;

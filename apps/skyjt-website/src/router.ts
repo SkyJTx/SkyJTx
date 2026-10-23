@@ -1,5 +1,5 @@
 import { pageRoutes } from "virtual:file-routes";
-import { createRouter, interceptFileRoutes } from "@skyjt/typed-routes";
+import { createRouter, interceptFileRoutes } from "@skyjt/typed-routes-solid";
 
 export const {
   Router,

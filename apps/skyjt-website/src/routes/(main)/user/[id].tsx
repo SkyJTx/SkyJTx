@@ -1,4 +1,4 @@
-import { defineRoute, InferOutput, validateData } from "@skyjt/typed-routes";
+import { defineRoute, InferOutput, validateData } from "@skyjt/typed-routes-solid";
 import { query, revalidate } from "@solidjs/router";
 import { createMemo, Errored, Loading, onSettled } from "solid-js";
 import * as v from "valibot";

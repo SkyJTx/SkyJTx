@@ -1,7 +1,7 @@
 import { defineConfig } from "vitest/config";
 import { fileURLToPath, URL } from "node:url";
 import solid from "@solidjs/vite-plugin";
-import { routes, defaultHttpMethods } from "@skyjt/typed-routes/vite";
+import { routes, defaultHttpMethods } from "@skyjt/typed-routes-solid/vite";
 import { PageFileSystemRouter } from "filesystem-routing";
 
 const router = new PageFileSystemRouter({

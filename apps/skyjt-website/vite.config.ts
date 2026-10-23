@@ -1,6 +1,6 @@
 import { defineConfig } from "vite";
 import { fileURLToPath, URL } from "node:url";
-import { routes } from "@skyjt/typed-routes/vite";
+import { routes } from "@skyjt/typed-routes-solid/vite";
 import solid from "@solidjs/vite-plugin";
 import { nitro } from "nitro/vite";
 import { aot } from "elysia/plugin/aot/vite";
