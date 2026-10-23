@@ -26,9 +26,13 @@ export default defineConfig({
       codeSplitting: true,
     }),
     nitro({
-      preset: "vercel",
+      preset: process.env.NITRO_PRESET || "cloudflare-module",
       routeRules: {
-        "/": { isr: 60 },
+        "/": {
+          headers: {
+            "cache-control": "public, max-age=0, s-maxage=60, stale-while-revalidate=60",
+          },
+        },
       },
     }),
     tailwindcss(),
