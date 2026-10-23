@@ -1,6 +1,6 @@
 import { defineRoute, InferOutput, validateData } from "@skyjt/typed-routes-solid";
 import { query, revalidate } from "@solidjs/router";
-import { createMemo, Errored, Loading, onSettled } from "solid-js";
+import { createMemo, Errored, Loading, onSettled, Show } from "solid-js";
 import * as v from "valibot";
 
 const loadUserData = query(async (id: number) => {
@@ -49,37 +49,62 @@ const routeSchema = v.object({
 
 export const route = defineRoute({
   params: routeSchema,
-  preload: async ({ params }) => loadUserData(params.id),
+  preload: async ({ params: [params, error] }) => {
+    if (error) return;
+    return loadUserData(params.id);
+  },
 });
 
 export type UserRouteParams = InferOutput<typeof routeSchema>;
 
 export default function UserRoute() {
-  const params = route.useParams();
-  const userData = createMemo(() => loadUserData(params().id));
+  const [params, paramsError] = route.useParams();
+  const userData = createMemo(() => {
+    const p = params();
+    return p ? loadUserData(p.id) : undefined;
+  });
 
   onSettled(() => {
-    console.log("User data query settled for id", params().id);
+    const p = params();
+    if (!p) return;
+    console.log("User data query settled for id", p.id);
 
     const intervalId = setInterval(() => {
-      revalidate(loadUserData.keyFor(params().id));
+      revalidate(loadUserData.keyFor(p.id));
     }, 1000);
 
     return () => {
-      console.log("Cleanup for user data query for id", params().id);
+      console.log("Cleanup for user data query for id", p.id);
       clearInterval(intervalId);
-    }
+    };
   });
 
   return (
     <div>
-      <Errored fallback={<p>Error occurred while fetching user data.</p>}>
-        <Loading fallback={<p>Loading user data...</p>}>
-          <p>User ID: {params().id}</p>
-          <p>User Name: {userData().name}</p>
-          <p>User Fetched At: {userData().fetch_at.toLocaleString()}</p>
-        </Loading>
-      </Errored>
+      <Show
+        when={params()}
+        fallback={
+          <div role="alert">
+            <p>Invalid user ID: {paramsError()?.message}</p>
+          </div>
+        }
+      >
+        {(validParams) => (
+          <Errored fallback={<p>Error occurred while fetching user data.</p>}>
+            <Loading fallback={<p>Loading user data...</p>}>
+              <p>User ID: {validParams().id}</p>
+              <Show when={userData()}>
+                {(data) => (
+                  <>
+                    <p>User Name: {data().name}</p>
+                    <p>User Fetched At: {data().fetch_at.toLocaleString()}</p>
+                  </>
+                )}
+              </Show>
+            </Loading>
+          </Errored>
+        )}
+      </Show>
     </div>
   );
 }

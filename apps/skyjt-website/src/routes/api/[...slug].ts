@@ -2,7 +2,7 @@ import type { APIEvent } from "filesystem-routing/api";
 import app from "~/server";
 
 async function handleRequest(event: APIEvent): Promise<Response> {
-  return app.fetch(event.request, event);
+  return app.fetch(event.request);
 }
 
 export const GET = handleRequest;
