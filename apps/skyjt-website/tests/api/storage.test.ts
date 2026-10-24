@@ -31,6 +31,12 @@ describe("API Route: /api/storage", () => {
   it("returns 404 for non-existent file", async () => {
     const res = await app.fetch(new Request("http://localhost/api/storage/file/non-existent-file-12345.xyz"));
     expect(res.status).toBe(404);
+    expect(res.headers.get("content-type")).toContain("application/problem+json");
+    const body = await res.json();
+    expect(body.type).toBe("STORAGE_NOT_FOUND");
+    expect(body.code).toBe("STORAGE_NOT_FOUND");
+    expect(body.status).toBe(404);
+    expect(body.detail).toContain("non-existent-file-12345.xyz");
   });
 
   describe("getMimeType with mime package", () => {

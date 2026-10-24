@@ -1,27 +1,25 @@
-import { Elysia, t } from "elysia";
+import { Elysia } from "elysia";
+import * as v from "valibot";
 import { storageRoutes } from "./modules/storage";
 
-export const PingResponseSchema = t.Object({
-  status: t.Literal("active"),
-  timestamp: t.Number(),
-  path: t.String(),
+export const PingResponseSchema = v.object({
+  status: v.literal("active"),
+  timestamp: v.number(),
+  path: v.string(),
 });
+export type PingResponse = v.InferOutput<typeof PingResponseSchema>;
 
 const app = new Elysia({ prefix: "/api" })
   .use(storageRoutes)
   .get("/", () => "Hello World")
-  .get(
-    "/ping",
-    {
-      response: PingResponseSchema,
-    },
-    ({ request }) => {
+  .get("/ping", ({ request }): PingResponse => {
       const url = new URL(request.url);
-      return {
-        status: "active" as const,
+      const responsePayload: PingResponse = {
+        status: "active",
         timestamp: Date.now(),
         path: url.pathname,
       };
+      return responsePayload;
     }
   );
 

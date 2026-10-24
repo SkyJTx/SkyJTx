@@ -1,308 +1,71 @@
-import { execFile } from "node:child_process";
-import { existsSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
-import * as cheerio from "cheerio";
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
-import { promisify } from "node:util";
+import { findChromeExecutable, dumpPageDom } from "./musescore/browser";
+import { extractAuthorIdentifiers, parseScoresFromHtml } from "./musescore/parser";
+import type { ScrapedMusicScore } from "./musescore/types";
 
-const execFileAsync = promisify(execFile);
+const TARGET_BASE_URL = process.env.MUSESCORE_URL ?? process.argv[2] ?? "https://musescore.com/user/29513374";
+const OUTPUT_FILE = resolve(import.meta.dirname, "../apps/skyjt-website/public/data/musicWorksData.json");
+const MAX_PAGES = 5;
 
-/**
- * Score metadata parsed from MuseScore HTML articles.
- */
-export interface ScrapedMusicScore {
-  readonly id: string;
-  readonly title: string;
-  readonly scoreUrl: string;
-  readonly thumbnailUrl: string;
-  readonly partsCount?: string;
-  readonly pagesCount?: string;
-  readonly duration?: string;
-  readonly date?: string;
-  readonly views?: string;
-  readonly instruments: readonly string[];
-}
-
-/**
- * Locates the local Chrome binary across standard Windows and POSIX install directories.
- */
-function findChromeExecutable(): string {
-  const candidates = [
-    "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
-    "C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe",
-    "/usr/bin/google-chrome",
-    "/usr/bin/chromium-browser",
-    "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
-  ];
-
-  for (const path of candidates) {
-    if (existsSync(path)) {
-      return path;
-    }
-  }
-
-  throw new Error("Google Chrome executable not found on host environment.");
-}
-
-/**
- * Executes Chrome headless asynchronously with a virtual time budget and strict process timeout
- * to prevent hanging on lingering WebSockets and long-polling analytics.
- */
-async function dumpPageDom(
-  chromePath: string,
-  targetBaseUrl: string,
-  page: number,
-  sandboxDir: string
-): Promise<string> {
-  const url = `${targetBaseUrl}?page=${page}&sort=date_uploaded`;
-
-  try {
-    const { stdout } = await execFileAsync(
-      chromePath,
-      [
-        "--headless=new",
-        "--incognito",
-        `--user-data-dir=${sandboxDir}`,
-        "--no-first-run",
-        "--no-default-browser-check",
-        "--disable-sync",
-        "--disable-gpu",
-        "--disable-background-networking",
-        "--disable-component-update",
-        "--disable-features=Translate,OptimizationHints,MediaRouter",
-        "--disable-extensions",
-        "--disable-blink-features=AutomationControlled",
-        "--run-all-compositor-stages-before-draw",
-        // Gives JavaScript and initial DOM elements up to 8 seconds to settle, then stops waiting
-        "--virtual-time-budget=8000",
-        "--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36",
-        "--dump-dom",
-        url,
-      ],
-      {
-        maxBuffer: 50 * 1024 * 1024,
-        encoding: "utf-8",
-        timeout: 20_000, // Hard abort after 20 seconds to guarantee no infinite hang
-      }
-    );
-
-    // Verify whether Cloudflare or a CAPTCHA gate caught the request
-    if (stdout.includes("Just a moment...") || stdout.includes("cf-browser-verification")) {
-      throw new Error(
-        "Request blocked by Cloudflare / anti-bot verification challenge. CLI headless cannot bypass this barrier directly."
-      );
-    }
-
-    return stdout;
-  } catch (error: any) {
-    if (error?.code === "ETIMEDOUT" || error?.signal === "SIGTERM") {
-      throw new Error(`Chrome process timed out fetching: ${url}`);
-    }
-    throw error;
-  }
-}
-
-/**
- * Extracts author identifier strings dynamically from page 1 HTML.
- */
-function extractAuthorIdentifiers(
-  targetBaseUrl: string,
-  html: string
-): readonly string[] {
-  const identifiers: string[] = [];
-
-  try {
-    const parsedUrl = new URL(targetBaseUrl);
-    const slug = parsedUrl.pathname.replace(/^\/+|\/+$/g, "");
-    if (slug) {
-      identifiers.push(slug);
-    }
-  } catch {
-    const fallbackSlug = targetBaseUrl.split("/").filter(Boolean).pop();
-    if (fallbackSlug) {
-      identifiers.push(fallbackSlug);
-    }
-  }
-
-  const $ = cheerio.load(html);
-  const canonicalHref = $('link[rel="canonical"]').attr("href");
-  const canonicalId = canonicalHref?.match(/musescore\.com\/user\/(\d+)/)?.[1];
-  if (canonicalId) {
-    identifiers.push(`/user/${canonicalId}`);
-  }
-
-  const ogUrl = $('meta[property="og:url"]').attr("content");
-  const ogId = ogUrl?.match(/musescore\.com\/user\/(\d+)/)?.[1];
-  if (ogId && !identifiers.includes(`/user/${ogId}`)) {
-    identifiers.push(`/user/${ogId}`);
-  }
-
-  return identifiers;
-}
-
-/**
- * Extracts and verifies author scores from rendered HTML string without hardcoded personal IDs.
- */
-function parseScoresFromHtml(
-  html: string,
-  authorIdentifiers: readonly string[]
-): readonly ScrapedMusicScore[] {
-  const $ = cheerio.load(html);
-  const scores: ScrapedMusicScore[] = [];
-
-  $("article").each((_, element) => {
-    const article = $(element);
-    const content = article.html() || "";
-    if (!content) {
-      return;
-    }
-
-    const isAuthorScore = authorIdentifiers.some((id) => content.includes(id));
-    if (!isAuthorScore) {
-      return;
-    }
-
-    const linkEl = article.find('a[href*="/scores/"]').first();
-    const scoreUrl = linkEl.attr("href");
-    if (!scoreUrl) {
-      return;
-    }
-
-    const idMatch = scoreUrl.match(/\/scores\/(\d+)/);
-    const id = idMatch?.[1];
-    if (!id) {
-      return;
-    }
-
-    const img = article.find("img").first();
-    const rawThumb = img.attr("src");
-    const thumbnailUrl = rawThumb ? rawThumb.replace(/&amp;/g, "&") : "";
-
-    const rawTitle = article.find(".tUpqA").first().text().trim();
-    const rawAlt = img.attr("alt") || "";
-    const title = rawTitle
-      ? rawTitle
-      : rawAlt
-        ? rawAlt.split(" sheet music arranged by")[0]?.trim() ?? "Untitled Score"
-        : "Untitled Score";
-
-    const metaText = article.find(".uRAco").first().text().trim();
-    const tags: string[] = [];
-    article.find(".B7-Vh").each((_, tagEl) => {
-      const tag = $(tagEl).text().trim();
-      if (tag) {
-        tags.push(tag);
-      }
-    });
-
-    const parts = metaText.split("•").map((s) => s.trim());
-    let partsCount: string | undefined;
-    let pagesCount: string | undefined;
-    let duration: string | undefined;
-    let date: string | undefined;
-    let views: string | undefined;
-
-    for (const part of parts) {
-      if (/^\d+\s+part/i.test(part)) {
-        partsCount = part;
-      } else if (/^\d+\s+page/i.test(part)) {
-        pagesCount = part;
-      } else if (/^\d{2}:\d{2}/i.test(part)) {
-        duration = part;
-      } else if (/view/i.test(part)) {
-        views = part;
-      } else if (/[A-Z][a-z]{2}\s+\d{1,2},\s+\d{4}/.test(part)) {
-        date = part;
-      }
-    }
-
-    scores.push({
-      id,
-      title,
-      scoreUrl,
-      thumbnailUrl,
-      ...(partsCount ? { partsCount } : {}),
-      ...(pagesCount ? { pagesCount } : {}),
-      ...(duration ? { duration } : {}),
-      ...(date ? { date } : {}),
-      ...(views ? { views } : {}),
-      instruments: tags,
-    });
-  });
-
-  return scores;
-}
-
-/**
- * Main scraper routine traversing all pages sequentially until no new author scores exist.
- */
-async function main(): Promise<void> {
-  const targetInput = process.env.MUSESCORE_URL ?? process.argv[2];
-  if (!targetInput) {
-    throw new Error(
-      "Target profile URL must be provided via MUSESCORE_URL in .env or as a CLI argument.\n" +
-        "Example: bun run scrape:musescore https://musescore.com/<username>\n" +
-        "See .env.example for configuration details."
-    );
-  }
-
-  const targetBaseUrl = targetInput.split("?")[0] ?? targetInput;
+async function run(): Promise<void> {
   const chromePath = findChromeExecutable();
-  const collectedScores: ScrapedMusicScore[] = [];
-  const seenIds = new Set<string>();
+  console.log(`Found Chrome binary at: ${chromePath}`);
 
-  const sandboxDir = mkdtempSync(join(tmpdir(), "musescore-sandbox-"));
+  const sandboxDir = mkdtempSync(join(tmpdir(), "chrome-scrape-"));
+  console.log(`Created isolated user-data sandbox at: ${sandboxDir}`);
+
   try {
-    let currentPage = 1;
-    const maxPages = 20;
+    const scoresMap = new Map<string, ScrapedMusicScore>();
     let authorIdentifiers: readonly string[] = [];
 
-    while (currentPage <= maxPages) {
-      process.stdout.write(`Fetching MuseScore page ${currentPage}... `);
-      const html = await dumpPageDom(chromePath, targetBaseUrl, currentPage, sandboxDir);
+    for (let page = 1; page <= MAX_PAGES; page++) {
+      console.log(`\n[Page ${page}/${MAX_PAGES}] Requesting DOM via Chrome Headless...`);
+      const html = await dumpPageDom(chromePath, TARGET_BASE_URL, page, sandboxDir);
 
-      if (currentPage === 1) {
-        authorIdentifiers = extractAuthorIdentifiers(targetBaseUrl, html);
+      if (page === 1) {
+        authorIdentifiers = extractAuthorIdentifiers(TARGET_BASE_URL, html);
+        console.log(`Extracted author identifier filter: ${JSON.stringify(authorIdentifiers)}`);
       }
 
       const pageScores = parseScoresFromHtml(html, authorIdentifiers);
+      console.log(`[Page ${page}] Extracted ${pageScores.length} matching score cards.`);
 
-      let newCount = 0;
-      for (const score of pageScores) {
-        if (!seenIds.has(score.id)) {
-          seenIds.add(score.id);
-          collectedScores.push(score);
-          newCount++;
-        }
-      }
-
-      console.log(`found ${pageScores.length} author scores (${newCount} new).`);
-
-      if (newCount === 0) {
+      if (pageScores.length === 0) {
+        console.log(`Terminating crawl early at page ${page} (no author scores matched).`);
         break;
       }
 
-      currentPage++;
+      let newItemsCount = 0;
+      for (const score of pageScores) {
+        if (!scoresMap.has(score.id)) {
+          scoresMap.set(score.id, score);
+          newItemsCount++;
+        }
+      }
+
+      console.log(`[Page ${page}] Added ${newItemsCount} new unique scores to collection.`);
+
+      if (page < MAX_PAGES) {
+        await new Promise((r) => setTimeout(r, 1500));
+      }
     }
 
-    const outDir = resolve(
-      typeof import.meta.dir === "string" ? import.meta.dir : process.cwd(),
-      "../data"
-    );
-    if (!existsSync(outDir)) {
-      mkdirSync(outDir, { recursive: true });
-    }
+    const finalScores = Array.from(scoresMap.values());
+    console.log(`\nTotal aggregated unique author scores: ${finalScores.length}`);
 
-    const outPath = resolve(outDir, "musicWorksData.json");
-    writeFileSync(outPath, JSON.stringify(collectedScores, null, 2), "utf-8");
-
-    console.log(`Successfully extracted ${collectedScores.length} total scores into ${outPath}`);
+    mkdirSync(resolve(OUTPUT_FILE, ".."), { recursive: true });
+    writeFileSync(OUTPUT_FILE, JSON.stringify(finalScores, null, 2) + "\n", "utf-8");
+    console.log(`Successfully written sheet music data to: ${OUTPUT_FILE}`);
   } finally {
-    rmSync(sandboxDir, { recursive: true, force: true });
+    try {
+      rmSync(sandboxDir, { recursive: true, force: true });
+      console.log(`Cleaned up temporary sandbox directory: ${sandboxDir}`);
+    } catch (cleanupError) {
+      console.warn(`Failed to remove temp directory (${sandboxDir}):`, cleanupError);
+    }
   }
 }
 
-main().catch((err: unknown) => {
-  console.error("Scraping execution failed:", err);
-  process.exit(1);
-});
+void run();

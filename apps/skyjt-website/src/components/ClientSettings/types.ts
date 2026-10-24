@@ -1,27 +1,46 @@
+import * as v from "valibot";
+
 /**
- * Supported color theme modes.
+ * Permitted color theme modes.
  */
-export type ThemeMode = "light" | "dark" | "system";
+export const THEME_MODES = ["light", "dark", "system"] as const;
+export const ThemeModeSchema = v.picklist(THEME_MODES);
+export type ThemeMode = v.InferOutput<typeof ThemeModeSchema>;
 
 /**
  * Resolved DaisyUI theme names.
  */
-export type ResolvedTheme = "light-seed" | "dark-seed";
+export const RESOLVED_THEMES = ["light-seed", "dark-seed"] as const;
+export const ResolvedThemeSchema = v.picklist(RESOLVED_THEMES);
+export type ResolvedTheme = v.InferOutput<typeof ResolvedThemeSchema>;
 
 /**
- * Supported root font size scale.
+ * Permitted root font size scale.
  */
-export type FontSize = "sm" | "md" | "lg" | "xl";
+export const FONT_SIZES = ["sm", "md", "lg", "xl"] as const;
+export const FontSizeSchema = v.picklist(FONT_SIZES);
+export type FontSize = v.InferOutput<typeof FontSizeSchema>;
+
+/**
+ * Valid 6-digit hex color format (#RRGGBB).
+ */
+export const HEX_COLOR_REGEX = /^#[0-9a-fA-F]{6}$/;
+export const SeedColorSchema = v.pipe(
+  v.string(),
+  v.regex(HEX_COLOR_REGEX, "Must be a valid 6-digit hex color code")
+);
+export type SeedColor = v.InferOutput<typeof SeedColorSchema>;
 
 /**
  * Client settings state representation.
  */
-export interface ClientSettingsState {
-  readonly theme: ThemeMode;
-  readonly seedColor: string;
-  readonly fontSize: FontSize;
-  readonly resolvedTheme: ResolvedTheme;
-}
+export const ClientSettingsStateSchema = v.object({
+  theme: ThemeModeSchema,
+  seedColor: SeedColorSchema,
+  fontSize: FontSizeSchema,
+  resolvedTheme: ResolvedThemeSchema,
+});
+export type ClientSettingsState = Readonly<v.InferOutput<typeof ClientSettingsStateSchema>>;
 
 /**
  * Preset theme color specification.

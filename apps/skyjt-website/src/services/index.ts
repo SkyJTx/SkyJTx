@@ -1,2 +1,3 @@
-export * from "./portfolioData";
+export * from "./portfolio";
 export * from "./eden-client";
+export * from "./portfolioData";

@@ -2,13 +2,11 @@ import type { JSX } from "@solidjs/web";
 import { Loading } from "solid-js";
 import { Tabs } from "~/components/Tabs";
 import { BrandTitle, BrandSubtitle } from "~/components/Brand";
-import { useWorksController, type WorksSegment } from "./works.controller";
+import * as v from "valibot";
+import { useWorksController, WorksSegmentSchema } from "./works.controller";
 import { WorksCarousel } from "./WorksCarousel";
 import { MusicWorksGrid } from "./MusicWorksGrid";
 
-/**
- * Inner works presentation content reading projects and music scores from controller.
- */
 function WorksContent(): JSX.Element {
   const c = useWorksController();
 
@@ -19,7 +17,12 @@ function WorksContent(): JSX.Element {
 
       <Tabs
         value={c.activeSegment()}
-        onChange={(val) => c.setActiveSegment(val as WorksSegment)}
+        onChange={(val) => {
+          const parsed = v.safeParse(WorksSegmentSchema, val);
+          if (parsed.success) {
+            c.setActiveSegment(parsed.output);
+          }
+        }}
         class="w-full flex flex-col items-center"
       >
         <Tabs.List class="tabs tabs-box bg-base-200/80 p-1 rounded-full border border-base-300 mb-8">
@@ -49,9 +52,6 @@ function WorksContent(): JSX.Element {
   );
 }
 
-/**
- * Works portfolio presentation with accessible Tabs wrapped in a Loading boundary.
- */
 export function WorksPresentation(): JSX.Element {
   return (
     <Loading

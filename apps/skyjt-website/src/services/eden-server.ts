@@ -1,6 +1,22 @@
 import { treaty } from "@elysiajs/eden";
+import * as v from "valibot";
 import { getRequestEvent, type RequestEvent } from "@solidjs/web";
 import app, { type AppType } from "~/server";
+
+const CloudflareContextSchema = v.object({
+  context: v.object({
+    cloudflare: v.object({
+      env: v.unknown(),
+    }),
+  }),
+});
+
+function getCloudflareEnv(event: unknown): unknown {
+  if (v.is(CloudflareContextSchema, event)) {
+    return event.context.cloudflare.env;
+  }
+  return undefined;
+}
 
 /**
  * Hop-by-hop headers per RFC 9110 / RFC 7230 that must not be forwarded across proxy boundaries.
@@ -42,7 +58,7 @@ export interface EdenServerOptions {
  * Creates an Eden Treaty server instance with hardened bidirectional HTTP context forwarding.
  */
 export function createEdenServer(options?: EdenServerOptions) {
-  const fetcherHandler = async (url: string, init?: RequestInit): Promise<Response> => {
+  const fetcherHandler = async (url: string | URL | Request, init?: RequestInit): Promise<Response> => {
     const event = options?.event ?? (() => {
       try {
         return getRequestEvent();
@@ -53,7 +69,7 @@ export function createEdenServer(options?: EdenServerOptions) {
 
     let env = options?.env;
     if (!env && event) {
-      env = (event as { context?: { cloudflare?: { env?: unknown } } })?.context?.cloudflare?.env;
+      env = getCloudflareEnv(event);
     }
 
     let signal = options?.signal || init?.signal;

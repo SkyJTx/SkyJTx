@@ -3,8 +3,6 @@ import {
   useContext,
   createSignal,
   createMemo,
-  createEffect,
-  onSettled,
   type Accessor,
   type ParentProps,
 } from "solid-js";
@@ -17,14 +15,9 @@ import {
   type ResolvedTheme,
   type ThemeMode,
 } from "./types";
-import {
-  parseBrowserCookies,
-  persistSettings,
-} from "./cookieStorage";
+import { persistSettings } from "./cookieStorage";
+import { useDomThemeSync } from "./useDomThemeSync";
 
-/**
- * Context payload for client settings state and actions.
- */
 export interface ClientSettingsContextValue {
   readonly theme: Accessor<ThemeMode>;
   readonly resolvedTheme: Accessor<ResolvedTheme>;
@@ -41,16 +34,10 @@ const ClientSettingsContext = createContext<ClientSettingsContextValue | null>(n
   name: "ClientSettingsContext",
 });
 
-/**
- * Properties for ClientSettingsProvider.
- */
 export interface ClientSettingsProviderProps extends ParentProps {
   readonly initialSettings?: Partial<ClientSettingsState>;
 }
 
-/**
- * Context provider managing theme mode, seed color, and font size backed by cookie persistence.
- */
 export function ClientSettingsProvider(props: ClientSettingsProviderProps): JSX.Element {
   const [theme, setThemeSignal] = createSignal<ThemeMode>(
     props.initialSettings?.theme ?? DEFAULT_SETTINGS.theme
@@ -73,63 +60,17 @@ export function ClientSettingsProvider(props: ClientSettingsProviderProps): JSX.
 
   const fontSizeValue = createMemo(() => FONT_SIZE_MAP[fontSize()]);
 
-  onSettled(() => {
-    if (typeof window === "undefined") return;
-
-    let removeMediaListener: (() => void) | undefined;
-    if (typeof window.matchMedia === "function") {
-      const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
-      setSystemPrefersDark(mediaQuery.matches);
-
-      const listener = (event: MediaQueryListEvent) => {
-        setSystemPrefersDark(event.matches);
-      };
-      mediaQuery.addEventListener?.("change", listener);
-      removeMediaListener = () => mediaQuery.removeEventListener?.("change", listener);
-    }
-
-    const browserCookies = parseBrowserCookies();
-    if (browserCookies.theme) {
-      setThemeSignal(browserCookies.theme);
-    }
-    if (browserCookies.seedColor) {
-      setSeedColorSignal(browserCookies.seedColor);
-    }
-    if (browserCookies.fontSize) {
-      setFontSizeSignal(browserCookies.fontSize);
-    }
-
-    return () => {
-      removeMediaListener?.();
-    };
+  useDomThemeSync({
+    resolvedTheme,
+    seedColor,
+    fontSizeValue,
+    onSystemDarkChange: (isDark) => setSystemPrefersDark(isDark),
+    onInitCookies: (cookies) => {
+      if (cookies.theme) setThemeSignal(cookies.theme);
+      if (cookies.seedColor) setSeedColorSignal(cookies.seedColor);
+      if (cookies.fontSize) setFontSizeSignal(cookies.fontSize);
+    },
   });
-
-  createEffect(
-    () => resolvedTheme(),
-    (resolved) => {
-      if (typeof document !== "undefined") {
-        document.documentElement.setAttribute("data-theme", resolved);
-      }
-    }
-  );
-
-  createEffect(
-    () => seedColor(),
-    (seed) => {
-      if (typeof document !== "undefined") {
-        document.documentElement.style.setProperty("--seed", seed);
-      }
-    }
-  );
-
-  createEffect(
-    () => fontSizeValue(),
-    (sizeVal) => {
-      if (typeof document !== "undefined") {
-        document.documentElement.style.fontSize = sizeVal;
-      }
-    }
-  );
 
   const setTheme = (mode: ThemeMode) => {
     setThemeSignal(mode);
@@ -171,9 +112,6 @@ export function ClientSettingsProvider(props: ClientSettingsProviderProps): JSX.
   );
 }
 
-/**
- * Hook to consume client settings state and actions.
- */
 export function useClientSettings(): ClientSettingsContextValue {
   const context = useContext(ClientSettingsContext);
   if (!context) {

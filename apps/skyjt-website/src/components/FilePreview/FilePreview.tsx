@@ -1,16 +1,10 @@
-import mime from "mime";
 import type { JSX } from "@solidjs/web";
-import {
-  createSignal,
-  createMemo,
-  Show,
-} from "solid-js";
+import { createMemo, Show } from "solid-js";
 import { Dialog } from "@kobalte/core/dialog";
 import { Icon } from "~/components/Icon";
+import { detectFileType, downloadFile, type FileType } from "~/utils/fileDownload";
+import { useClipboard } from "~/hooks/useClipboard";
 
-/**
- * Properties for FilePreview lightbox component.
- */
 export interface FilePreviewProps {
   url: string;
   name: string;
@@ -19,55 +13,17 @@ export interface FilePreviewProps {
   onClose: () => void;
 }
 
-type FileType = "image" | "pdf";
-
-function detectFileType(url: string): FileType {
-  const cleanUrl = url.split(/[?#]/)[0] ?? url;
-  const mimeType = mime.getType(cleanUrl);
-  if (mimeType === "application/pdf") {
-    return "pdf";
-  }
-  return "image";
-}
-
-/**
- * Accessible modal lightbox powered by Kobalte Dialog and styled with daisyUI tokens.
- */
 export function FilePreview(props: FilePreviewProps): JSX.Element {
-  const [copied, setCopied] = createSignal(false);
-
+  const { copied, copy } = useClipboard(2000);
   const fileType = createMemo<FileType>(() => detectFileType(props.url));
 
-  const handleDownload = async (e: MouseEvent) => {
+  const handleDownload = (e: MouseEvent) => {
     e.preventDefault();
-    try {
-      const response = await fetch(props.url);
-      const blob = await response.blob();
-      const blobUrl = URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = blobUrl;
-      const filename = props.url.split("/").pop()?.split(/[?#]/)[0] || "download";
-      link.download = filename;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(blobUrl);
-    } catch (err) {
-      console.warn("[FilePreview] Direct download failed, opening in new tab:", err);
-      window.open(props.url, "_blank", "noopener,noreferrer");
-    }
+    void downloadFile(props.url, props.name);
   };
 
-  const handleShare = async () => {
-    if (typeof navigator !== "undefined" && navigator.clipboard) {
-      try {
-        await navigator.clipboard.writeText(props.url);
-        setCopied(true);
-        setTimeout(() => setCopied(false), 2000);
-      } catch (err) {
-        console.error("[FilePreview] Clipboard write failed:", err);
-      }
-    }
+  const handleShare = () => {
+    void copy(props.url);
   };
 
   return (
@@ -78,94 +34,83 @@ export function FilePreview(props: FilePreviewProps): JSX.Element {
       }}
     >
       <Dialog.Portal>
-        <Dialog.Overlay class="fixed inset-0 bg-neutral/80 backdrop-blur-md z-50 animate-fade-in transition-opacity duration-200" />
-        <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <Dialog.Content class="bg-base-100 border border-base-300 rounded-box shadow-2xl max-w-4xl w-full max-h-[90vh] flex flex-col overflow-hidden animate-scale-in">
-            {/* Header */}
-            <div class="flex items-center justify-between px-4 py-3 border-b border-base-300 bg-base-200/50">
-              <div class="flex items-center gap-3 truncate">
-                <div class="p-2 rounded-field bg-base-300/60 text-primary">
-                  <Icon
-                    name={fileType() === "pdf" ? "file-text" : "image"}
-                    size={18}
-                  />
-                </div>
-                <div class="truncate">
-                  <Dialog.Title class="text-sm sm:text-base font-semibold text-base-content truncate">
-                    {props.name}
-                  </Dialog.Title>
-                  <Show when={props.date}>
-                    <p class="text-xs text-base-content/60">{props.date}</p>
-                  </Show>
-                </div>
+        <Dialog.Overlay class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm animate-fade-in" />
+        <div class="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 md:p-6">
+          <Dialog.Content class="relative w-full max-w-4xl max-h-[90vh] bg-base-100 rounded-2xl shadow-2xl border border-base-content/10 flex flex-col overflow-hidden animate-scale-in">
+            <div class="flex items-center justify-between px-4 py-3 border-b border-base-content/10 bg-base-100/80 backdrop-blur-xs shrink-0">
+              <div class="flex flex-col min-w-0 pr-4">
+                <Dialog.Title class="text-sm sm:text-base font-bold text-base-content truncate">
+                  {props.name}
+                </Dialog.Title>
+                <Show when={props.date}>
+                  <Dialog.Description class="text-xs text-base-content/60">
+                    {props.date}
+                  </Dialog.Description>
+                </Show>
               </div>
 
-              <div class="flex items-center gap-1">
+              <div class="flex items-center gap-1.5 shrink-0">
                 <button
                   type="button"
-                  class="btn btn-ghost btn-circle btn-sm"
-                  title="Download File"
-                  onClick={handleDownload}
-                  aria-label="Download File"
-                >
-                  <Icon name="download" size={16} />
-                </button>
-
-                <button
-                  type="button"
-                  class="btn btn-ghost btn-circle btn-sm text-base-content"
-                  title="Share / Copy Link"
+                  class="btn btn-ghost btn-circle btn-sm text-base-content/70 hover:text-base-content"
                   onClick={handleShare}
-                  aria-label="Copy Link"
+                  title={copied() ? "Copied!" : "Copy URL"}
+                  aria-label="Copy URL"
                 >
-                  <Show
-                    when={copied()}
-                    fallback={<Icon name="share" size={16} />}
-                  >
+                  <Show when={copied()} fallback={<Icon name="share" size={16} />}>
                     <Icon name="check" size={16} class="text-success" />
                   </Show>
                 </button>
 
-                <Dialog.CloseButton
-                  class="btn btn-ghost btn-circle btn-sm text-base-content"
-                  aria-label="Close modal"
+                <a
+                  href={props.url}
+                  download
+                  onClick={handleDownload}
+                  class="btn btn-ghost btn-circle btn-sm text-base-content/70 hover:text-base-content"
+                  title="Download File"
+                  aria-label="Download File"
                 >
-                  <Icon name="x" size={18} />
+                  <Icon name="download" size={16} />
+                </a>
+
+                <a
+                  href={props.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="btn btn-ghost btn-circle btn-sm text-base-content/70 hover:text-base-content"
+                  title="Open in New Tab"
+                  aria-label="Open in New Tab"
+                >
+                  <Icon name="external-link" size={16} />
+                </a>
+
+                <Dialog.CloseButton
+                  class="btn btn-ghost btn-circle btn-sm text-base-content/70 hover:text-base-content ml-1"
+                  aria-label="Close Preview"
+                >
+                  <Icon name="x" size={16} />
                 </Dialog.CloseButton>
               </div>
             </div>
 
-            <Dialog.Description class="sr-only">
-              File preview modal for {props.name}
-            </Dialog.Description>
-
-            {/* Media Body */}
-            <div class="flex-1 overflow-auto bg-base-300/30 flex items-center justify-center p-4 min-h-[300px]">
+            <div class="flex-1 overflow-auto bg-base-200/50 flex items-center justify-center p-2 sm:p-4 min-h-[300px]">
               <Show
                 when={fileType() === "image"}
                 fallback={
                   <iframe
-                    src={`${props.url}#toolbar=1`}
+                    src={props.url}
+                    class="w-full h-full min-h-[500px] rounded-lg border border-base-content/10 bg-base-100"
                     title={props.name}
-                    class="w-full h-[600px] rounded-field border border-base-300"
                   />
                 }
               >
                 <img
                   src={props.url}
                   alt={props.name}
-                  class="max-w-full max-h-[70vh] object-contain rounded-box shadow-md"
+                  class="max-w-full max-h-[75vh] object-contain rounded-lg shadow-sm"
                 />
               </Show>
             </div>
-
-            {/* Toast Feedback */}
-            <Show when={copied()}>
-              <div class="absolute bottom-4 left-1/2 -translate-x-1/2 bg-neutral text-neutral-content px-4 py-2 rounded-box shadow-lg text-xs font-semibold flex items-center gap-2">
-                <Icon name="check" size={14} class="text-success" />
-                Link copied to clipboard
-              </div>
-            </Show>
           </Dialog.Content>
         </div>
       </Dialog.Portal>

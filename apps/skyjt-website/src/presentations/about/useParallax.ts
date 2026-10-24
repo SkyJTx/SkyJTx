@@ -1,8 +1,11 @@
 import { createRenderEffect, untrack, type Accessor } from "solid-js";
+import {
+  computeScrollProgress,
+  computeTiltAndLight,
+  applyParallaxProperties,
+  type ParallaxOffsetsState,
+} from "./parallaxMath";
 
-/**
- * Options for configuring parallax layer speeds and motion behavior.
- */
 export interface UseParallaxOptions {
   readonly bgSpeed?: number;
   readonly avatarSpeed?: number;
@@ -12,9 +15,6 @@ export interface UseParallaxOptions {
   readonly enableCursorLight?: boolean;
 }
 
-/**
- * Parallax offset values and progress accessors produced by the useParallax hook.
- */
 export interface ParallaxOffsets {
   readonly bgOffset: Accessor<number>;
   readonly avatarOffset: Accessor<number>;
@@ -24,9 +24,6 @@ export interface ParallaxOffsets {
   readonly tiltY: Accessor<number>;
 }
 
-/**
- * Hook calculating multi-layer parallax offsets imperatively via CSS custom properties.
- */
 export function useParallax(
   targetRef: () => HTMLElement | null,
   options: UseParallaxOptions = {}
@@ -50,137 +47,62 @@ export function useParallax(
   let currentMouseY = 50;
   let currentLightOpacity = 0;
 
-  const applyStyles = (
-    el: HTMLElement,
-    bg: number,
-    avatar: number,
-    content: number,
-    prog: number,
-    tiltX: number,
-    tiltY: number,
-    shiftX = 0,
-    shiftY = 0,
-    mouseX = 50,
-    mouseY = 50,
-    lightOpacity = 0
-  ) => {
-    el.style.setProperty("--parallax-bg", String(bg) + "px");
-    el.style.setProperty("--parallax-avatar", String(avatar) + "px");
-    el.style.setProperty("--parallax-content", String(content) + "px");
-    el.style.setProperty("--parallax-progress", prog.toFixed(4));
-    el.style.setProperty("--tilt-x", String(tiltX) + "deg");
-    el.style.setProperty("--tilt-y", String(tiltY) + "deg");
-    el.style.setProperty("--tilt-shift-x", String(shiftX) + "px");
-    el.style.setProperty("--tilt-shift-y", String(shiftY) + "px");
-    el.style.setProperty("--mouse-x", String(mouseX) + "%");
-    el.style.setProperty("--mouse-y", String(mouseY) + "%");
-    el.style.setProperty("--cursor-light-opacity", String(lightOpacity));
+  const updateProperties = (element: HTMLElement) => {
+    const state: ParallaxOffsetsState = {
+      bg: currentBg,
+      avatar: currentAvatar,
+      content: currentContent,
+      progress: currentProgress,
+      tiltX: currentTiltX,
+      tiltY: currentTiltY,
+      shiftX: currentShiftX,
+      shiftY: currentShiftY,
+      mouseX: currentMouseX,
+      mouseY: currentMouseY,
+      lightOpacity: currentLightOpacity,
+    };
+    applyParallaxProperties(element, state);
   };
 
   const calculateOffsets = (element: HTMLElement) => {
-    const rect = element.getBoundingClientRect();
-    const windowHeight = (typeof window !== "undefined" && window.innerHeight) || 1;
-    const elemHeight = rect.height || 1;
-    const elemCenter = rect.top + elemHeight / 2;
-    const viewportCenter = windowHeight / 2;
-    const halfRange = (windowHeight + elemHeight) / 2;
-
-    const rawProgress = (elemCenter - viewportCenter) / halfRange;
-    currentProgress = Math.max(-1.5, Math.min(1.5, rawProgress));
-
+    currentProgress = computeScrollProgress(element);
     currentBg = Math.round(currentProgress * bgSpeed * 10) / 10;
     currentAvatar = Math.round(currentProgress * avatarSpeed * 10) / 10;
     currentContent = Math.round(currentProgress * contentSpeed * 10) / 10;
-
-    applyStyles(
-      element,
-      currentBg,
-      currentAvatar,
-      currentContent,
-      currentProgress,
-      currentTiltX,
-      currentTiltY,
-      currentShiftX,
-      currentShiftY,
-      currentMouseX,
-      currentMouseY,
-      currentLightOpacity
-    );
+    updateProperties(element);
   };
-
-  const initialElement = untrack(() => targetRef());
-  if (initialElement) {
-    calculateOffsets(initialElement);
-  }
 
   createRenderEffect(
     () => targetRef(),
     (element) => {
-      if (!element || typeof window === "undefined") {
-        return;
-      }
+      if (!element || typeof window === "undefined") return;
 
       let rafId: number | null = null;
       let isVisible = true;
 
-      const updateOffsets = () => {
-        if (!isVisible) {
-          return;
-        }
-        calculateOffsets(element);
-      };
-
       const scheduleUpdate = () => {
-        if (rafId !== null) {
-          return;
-        }
+        if (rafId !== null) return;
         rafId = requestAnimationFrame(() => {
           rafId = null;
-          updateOffsets();
+          if (isVisible) {
+            calculateOffsets(element);
+          }
         });
       };
 
       const handlePointerMove = (e: MouseEvent | PointerEvent) => {
-        if (!enableTilt && !enableCursorLight) {
-          return;
-        }
-        const rect = element.getBoundingClientRect();
-        if (rect.width <= 0 || rect.height <= 0) {
-          return;
-        }
-        const xRel = (e.clientX - rect.left) / rect.width - 0.5;
-        const yRel = (e.clientY - rect.top) / rect.height - 0.5;
+        if (!enableTilt && !enableCursorLight) return;
 
-        if (enableTilt) {
-          currentTiltX = Math.round(-yRel * 2 * maxTilt * 10) / 10;
-          currentTiltY = Math.round(xRel * 2 * maxTilt * 10) / 10;
-          currentShiftX = Math.round(xRel * 8 * 10) / 10;
-          currentShiftY = Math.round(yRel * 8 * 10) / 10;
-        } else {
-          currentTiltX = 0;
-          currentTiltY = 0;
-          currentShiftX = 0;
-          currentShiftY = 0;
-        }
+        const tilt = computeTiltAndLight(e, element, maxTilt, enableTilt, enableCursorLight);
+        currentTiltX = tilt.tiltX;
+        currentTiltY = tilt.tiltY;
+        currentShiftX = tilt.shiftX;
+        currentShiftY = tilt.shiftY;
+        currentMouseX = tilt.mouseX;
+        currentMouseY = tilt.mouseY;
+        currentLightOpacity = tilt.lightOpacity;
 
-        currentMouseX = enableCursorLight ? Math.round((xRel + 0.5) * 100) : 50;
-        currentMouseY = enableCursorLight ? Math.round((yRel + 0.5) * 100) : 50;
-        currentLightOpacity = enableCursorLight ? 1 : 0;
-
-        applyStyles(
-          element,
-          currentBg,
-          currentAvatar,
-          currentContent,
-          currentProgress,
-          currentTiltX,
-          currentTiltY,
-          currentShiftX,
-          currentShiftY,
-          currentMouseX,
-          currentMouseY,
-          currentLightOpacity
-        );
+        updateProperties(element);
       };
 
       const handlePointerLeave = () => {
@@ -189,20 +111,7 @@ export function useParallax(
         currentTiltY = 0;
         currentShiftX = 0;
         currentShiftY = 0;
-        applyStyles(
-          element,
-          currentBg,
-          currentAvatar,
-          currentContent,
-          currentProgress,
-          0,
-          0,
-          0,
-          0,
-          currentMouseX,
-          currentMouseY,
-          0
-        );
+        updateProperties(element);
       };
 
       let observer: IntersectionObserver | null = null;
@@ -226,15 +135,13 @@ export function useParallax(
       element.addEventListener("pointermove", handlePointerMove as EventListener, { passive: true });
       element.addEventListener("pointerleave", handlePointerLeave, { passive: true });
 
-      calculateOffsets(element);
+      untrack(() => {
+        calculateOffsets(element);
+      });
 
       return () => {
-        if (rafId !== null) {
-          cancelAnimationFrame(rafId);
-        }
-        if (observer) {
-          observer.disconnect();
-        }
+        if (rafId !== null) cancelAnimationFrame(rafId);
+        observer?.disconnect();
         window.removeEventListener("scroll", scheduleUpdate);
         window.removeEventListener("resize", scheduleUpdate);
         element.removeEventListener("pointermove", handlePointerMove as EventListener);

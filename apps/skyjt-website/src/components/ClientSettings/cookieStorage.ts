@@ -1,6 +1,10 @@
 import { parseCookie, stringifySetCookie } from "cookie";
+import * as v from "valibot";
 import {
   DEFAULT_SETTINGS,
+  ThemeModeSchema,
+  FontSizeSchema,
+  SeedColorSchema,
   type ClientSettingsState,
   type FontSize,
   type ResolvedTheme,
@@ -11,27 +15,25 @@ const COOKIE_THEME = "skyjt_theme";
 const COOKIE_SEED = "skyjt_seed";
 const COOKIE_FONT_SIZE = "skyjt_font_size";
 
-const HEX_COLOR_REGEX = /^#[0-9a-fA-F]{6}$/;
-
 /**
  * Validates whether a value matches the ThemeMode union.
  */
-export function isValidTheme(value: string | undefined): value is ThemeMode {
-  return value === "light" || value === "dark" || value === "system";
+export function isValidTheme(value: unknown): value is ThemeMode {
+  return v.is(ThemeModeSchema, value);
 }
 
 /**
  * Validates whether a value matches the FontSize union.
  */
-export function isValidFontSize(value: string | undefined): value is FontSize {
-  return value === "sm" || value === "md" || value === "lg" || value === "xl";
+export function isValidFontSize(value: unknown): value is FontSize {
+  return v.is(FontSizeSchema, value);
 }
 
 /**
  * Validates whether a value is a valid 6-digit hex color code.
  */
-export function isValidHexColor(value: string | undefined): boolean {
-  return typeof value === "string" && HEX_COLOR_REGEX.test(value);
+export function isValidHexColor(value: unknown): value is string {
+  return v.is(SeedColorSchema, value);
 }
 
 /**
@@ -49,13 +51,16 @@ export function parseServerCookies(cookieHeader: string | null | undefined): Cli
   const cookies = parseCookieMap(cookieHeader);
 
   const rawTheme = cookies[COOKIE_THEME];
-  const theme: ThemeMode = isValidTheme(rawTheme) ? rawTheme : DEFAULT_SETTINGS.theme;
+  const themeParsed = v.safeParse(ThemeModeSchema, rawTheme);
+  const theme: ThemeMode = themeParsed.success ? themeParsed.output : DEFAULT_SETTINGS.theme;
 
   const rawSeed = cookies[COOKIE_SEED];
-  const seedColor = isValidHexColor(rawSeed) ? (rawSeed as string) : DEFAULT_SETTINGS.seedColor;
+  const seedParsed = v.safeParse(SeedColorSchema, rawSeed);
+  const seedColor = seedParsed.success ? seedParsed.output : DEFAULT_SETTINGS.seedColor;
 
   const rawFontSize = cookies[COOKIE_FONT_SIZE];
-  const fontSize: FontSize = isValidFontSize(rawFontSize) ? rawFontSize : DEFAULT_SETTINGS.fontSize;
+  const fontParsed = v.safeParse(FontSizeSchema, rawFontSize);
+  const fontSize: FontSize = fontParsed.success ? fontParsed.output : DEFAULT_SETTINGS.fontSize;
 
   const resolvedTheme: ResolvedTheme = theme === "light" ? "light-seed" : "dark-seed";
 
@@ -75,24 +80,16 @@ export function parseBrowserCookies(): Partial<ClientSettingsState> {
     return {};
   }
   const cookies = parseCookieMap(document.cookie);
-  const result: { theme?: ThemeMode; seedColor?: string; fontSize?: FontSize } = {};
 
-  const rawTheme = cookies[COOKIE_THEME];
-  if (isValidTheme(rawTheme)) {
-    result.theme = rawTheme;
-  }
+  const themeParsed = v.safeParse(ThemeModeSchema, cookies[COOKIE_THEME]);
+  const seedParsed = v.safeParse(SeedColorSchema, cookies[COOKIE_SEED]);
+  const fontParsed = v.safeParse(FontSizeSchema, cookies[COOKIE_FONT_SIZE]);
 
-  const rawSeed = cookies[COOKIE_SEED];
-  if (isValidHexColor(rawSeed)) {
-    result.seedColor = rawSeed;
-  }
-
-  const rawFontSize = cookies[COOKIE_FONT_SIZE];
-  if (isValidFontSize(rawFontSize)) {
-    result.fontSize = rawFontSize;
-  }
-
-  return result;
+  return {
+    ...(themeParsed.success ? { theme: themeParsed.output } : {}),
+    ...(seedParsed.success ? { seedColor: seedParsed.output } : {}),
+    ...(fontParsed.success ? { fontSize: fontParsed.output } : {}),
+  };
 }
 
 /**
