@@ -5,6 +5,7 @@ import solid from "@solidjs/vite-plugin";
 import { nitro } from "nitro/vite";
 import { aot } from "elysia/plugin/aot/vite";
 import tailwindcss from "@tailwindcss/vite";
+import Icons from "unplugin-icons/vite";
 
 export default defineConfig({
   resolve: {
@@ -36,6 +37,9 @@ export default defineConfig({
       },
     }),
     tailwindcss(),
+    Icons({
+      compiler: "solid",
+    }),
     {
       ...aot("src/server/index.ts"),
       apply(_config, env) {

@@ -1,3 +1,4 @@
+import { parseCookie, stringifySetCookie } from "cookie";
 import {
   DEFAULT_SETTINGS,
   type ClientSettingsState,
@@ -34,24 +35,11 @@ export function isValidHexColor(value: string | undefined): boolean {
 }
 
 /**
- * Parses raw cookie string into a key-value record.
+ * Parses raw cookie string into a key-value record using the RFC 6265 compliant cookie package.
  */
-function parseCookieMap(cookieString: string | null | undefined): Record<string, string> {
-  const result: Record<string, string> = {};
-  if (!cookieString) return result;
-
-  const pairs = cookieString.split(";");
-  for (const pair of pairs) {
-    const trimmed = pair.trim();
-    if (!trimmed) continue;
-    const eqIdx = trimmed.indexOf("=");
-    if (eqIdx > 0) {
-      const key = decodeURIComponent(trimmed.slice(0, eqIdx).trim());
-      const val = decodeURIComponent(trimmed.slice(eqIdx + 1).trim());
-      result[key] = val;
-    }
-  }
-  return result;
+function parseCookieMap(cookieString: string | null | undefined): Record<string, string | undefined> {
+  if (!cookieString) return {};
+  return parseCookie(cookieString);
 }
 
 /**
@@ -108,12 +96,17 @@ export function parseBrowserCookies(): Partial<ClientSettingsState> {
 }
 
 /**
- * Writes a client cookie with a 1-year max age and Lax same-site policy.
+ * Writes a client cookie with a 1-year max age and Lax same-site policy using stringifySetCookie.
  */
 export function writeClientCookie(name: string, value: string): void {
   if (typeof document === "undefined") return;
-  const maxAge = 31536000;
-  document.cookie = `${encodeURIComponent(name)}=${encodeURIComponent(value)}; path=/; max-age=${maxAge}; SameSite=Lax`;
+  document.cookie = stringifySetCookie({
+    name,
+    value,
+    path: "/",
+    maxAge: 31536000,
+    sameSite: "lax",
+  });
 }
 
 /**

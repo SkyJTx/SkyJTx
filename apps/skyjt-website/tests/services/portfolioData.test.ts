@@ -1,4 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
+import * as v from "valibot";
+import { createEdenServer } from "~/services/eden-server";
 import {
   fetchWorksData,
   fetchPersonalInfo,
@@ -7,9 +9,14 @@ import {
   getPersonalInfoQuery,
   getMusicWorksDataQuery,
   clearPortfolioCache,
+  setEdenForTesting,
   WorksDataSchema,
   MusicWorksDataSchema,
   PersonalInfoSchema,
+  STORAGE_BASE_URL,
+  WORKS_DATA_URL,
+  PERSONAL_INFO_URL,
+  MUSIC_WORKS_DATA_URL,
   SUPABASE_WORKS_URL,
   SUPABASE_PERSONAL_URL,
   SUPABASE_MUSIC_WORKS_URL,
@@ -24,9 +31,12 @@ import {
   PORTFOLIO_QUERY_KEYS as CONST_PORTFOLIO_QUERY_KEYS,
   PORTFOLIO_CACHE_TTL_MS as CONST_PORTFOLIO_CACHE_TTL_MS,
   PROJECT_LINK_ICONS as CONST_PROJECT_LINK_ICONS,
+  STORAGE_BASE_URL as CONST_STORAGE_BASE_URL,
+  WORKS_DATA_URL as CONST_WORKS_DATA_URL,
+  PERSONAL_INFO_URL as CONST_PERSONAL_INFO_URL,
+  MUSIC_WORKS_DATA_URL as CONST_MUSIC_WORKS_DATA_URL,
 } from "~/constants";
 import type { ProjectData, MusicWorkData } from "~/types";
-import * as v from "valibot";
 
 describe("portfolioData service", () => {
   beforeEach(() => {
@@ -38,12 +48,12 @@ describe("portfolioData service", () => {
     it("validates valid works data structure", () => {
       const mockProjects: ProjectData[] = [
         {
-          id: "test-proj",
+          id: "test-id",
           title: "Test Project",
-          description: "A valid test project description.",
+          description: "Test description",
           thumbnailUrl: "https://example.com/thumb.jpg",
           images: [{ src: "https://example.com/img.jpg", alt: "alt" }],
-          links: [{ label: "Code", url: "https://github.com", icon: "github" }],
+          links: [{ label: "GitHub", url: "https://github.com", icon: "github" }],
         },
       ];
 
@@ -52,23 +62,18 @@ describe("portfolioData service", () => {
     });
 
     it("rejects invalid works data structure", () => {
-      const invalidData = [{ id: 123, title: null }];
-      const result = v.safeParse(WorksDataSchema, invalidData);
+      const invalidProjects = [{ id: 123, title: 456 }];
+      const result = v.safeParse(WorksDataSchema, invalidProjects);
       expect(result.success).toBe(false);
     });
 
     it("validates valid music works data structure", () => {
       const mockScores: MusicWorkData[] = [
         {
-          id: "score-101",
-          title: "Synthetic Composition Alpha",
-          scoreUrl: "https://example.com/scores/101",
-          thumbnailUrl: "https://example.com/score_101.png",
-          partsCount: "1 part",
-          pagesCount: "2 pages",
-          duration: "02:05",
-          date: "Sep 23, 2026",
-          views: "2 views",
+          id: "score-1",
+          title: "BWV 1067",
+          scoreUrl: "https://musescore.com/score/1",
+          thumbnailUrl: "https://example.com/score.png",
           instruments: ["Solo Harpsichord", "Harpsichord"],
         },
       ];
@@ -95,25 +100,26 @@ describe("portfolioData service", () => {
         {
           id: "remote-p1",
           title: "Remote Project",
-          description: "Fetched from Supabase",
+          description: "Fetched from Storage",
           thumbnailUrl: "https://example.com/p1.jpg",
           images: [],
           links: [],
         },
       ];
 
-      vi.spyOn(globalThis, "fetch").mockImplementation((input) => {
-        const url = typeof input === "string" ? input : input instanceof URL ? input.href : input.url;
-        if (url === SUPABASE_WORKS_URL) {
-          return Promise.resolve(
-            new Response(JSON.stringify(mockProjects), {
-              status: 200,
-              headers: { "Content-Type": "application/json" },
-            })
-          );
-        }
-        return Promise.reject(new Error("Unknown URL"));
-      });
+      setEdenForTesting(
+        createEdenServer({
+          fetcher: async (req) => {
+            if (req.url.includes("/data/works")) {
+              return new Response(JSON.stringify(mockProjects), {
+                status: 200,
+                headers: { "Content-Type": "application/json" },
+              });
+            }
+            return new Response("Not Found", { status: 404 });
+          },
+        })
+      );
 
       const data = await fetchWorksData();
       expect(data).toHaveLength(1);
@@ -132,27 +138,34 @@ describe("portfolioData service", () => {
         },
       ];
 
-      const fetchSpy = vi.spyOn(globalThis, "fetch").mockResolvedValue(
-        new Response(JSON.stringify(mockProjects), {
-          status: 200,
-          headers: { "Content-Type": "application/json" },
+      let callCount = 0;
+      setEdenForTesting(
+        createEdenServer({
+          fetcher: async () => {
+            callCount++;
+            return new Response(JSON.stringify(mockProjects), {
+              status: 200,
+              headers: { "Content-Type": "application/json" },
+            });
+          },
         })
       );
 
       const data1 = await fetchWorksData();
       const data2 = await fetchWorksData();
 
-      expect(fetchSpy).toHaveBeenCalledTimes(1);
+      expect(callCount).toBe(1);
       expect(data1).toEqual(data2);
     });
 
-    it("falls back to empty NOT_FOUND_PROJECTS when fetch fails", async () => {
-      vi.spyOn(globalThis, "fetch").mockResolvedValue(
-        new Response("Not Found", { status: 404 })
+    it("throws descriptive error when fetch fails instead of returning fake data", async () => {
+      setEdenForTesting(
+        createEdenServer({
+          fetcher: async () => new Response("Not Found", { status: 404 }),
+        })
       );
 
-      const data = await fetchWorksData();
-      expect(data).toEqual(NOT_FOUND_PROJECTS);
+      await expect(fetchWorksData()).rejects.toThrow("Failed to fetch works data");
     });
   });
 
@@ -168,18 +181,19 @@ describe("portfolioData service", () => {
         },
       ];
 
-      vi.spyOn(globalThis, "fetch").mockImplementation((input) => {
-        const url = typeof input === "string" ? input : input instanceof URL ? input.href : input.url;
-        if (url === SUPABASE_MUSIC_WORKS_URL) {
-          return Promise.resolve(
-            new Response(JSON.stringify(mockScores), {
-              status: 200,
-              headers: { "Content-Type": "application/json" },
-            })
-          );
-        }
-        return Promise.reject(new Error("Unknown URL"));
-      });
+      setEdenForTesting(
+        createEdenServer({
+          fetcher: async (req) => {
+            if (req.url.includes("/data/music")) {
+              return new Response(JSON.stringify(mockScores), {
+                status: 200,
+                headers: { "Content-Type": "application/json" },
+              });
+            }
+            return new Response("Not Found", { status: 404 });
+          },
+        })
+      );
 
       const data = await fetchMusicWorksData();
       expect(data).toHaveLength(1);
@@ -197,27 +211,34 @@ describe("portfolioData service", () => {
         },
       ];
 
-      const fetchSpy = vi.spyOn(globalThis, "fetch").mockResolvedValue(
-        new Response(JSON.stringify(mockScores), {
-          status: 200,
-          headers: { "Content-Type": "application/json" },
+      let callCount = 0;
+      setEdenForTesting(
+        createEdenServer({
+          fetcher: async () => {
+            callCount++;
+            return new Response(JSON.stringify(mockScores), {
+              status: 200,
+              headers: { "Content-Type": "application/json" },
+            });
+          },
         })
       );
 
       const data1 = await fetchMusicWorksData();
       const data2 = await fetchMusicWorksData();
 
-      expect(fetchSpy).toHaveBeenCalledTimes(1);
+      expect(callCount).toBe(1);
       expect(data1).toEqual(data2);
     });
 
-    it("falls back to empty NOT_FOUND_MUSIC_WORKS when fetch fails", async () => {
-      vi.spyOn(globalThis, "fetch").mockResolvedValue(
-        new Response("Not Found", { status: 404 })
+    it("throws descriptive error when music fetch fails instead of returning fake data", async () => {
+      setEdenForTesting(
+        createEdenServer({
+          fetcher: async () => new Response("Not Found", { status: 404 }),
+        })
       );
 
-      const data = await fetchMusicWorksData();
-      expect(data).toEqual(NOT_FOUND_MUSIC_WORKS);
+      await expect(fetchMusicWorksData()).rejects.toThrow("Failed to fetch music works data");
     });
   });
 
@@ -233,22 +254,23 @@ describe("portfolioData service", () => {
         githubUrl: "https://github.com/janedoe",
         linkedinUrl: "https://linkedin.com/in/janedoe",
         musescoreUrl: "https://musescore.com/janedoe",
-        resumeUrl: "https://example.com/cv.pdf",
-        myselfPhotoUrl: "https://example.com/me.jpg",
+        resumeUrl: "/api/storage/file/cv.pdf",
+        myselfPhotoUrl: "/api/storage/file/me.jpg",
       };
 
-      vi.spyOn(globalThis, "fetch").mockImplementation((input) => {
-        const url = typeof input === "string" ? input : input instanceof URL ? input.href : input.url;
-        if (url === SUPABASE_PERSONAL_URL) {
-          return Promise.resolve(
-            new Response(JSON.stringify(mockInfo), {
-              status: 200,
-              headers: { "Content-Type": "application/json" },
-            })
-          );
-        }
-        return Promise.reject(new Error("Unknown URL"));
-      });
+      setEdenForTesting(
+        createEdenServer({
+          fetcher: async (req) => {
+            if (req.url.includes("/data/personal")) {
+              return new Response(JSON.stringify(mockInfo), {
+                status: 200,
+                headers: { "Content-Type": "application/json" },
+              });
+            }
+            return new Response("Not Found", { status: 404 });
+          },
+        })
+      );
 
       const data = await fetchPersonalInfo();
       expect(data.fullName).toBe("Jane Doe");
@@ -266,29 +288,38 @@ describe("portfolioData service", () => {
         githubUrl: "https://github.com/janedoe",
         linkedinUrl: "https://linkedin.com/in/janedoe",
         musescoreUrl: "https://musescore.com/janedoe",
-        resumeUrl: "https://example.com/cv.pdf",
-        myselfPhotoUrl: "https://example.com/me.jpg",
+        resumeUrl: "/api/storage/file/cv.pdf",
+        myselfPhotoUrl: "/api/storage/file/me.jpg",
       };
 
-      const fetchSpy = vi.spyOn(globalThis, "fetch").mockResolvedValue(
-        new Response(JSON.stringify(mockInfo), {
-          status: 200,
-          headers: { "Content-Type": "application/json" },
+      let callCount = 0;
+      setEdenForTesting(
+        createEdenServer({
+          fetcher: async () => {
+            callCount++;
+            return new Response(JSON.stringify(mockInfo), {
+              status: 200,
+              headers: { "Content-Type": "application/json" },
+            });
+          },
         })
       );
 
       const data1 = await fetchPersonalInfo();
       const data2 = await fetchPersonalInfo();
 
-      expect(fetchSpy).toHaveBeenCalledTimes(1);
+      expect(callCount).toBe(1);
       expect(data1).toEqual(data2);
     });
 
-    it("falls back to NOT_FOUND_PERSONAL_INFO on network error", async () => {
-      vi.spyOn(globalThis, "fetch").mockRejectedValue(new Error("Network failed"));
+    it("throws descriptive error on personal info fetch failure instead of returning fake data", async () => {
+      setEdenForTesting(
+        createEdenServer({
+          fetcher: async () => new Response("Internal Server Error", { status: 500 }),
+        })
+      );
 
-      const data = await fetchPersonalInfo();
-      expect(data).toEqual(NOT_FOUND_PERSONAL_INFO);
+      await expect(fetchPersonalInfo()).rejects.toThrow("Failed to fetch personal info");
     });
   });
 
@@ -302,11 +333,16 @@ describe("portfolioData service", () => {
       expect(getMusicWorksDataQuery.key).toBe(PORTFOLIO_QUERY_KEYS.MUSIC);
     });
   });
+
   describe("constants contracts", () => {
     it("re-exports all portfolio constants identically from ~/services/portfolioData", () => {
       expect(PORTFOLIO_QUERY_KEYS).toEqual(CONST_PORTFOLIO_QUERY_KEYS);
       expect(PORTFOLIO_CACHE_TTL_MS).toBe(CONST_PORTFOLIO_CACHE_TTL_MS);
       expect(PROJECT_LINK_ICONS).toEqual(CONST_PROJECT_LINK_ICONS);
+      expect(STORAGE_BASE_URL).toBe(CONST_STORAGE_BASE_URL);
+      expect(WORKS_DATA_URL).toBe(CONST_WORKS_DATA_URL);
+      expect(PERSONAL_INFO_URL).toBe(CONST_PERSONAL_INFO_URL);
+      expect(MUSIC_WORKS_DATA_URL).toBe(CONST_MUSIC_WORKS_DATA_URL);
       expect(PORTFOLIO_CACHE_TTL_MS).toBe(60000);
       expect(PROJECT_LINK_ICONS).toEqual(["github", "external-link", "file-text"]);
     });

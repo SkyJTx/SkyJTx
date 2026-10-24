@@ -1,25 +1,32 @@
 import type { PersonalInfo, ProjectData, MusicWorkData } from "~/types";
 
 /**
- * Public Supabase storage bucket base endpoint for runtime content assets.
+ * Storage proxy endpoint for runtime content assets.
  */
-export const SUPABASE_BASE_URL =
-  "https://kmqwwvhddlqvdmvnqved.supabase.co/storage/v1/object/public/skyjt-website-storage/Data";
+export const STORAGE_BASE_URL = "/api/storage";
 
 /**
- * Supabase storage endpoint for software projects payload.
+ * Storage endpoint for software projects payload.
  */
-export const SUPABASE_WORKS_URL = `${SUPABASE_BASE_URL}/worksData.json` as const;
+export const WORKS_DATA_URL = `${STORAGE_BASE_URL}/data/works` as const;
 
 /**
- * Supabase storage endpoint for personal profile metadata payload.
+ * Storage endpoint for personal profile metadata payload.
  */
-export const SUPABASE_PERSONAL_URL = `${SUPABASE_BASE_URL}/personalInfo.json` as const;
+export const PERSONAL_INFO_URL = `${STORAGE_BASE_URL}/data/personal` as const;
 
 /**
- * Supabase storage endpoint for sheet music scores payload.
+ * Storage endpoint for sheet music scores payload.
  */
-export const SUPABASE_MUSIC_WORKS_URL = `${SUPABASE_BASE_URL}/musicWorksData.json` as const;
+export const MUSIC_WORKS_DATA_URL = `${STORAGE_BASE_URL}/data/music` as const;
+
+/**
+ * Backward compatibility aliases for legacy Supabase constants.
+ */
+export const SUPABASE_BASE_URL = `${STORAGE_BASE_URL}/data`;
+export const SUPABASE_WORKS_URL = WORKS_DATA_URL;
+export const SUPABASE_PERSONAL_URL = PERSONAL_INFO_URL;
+export const SUPABASE_MUSIC_WORKS_URL = MUSIC_WORKS_DATA_URL;
 
 /**
  * Default cache duration (in milliseconds) for in-memory portfolio data.

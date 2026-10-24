@@ -1,4 +1,5 @@
-﻿import type { JSX } from "@solidjs/web";
+import mime from "mime";
+import type { JSX } from "@solidjs/web";
 import {
   createSignal,
   createMemo,
@@ -21,8 +22,9 @@ export interface FilePreviewProps {
 type FileType = "image" | "pdf";
 
 function detectFileType(url: string): FileType {
-  const cleanUrl = url.split(/[?#]/)[0].toLowerCase();
-  if (cleanUrl.endsWith(".pdf") || url.toLowerCase().includes(".pdf")) {
+  const cleanUrl = url.split(/[?#]/)[0] ?? url;
+  const mimeType = mime.getType(cleanUrl);
+  if (mimeType === "application/pdf") {
     return "pdf";
   }
   return "image";
@@ -50,7 +52,8 @@ export function FilePreview(props: FilePreviewProps): JSX.Element {
       link.click();
       document.body.removeChild(link);
       URL.revokeObjectURL(blobUrl);
-    } catch {
+    } catch (err) {
+      console.warn("[FilePreview] Direct download failed, opening in new tab:", err);
       window.open(props.url, "_blank", "noopener,noreferrer");
     }
   };
@@ -61,8 +64,8 @@ export function FilePreview(props: FilePreviewProps): JSX.Element {
         await navigator.clipboard.writeText(props.url);
         setCopied(true);
         setTimeout(() => setCopied(false), 2000);
-      } catch {
-        // Fallback silently
+      } catch (err) {
+        console.error("[FilePreview] Clipboard write failed:", err);
       }
     }
   };

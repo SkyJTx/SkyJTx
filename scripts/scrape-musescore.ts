@@ -1,5 +1,6 @@
 import { execFile } from "node:child_process";
 import { existsSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import * as cheerio from "cheerio";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { promisify } from "node:util";
@@ -123,18 +124,15 @@ function extractAuthorIdentifiers(
     }
   }
 
-  const canonicalMatch = html.match(
-    /<link[^>]+(?:href="https:\/\/musescore\.com\/user\/(\d+)"[^>]+rel="canonical"|rel="canonical"[^>]+href="https:\/\/musescore\.com\/user\/(\d+)")/i
-  );
-  const canonicalId = canonicalMatch?.[1] ?? canonicalMatch?.[2];
+  const $ = cheerio.load(html);
+  const canonicalHref = $('link[rel="canonical"]').attr("href");
+  const canonicalId = canonicalHref?.match(/musescore\.com\/user\/(\d+)/)?.[1];
   if (canonicalId) {
     identifiers.push(`/user/${canonicalId}`);
   }
 
-  const ogMatch = html.match(
-    /meta[^>]+property="og:url"[^>]+content="https:\/\/musescore\.com\/user\/(\d+)"/i
-  );
-  const ogId = ogMatch?.[1];
+  const ogUrl = $('meta[property="og:url"]').attr("content");
+  const ogId = ogUrl?.match(/musescore\.com\/user\/(\d+)/)?.[1];
   if (ogId && !identifiers.includes(`/user/${ogId}`)) {
     identifiers.push(`/user/${ogId}`);
   }
@@ -149,54 +147,53 @@ function parseScoresFromHtml(
   html: string,
   authorIdentifiers: readonly string[]
 ): readonly ScrapedMusicScore[] {
-  const articles = [...html.matchAll(/<article\b[^>]*>([\s\S]*?)<\/article>/gi)];
+  const $ = cheerio.load(html);
   const scores: ScrapedMusicScore[] = [];
 
-  for (const match of articles) {
-    const content = match[1];
+  $("article").each((_, element) => {
+    const article = $(element);
+    const content = article.html() || "";
     if (!content) {
-      continue;
+      return;
     }
 
-    const isAuthorScore =
-      authorIdentifiers.some((id) => content.includes(id));
-
+    const isAuthorScore = authorIdentifiers.some((id) => content.includes(id));
     if (!isAuthorScore) {
-      continue;
+      return;
     }
 
-    const linkMatch = content.match(
-      /href="(https:\/\/musescore\.com\/user\/\d+\/scores\/(\d+))"/
-    );
-    if (!linkMatch) {
-      continue;
+    const linkEl = article.find('a[href*="/scores/"]').first();
+    const scoreUrl = linkEl.attr("href");
+    if (!scoreUrl) {
+      return;
     }
 
-    const scoreUrl = linkMatch[1];
-    const id = linkMatch[2];
-    if (!scoreUrl || !id) {
-      continue;
+    const idMatch = scoreUrl.match(/\/scores\/(\d+)/);
+    const id = idMatch?.[1];
+    if (!id) {
+      return;
     }
 
-    const imgMatch = content.match(/<img[^>]*src="([^"]+)"[^>]*alt="([^"]*)"/);
-    const rawThumb = imgMatch?.[1];
+    const img = article.find("img").first();
+    const rawThumb = img.attr("src");
     const thumbnailUrl = rawThumb ? rawThumb.replace(/&amp;/g, "&") : "";
 
-    const titleMatch = content.match(/class="tUpqA">([\s\S]*?)<\/div>/);
-    const rawTitle = titleMatch?.[1];
-    const rawAlt = imgMatch?.[2];
+    const rawTitle = article.find(".tUpqA").first().text().trim();
+    const rawAlt = img.attr("alt") || "";
     const title = rawTitle
-      ? rawTitle.trim()
+      ? rawTitle
       : rawAlt
         ? rawAlt.split(" sheet music arranged by")[0]?.trim() ?? "Untitled Score"
         : "Untitled Score";
 
-    const metaMatch = content.match(/class="uRAco">([\s\S]*?)<\/span>/);
-    const metaText = metaMatch?.[1] ? metaMatch[1].trim() : "";
-
-    const tags = [...content.matchAll(/class="B7-Vh">([\s\S]*?)<\/div>/gi)]
-      .map((m) => m[1]?.trim())
-      .filter((tag): tag is string => typeof tag === "string" && tag.length > 0);
+    const metaText = article.find(".uRAco").first().text().trim();
+    const tags: string[] = [];
+    article.find(".B7-Vh").each((_, tagEl) => {
+      const tag = $(tagEl).text().trim();
+      if (tag) {
+        tags.push(tag);
+      }
+    });
 
     const parts = metaText.split("•").map((s) => s.trim());
     let partsCount: string | undefined;
@@ -231,7 +228,7 @@ function parseScoresFromHtml(
       ...(views ? { views } : {}),
       instruments: tags,
     });
-  }
+  });
 
   return scores;
 }

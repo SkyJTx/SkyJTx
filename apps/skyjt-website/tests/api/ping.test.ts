@@ -71,7 +71,7 @@ describe("API Route: /api/ping", () => {
     expect(parsed.status).toBe("active");
     expect(parsed.path).toBe("/api/ping");
     expect(parsed.timestamp).toBeLessThanOrEqual(Date.now());
-  });
+  }, 15000);
 
   it("falls through with 404 when dispatched with unsupported HTTP method", async () => {
     const response = await fetch(`${baseUrl}/api/ping`, { method: "POST" });

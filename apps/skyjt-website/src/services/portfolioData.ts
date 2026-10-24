@@ -1,4 +1,7 @@
 import * as v from "valibot";
+import { isServer } from "@solidjs/web";
+import { edenClient, type EdenClient } from "./eden-client";
+import type { EdenServer } from "./eden-server";
 import { getOwner, useContext } from "solid-js";
 import { query, RouterContext } from "@solidjs/router";
 import type {
@@ -7,6 +10,10 @@ import type {
   MusicWorkData,
 } from "~/types";
 import {
+  STORAGE_BASE_URL,
+  WORKS_DATA_URL,
+  PERSONAL_INFO_URL,
+  MUSIC_WORKS_DATA_URL,
   SUPABASE_BASE_URL,
   SUPABASE_WORKS_URL,
   SUPABASE_PERSONAL_URL,
@@ -21,6 +28,10 @@ import {
 
 // Re-export constants for seamless backward compatibility
 export {
+  STORAGE_BASE_URL,
+  WORKS_DATA_URL,
+  PERSONAL_INFO_URL,
+  MUSIC_WORKS_DATA_URL,
   SUPABASE_BASE_URL,
   SUPABASE_WORKS_URL,
   SUPABASE_PERSONAL_URL,
@@ -133,6 +144,11 @@ export function clearPortfolioCache(): void {
   worksCache = null;
   personalCache = null;
   musicCache = null;
+  cachedEdenServer = null;
+}
+
+export function setEdenForTesting(eden: EdenClient | EdenServer | null): void {
+  cachedEdenServer = eden as EdenServer;
 }
 
 /**
@@ -146,76 +162,76 @@ function hasRouterContext(): boolean {
   }
 }
 
-/**
- * Fetches JSON directly from remote Supabase storage bucket with safe fallback to Not Found.
- */
-async function fetchFromSupabase<T>(
-  url: string,
-  schema: v.BaseSchema<unknown, T, v.BaseIssue<unknown>>,
-  fallbackData: T
-): Promise<T> {
-  try {
-    const res = await fetch(url);
-    if (res.ok) {
-      const json: unknown = await res.json();
-      const parseResult = v.safeParse(schema, json);
-      if (parseResult.success) {
-        return parseResult.output;
-      }
-    }
-  } catch {
-    // Remote fetch failure handled gracefully by falling back to Not Found data
-  }
 
-  return fallbackData;
+
+let cachedEdenServer: EdenServer | null = null;
+
+/**
+ * Resolves the appropriate Eden Treaty instance for the current execution context.
+ * Dynamically loads edenServer during SSR to prevent bundling server modules into client assets.
+ */
+export async function getEden(): Promise<EdenClient | EdenServer> {
+  if (cachedEdenServer) {
+    return cachedEdenServer;
+  }
+  if (isServer) {
+    const serverModulePath = "./eden-server";
+    const mod = (await import(serverModulePath)) as { edenServer: EdenServer };
+    cachedEdenServer = mod.edenServer;
+    return cachedEdenServer;
+  }
+  return edenClient;
 }
 
 /**
- * Fetches portfolio projects exclusively from remote Supabase bucket with in-memory TTL caching.
+ * Fetches portfolio projects from storage proxy with in-memory TTL caching.
  */
 export async function fetchWorksData(): Promise<readonly ProjectData[]> {
   if (isCacheFresh(worksCache)) {
     return worksCache.data;
   }
-  const data = await fetchFromSupabase(
-    SUPABASE_WORKS_URL,
-    WorksDataSchema,
-    NOT_FOUND_PROJECTS
-  );
-  worksCache = { data, timestamp: Date.now() };
-  return data;
+  const eden = await getEden();
+  const res = await eden.api.storage.data.works.get();
+  if (res.error) {
+    throw new Error(`Failed to fetch works data: ${JSON.stringify((res.error as { value?: unknown })?.value || res.error)}`);
+  }
+  const output = v.parse(WorksDataSchema, res.data);
+  worksCache = { data: output, timestamp: Date.now() };
+  return output;
 }
 
 /**
- * Fetches personal profile metadata exclusively from remote Supabase bucket with in-memory TTL caching.
+ * Fetches personal profile metadata from storage proxy with in-memory TTL caching.
  */
 export async function fetchPersonalInfo(): Promise<Readonly<PersonalInfo>> {
   if (isCacheFresh(personalCache)) {
     return personalCache.data;
   }
-  const data = await fetchFromSupabase(
-    SUPABASE_PERSONAL_URL,
-    PersonalInfoSchema,
-    NOT_FOUND_PERSONAL_INFO
-  );
-  personalCache = { data, timestamp: Date.now() };
-  return data;
+  const eden = await getEden();
+  const res = await eden.api.storage.data.personal.get();
+  if (res.error) {
+    throw new Error(`Failed to fetch personal info: ${JSON.stringify((res.error as { value?: unknown })?.value || res.error)}`);
+  }
+  const output = v.parse(PersonalInfoSchema, res.data);
+  personalCache = { data: output, timestamp: Date.now() };
+  return output;
 }
 
 /**
- * Fetches music scores exclusively from remote Supabase bucket with in-memory TTL caching.
+ * Fetches music scores from storage proxy with in-memory TTL caching.
  */
 export async function fetchMusicWorksData(): Promise<readonly MusicWorkData[]> {
   if (isCacheFresh(musicCache)) {
     return musicCache.data;
   }
-  const data = await fetchFromSupabase(
-    SUPABASE_MUSIC_WORKS_URL,
-    MusicWorksDataSchema,
-    NOT_FOUND_MUSIC_WORKS
-  );
-  musicCache = { data, timestamp: Date.now() };
-  return data;
+  const eden = await getEden();
+  const res = await eden.api.storage.data.music.get();
+  if (res.error) {
+    throw new Error(`Failed to fetch music works data: ${JSON.stringify((res.error as { value?: unknown })?.value || res.error)}`);
+  }
+  const output = v.parse(MusicWorksDataSchema, res.data);
+  musicCache = { data: output, timestamp: Date.now() };
+  return output;
 }
 
 const rawWorksQuery = query(fetchWorksData, PORTFOLIO_QUERY_KEYS.WORKS);

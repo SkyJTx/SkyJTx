@@ -69,3 +69,5 @@ data/**
 
 # Cloudflare
 .wrangler/
+
+.tasks/

@@ -5,6 +5,7 @@ import {
   onSettled,
   For,
 } from "solid-js";
+import EmblaCarousel, { type EmblaCarouselType } from "embla-carousel";
 import { Icon } from "~/components/Icon";
 
 /**
@@ -18,7 +19,7 @@ export interface CarouselProps<T> {
 }
 
 /**
- * Accessible responsive carousel component with swipe gesture tracking and navigation controls.
+ * Accessible responsive carousel component powered by embla-carousel physics engine.
  */
 export function Carousel<T>(props: CarouselProps<T>): JSX.Element {
   const [currentPage, setCurrentPage] = createSignal(0);
@@ -26,22 +27,8 @@ export function Carousel<T>(props: CarouselProps<T>): JSX.Element {
   const desktopSlides = () => props.slidesPerViewDesktop ?? 2;
   const [slidesPerView, setSlidesPerView] = createSignal(mobileSlides());
 
-  const [isDragging, setIsDragging] = createSignal(false);
-  const [startX, setStartX] = createSignal(0);
-  const [dragOffset, setDragOffset] = createSignal(0);
   let viewportRef: HTMLDivElement | null = null;
-
-  onSettled(() => {
-    const update = () => {
-      setSlidesPerView(window.innerWidth >= 768 ? desktopSlides() : mobileSlides());
-    };
-    update();
-    window.addEventListener("resize", update);
-
-    return () => {
-      window.removeEventListener("resize", update);
-    };
-  });
+  let emblaApi: EmblaCarouselType | undefined;
 
   const totalPages = createMemo(() =>
     Math.max(1, Math.ceil(props.items.length / slidesPerView()))
@@ -49,43 +36,54 @@ export function Carousel<T>(props: CarouselProps<T>): JSX.Element {
 
   const slideWidthPercent = createMemo(() => 100 / slidesPerView());
 
+  onSettled(() => {
+    if (typeof window === "undefined" || !viewportRef || typeof IntersectionObserver === "undefined") return;
+
+    const currentWidth = window.innerWidth || 1024;
+    const initialView = currentWidth >= 768 ? desktopSlides() : mobileSlides();
+    if (initialView !== slidesPerView()) {
+      setSlidesPerView(initialView);
+    }
+
+    try {
+      emblaApi = EmblaCarousel(viewportRef, {
+        loop: false,
+        align: "start",
+        containScroll: "trimSnaps",
+      });
+
+      const onSelect = () => {
+        if (!emblaApi) return;
+        setCurrentPage(emblaApi.selectedScrollSnap());
+      };
+
+      emblaApi.on("select", onSelect);
+      emblaApi.on("reInit", onSelect);
+    } catch (err) {
+      console.error("[Carousel] Failed to initialize Embla Carousel:", err);
+    }
+
+    const handleResize = () => {
+      const nextView = window.innerWidth >= 768 ? desktopSlides() : mobileSlides();
+      if (nextView !== slidesPerView()) {
+        setSlidesPerView(nextView);
+        emblaApi?.reInit();
+      }
+    };
+
+    window.addEventListener("resize", handleResize);
+
+    return () => {
+      window.removeEventListener("resize", handleResize);
+      emblaApi?.destroy();
+    };
+  });
+
   const goTo = (page: number) => {
     const max = totalPages() - 1;
-    setCurrentPage(Math.max(0, Math.min(page, max)));
-  };
-
-  const dragOffsetPercent = createMemo(() => {
-    if (!viewportRef) return 0;
-    const width = viewportRef.getBoundingClientRect().width;
-    if (width === 0) return 0;
-    return (dragOffset() / width) * 100;
-  });
-
-  const trackOffset = createMemo(() => {
-    return -(currentPage() * slidesPerView() * slideWidthPercent()) + dragOffsetPercent();
-  });
-
-  const handlePointerDown = (e: PointerEvent) => {
-    setIsDragging(true);
-    setStartX(e.clientX);
-    setDragOffset(0);
-  };
-
-  const handlePointerMove = (e: PointerEvent) => {
-    if (!isDragging()) return;
-    setDragOffset(e.clientX - startX());
-  };
-
-  const handlePointerUp = () => {
-    if (!isDragging()) return;
-    setIsDragging(false);
-    const threshold = 40;
-    if (dragOffset() < -threshold) {
-      goTo(currentPage() + 1);
-    } else if (dragOffset() > threshold) {
-      goTo(currentPage() - 1);
-    }
-    setDragOffset(0);
+    const target = Math.max(0, Math.min(page, max));
+    setCurrentPage(target);
+    emblaApi?.scrollTo(target);
   };
 
   return (
@@ -95,18 +93,8 @@ export function Carousel<T>(props: CarouselProps<T>): JSX.Element {
           viewportRef = el;
         }}
         class="w-full overflow-hidden relative cursor-grab active:cursor-grabbing rounded-box"
-        onPointerDown={handlePointerDown}
-        onPointerMove={handlePointerMove}
-        onPointerUp={handlePointerUp}
-        onPointerCancel={handlePointerUp}
       >
-        <div
-          class="flex transition-transform duration-300 ease-out"
-          style={{
-            transform: `translateX(${trackOffset()}%)`,
-            "transition-duration": isDragging() ? "0ms" : "350ms",
-          }}
-        >
+        <div class="flex">
           <For each={props.items}>
             {(item) => (
               <div
