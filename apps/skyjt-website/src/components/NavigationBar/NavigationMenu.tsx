@@ -20,12 +20,12 @@ export function NavigationMenu(props: NavigationMenuProps): JSX.Element {
   return (
     <nav
       ref={setNavEl}
-      class="relative flex items-center bg-base-200/50 backdrop-blur-md p-1.5 rounded-full border border-base-content/10 shadow-lg"
+      class="relative flex items-center gap-1"
       aria-label="Main Navigation"
     >
       <Show when={indicatorStyle().ready}>
         <div
-          class="absolute top-1.5 bottom-1.5 bg-primary rounded-full transition-all duration-300 ease-out shadow-sm pointer-events-none"
+          class="absolute inset-y-0 bg-primary rounded-full transition-all duration-300 ease-out shadow-sm pointer-events-none z-0"
           style={{
             left: `${indicatorStyle().left}px`,
             width: `${indicatorStyle().width}px`,
@@ -34,7 +34,7 @@ export function NavigationMenu(props: NavigationMenuProps): JSX.Element {
         />
       </Show>
 
-      <div class="relative flex items-center gap-1 z-10">
+      <div class="flex items-center gap-1 z-10">
         <For each={props.sections}>
           {(section) => {
             const isActive = () => props.activeSection === section;

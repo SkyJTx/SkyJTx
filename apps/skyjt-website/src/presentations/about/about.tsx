@@ -1,6 +1,5 @@
 import type { JSX } from "@solidjs/web";
-import { createSignal, Loading } from "solid-js";
-import { Image } from "@kobalte/core/image";
+import { createSignal, Loading, Show } from "solid-js";
 import { Icon } from "~/components/Icon";
 import { useAboutController } from "./about.controller";
 import { useParallax } from "./useParallax";
@@ -69,16 +68,20 @@ function AboutContent(): JSX.Element {
         >
           <div class="relative">
             <div class="absolute -inset-2 rounded-full bg-primary/20 blur-lg pointer-events-none" />
-            <Image class="relative">
-              <Image.Img
+            <Show
+              when={c.avatarUrl}
+              fallback={
+                <div class="w-36 h-36 sm:w-48 sm:h-48 rounded-full bg-base-300 flex items-center justify-center text-2xl font-bold text-base-content/60 ring-4 ring-primary/40">
+                  NK
+                </div>
+              }
+            >
+              <img
                 src={c.avatarUrl}
                 alt={c.fullName}
                 class="w-36 h-36 sm:w-48 sm:h-48 rounded-full object-cover shadow-2xl ring-4 ring-primary/40"
               />
-              <Image.Fallback class="w-36 h-36 sm:w-48 sm:h-48 rounded-full bg-base-300 flex items-center justify-center text-2xl font-bold text-base-content/60 ring-4 ring-primary/40">
-                NK
-              </Image.Fallback>
-            </Image>
+            </Show>
           </div>
 
           <div class="mt-3.5 text-center">

@@ -27,6 +27,20 @@ export default defineConfig({
     }),
     nitro({
       preset: process.env.NITRO_PRESET || "cloudflare-module",
+      cloudflare: {
+        wrangler: {
+          name: "skyjt-website",
+          compatibility_date: "2026-07-30",
+          compatibility_flags: ["nodejs_compat"],
+          observability: {
+            enabled: true,
+          },
+        },
+      },
+      commands: {
+        preview: "bunx wrangler dev --env .env",
+        deploy: "bunx wrangler --cwd ./ deploy",
+      },
       routeRules: {
         "/": {
           headers: {

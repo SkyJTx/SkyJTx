@@ -22,15 +22,16 @@ export function ClientSettingsModal(props: ClientSettingsModalProps): JSX.Elemen
   const settings = useClientSettings();
 
   return (
-    <Dialog
-      open={props.isOpen}
-      onOpenChange={(open) => {
-        if (!open) props.onClose();
-      }}
-    >
-      <Dialog.Overlay class="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs animate-fade-in transition-opacity duration-200" />
-      <div class="fixed inset-0 z-50 flex items-center justify-center p-4 print:hidden pointer-events-none">
-        <Dialog.Content class="relative w-full max-w-md bg-base-200 border border-base-content/15 rounded-2xl shadow-2xl p-6 flex flex-col gap-6 max-h-[90vh] overflow-y-auto animate-scale-in transition-all duration-200 pointer-events-auto">
+    <Show when={props.isOpen}>
+      <Dialog
+        open={true}
+        onOpenChange={(open) => {
+          if (!open) props.onClose();
+        }}
+      >
+        <Dialog.Overlay class="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs animate-fade-in transition-opacity duration-200" />
+        <div class="fixed inset-0 z-50 flex items-center justify-center p-4 print:hidden pointer-events-none">
+          <Dialog.Content class="relative w-full max-w-md bg-base-200 border border-base-content/15 rounded-2xl shadow-2xl p-6 flex flex-col gap-6 max-h-[90vh] overflow-y-auto animate-scale-in transition-all duration-200 pointer-events-auto">
           {/* Header */}
           <div class="flex items-center justify-between border-b border-base-content/10 pb-3">
             <div>
@@ -150,7 +151,8 @@ export function ClientSettingsModal(props: ClientSettingsModalProps): JSX.Elemen
             </button>
           </div>
         </Dialog.Content>
-      </div>
-    </Dialog>
+        </div>
+      </Dialog>
+    </Show>
   );
 }

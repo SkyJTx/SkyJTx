@@ -1,0 +1,44 @@
+diff --git a/dist/_chunks/miniflare-runner.mjs b/dist/_chunks/miniflare-runner.mjs
+index 7fc4c54e5001f39f1295bc80401330806146ebfc..d739680409d09c284e75d61d88c6a2cbdd558a19 100644
+--- a/dist/_chunks/miniflare-runner.mjs
++++ b/dist/_chunks/miniflare-runner.mjs
+@@ -46,7 +46,7 @@ let __userEntry;
+ let __server;
+ let __ipcInitialized = false;
+ let __serverWs;
+-let __currentEnv;
++let __ipcEnv;
+ 
+ const __userEnvs = new WeakMap();
+ 
+@@ -134,7 +134,7 @@ async function __loadEntry(env, path) {
+ 
+ function __sendMessage(message) {
+   const payload = JSON.stringify(message);
+-  const env = __currentEnv;
++  const env = __ipcEnv;
+   if (env && env[__IPC_BINDING]) {
+     env[__IPC_BINDING].fetch("http://localhost/__ipc", {
+       method: "POST",
+@@ -249,11 +249,10 @@ export default {
+       return adapter.handleUpgrade(request, __userEnv(env), ctx);
+     }
+ 
+-    __currentEnv = env;
++    __ipcEnv = env;
+     try {
+       ${fetchBody}
+     } finally {
+-      __currentEnv = undefined;
+     }
+   }
+ };
+@@ -1136,7 +1135,7 @@ var MiniflareEnvRunner = class extends BaseEnvRunner {
+ 				}
+ 				options.durableObjects = autoDOs;
+ 			}
+-			options.script = generateWrapper(resolvedEntry, {
++			options.script = generateWrapper(resolvedEntry.replace(/\\/g, '/'), {
+ 				dynamicOnly: true,
+ 				captureErrors: this.#captureErrors,
+ 				exports: detectedExports,

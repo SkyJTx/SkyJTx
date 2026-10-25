@@ -6,14 +6,34 @@ import { detectFileType, downloadFile, type FileType } from "~/utils/fileDownloa
 import { useClipboard } from "~/hooks/useClipboard";
 
 export interface FilePreviewProps {
-  url: string;
-  name: string;
-  date?: string;
-  isOpen: boolean;
-  onClose: () => void;
+  readonly url: string;
+  readonly name: string;
+  readonly date?: string;
+  readonly isOpen: boolean;
+  readonly onClose: () => void;
 }
 
 export function FilePreview(props: FilePreviewProps): JSX.Element {
+  return (
+    <Show when={props.isOpen}>
+      <FilePreviewModal
+        url={props.url}
+        name={props.name}
+        date={props.date}
+        onClose={props.onClose}
+      />
+    </Show>
+  );
+}
+
+interface FilePreviewModalProps {
+  readonly url: string;
+  readonly name: string;
+  readonly date?: string;
+  readonly onClose: () => void;
+}
+
+function FilePreviewModal(props: FilePreviewModalProps): JSX.Element {
   const { copied, copy } = useClipboard(2000);
   const fileType = createMemo<FileType>(() => detectFileType(props.url));
 
@@ -28,7 +48,7 @@ export function FilePreview(props: FilePreviewProps): JSX.Element {
 
   return (
     <Dialog
-      open={props.isOpen}
+      open={true}
       onOpenChange={(open) => {
         if (!open) props.onClose();
       }}

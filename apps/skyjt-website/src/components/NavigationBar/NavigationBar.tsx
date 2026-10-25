@@ -71,7 +71,7 @@ export function NavigationBar(props: NavigationBarProps): JSX.Element {
           >
             <div
               id="dynamic-island-menu"
-              class="flex items-center max-w-[calc(100vw-1rem)] bg-slate-900/90 dark:bg-base-300/90 backdrop-blur-2xl border border-white/15 dark:border-base-content/20 shadow-2xl rounded-2xl p-1.5 gap-1 animate-dynamic-island"
+              class="flex items-center max-w-[calc(100vw-1rem)] bg-slate-900/90 dark:bg-base-300/90 backdrop-blur-2xl border border-white/15 dark:border-base-content/20 shadow-2xl rounded-full p-1.5 gap-1 animate-dynamic-island"
             >
               <NavigationMenu
                 sections={props.sections}
@@ -103,7 +103,7 @@ export function NavigationBar(props: NavigationBarProps): JSX.Element {
           </Show>
         </div>
 
-        <div class="hidden sm:flex items-center bg-slate-900/60 dark:bg-base-300/40 backdrop-blur-xl border border-white/10 dark:border-base-content/15 shadow-2xl rounded-2xl px-2 py-1.5 gap-1.5">
+        <div class="hidden sm:flex items-center bg-slate-900/60 dark:bg-base-300/40 backdrop-blur-xl border border-white/10 dark:border-base-content/15 shadow-2xl rounded-full p-1.5 gap-1.5">
           <NavigationMenu
             sections={props.sections}
             activeSection={props.activeSection}

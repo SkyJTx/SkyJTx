@@ -26,5 +26,8 @@
   },
   "overrides": {
     "@skyjt/typed-routes": "^0.6.2"
+  },
+  "patchedDependencies": {
+    "env-runner@0.2.3": "patches/env-runner@0.2.3.patch"
   }
 }
