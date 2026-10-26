@@ -12,7 +12,7 @@
     "typecheck": "tsc --noEmit",
     "lint": "oxlint src",
     "preview": "vite preview",
-    "deploy": "nitro deploy --prebuilt"
+    "deploy": "vite build && nitro deploy --prebuilt"
   },
   "license": "MIT",
   "devDependencies": {

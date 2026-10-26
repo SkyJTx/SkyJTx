@@ -28,6 +28,16 @@ describe("API Route: /api/storage", () => {
     expect(Array.isArray(json)).toBe(true);
   });
 
+  it("streams existing file with correct headers and zero buffer copies", async () => {
+    const res = await app.fetch(new Request("http://localhost/api/storage/file/Works/AIDM/AIDM%20(1).jpg"));
+    expect(res.status).toBe(200);
+    expect(res.headers.get("content-type")).toBe("image/jpeg");
+    expect(res.headers.get("content-disposition")).toBe("inline");
+    expect(res.headers.get("cache-control")).toContain("public");
+    const arrayBuffer = await res.arrayBuffer();
+    expect(arrayBuffer.byteLength).toBeGreaterThan(0);
+  });
+
   it("returns 404 for non-existent file", async () => {
     const res = await app.fetch(new Request("http://localhost/api/storage/file/non-existent-file-12345.xyz"));
     expect(res.status).toBe(404);

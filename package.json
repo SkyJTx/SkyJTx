@@ -12,7 +12,8 @@
     "dev": "turbo run dev",
     "lint": "turbo run lint",
     "test": "turbo run test",
-    "scrape:musescore": "bun run scripts/scrape-musescore.ts"
+    "scrape:musescore": "bun run scripts/scrape-musescore.ts",
+    "sync:r2": "bun run scripts/sync-r2-data.ts"
   },
   "devDependencies": {
     "@aws-sdk/client-s3": "^3.1156.0",

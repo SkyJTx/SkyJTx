@@ -48,3 +48,74 @@ export async function getObjectBytes(key: string): Promise<GetObjectBytesResult 
     throw error;
   }
 }
+
+export interface GetObjectStreamResult {
+  readonly stream: ReadableStream;
+  readonly contentType: string;
+  readonly contentLength?: number;
+}
+
+export async function getObjectStream(key: string): Promise<GetObjectStreamResult | null> {
+  const normalizedKey = key.replace(/^\/+/, "");
+  const context = getStorageContext();
+  try {
+    const command = new GetObjectCommand({
+      Bucket: context.bucket,
+      Key: normalizedKey,
+    });
+    const response = await context.client.send(command);
+
+    if (!response.Body) {
+      return null;
+    }
+
+    const contentType =
+      response.ContentType && response.ContentType !== "application/octet-stream"
+        ? response.ContentType
+        : getMimeType(normalizedKey);
+
+    return {
+      stream: response.Body.transformToWebStream(),
+      contentType,
+      contentLength: response.ContentLength,
+    };
+  } catch (error: unknown) {
+    if (
+      typeof error === "object" &&
+      error !== null &&
+      "name" in error &&
+      (error as { name: string }).name === "NoSuchKey"
+    ) {
+      return null;
+    }
+    throw error;
+  }
+}
+
+export async function getObjectText(key: string): Promise<string | null> {
+  const normalizedKey = key.replace(/^\/+/, "");
+  const context = getStorageContext();
+  try {
+    const command = new GetObjectCommand({
+      Bucket: context.bucket,
+      Key: normalizedKey,
+    });
+    const response = await context.client.send(command);
+
+    if (!response.Body) {
+      return null;
+    }
+
+    return await response.Body.transformToString();
+  } catch (error: unknown) {
+    if (
+      typeof error === "object" &&
+      error !== null &&
+      "name" in error &&
+      (error as { name: string }).name === "NoSuchKey"
+    ) {
+      return null;
+    }
+    throw error;
+  }
+}

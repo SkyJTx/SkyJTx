@@ -29,11 +29,26 @@ export default defineConfig({
       preset: process.env.NITRO_PRESET || "cloudflare-module",
       cloudflare: {
         wrangler: {
-          name: "skyjt-website",
+          name: "nattakarn",
           compatibility_date: "2026-07-30",
-          compatibility_flags: ["nodejs_compat"],
+          compatibility_flags: [
+            "nodejs_compat",
+          ],
           observability: {
             enabled: true,
+            head_sampling_rate: 1,
+            redact_query_string: false,
+            logs: {
+              enabled: true,
+              head_sampling_rate: 1,
+              invocation_logs: true,
+              persist: true
+            },
+            traces: {
+              enabled: true,
+              head_sampling_rate: 1,
+              persist: true
+            },
           },
         },
       },
