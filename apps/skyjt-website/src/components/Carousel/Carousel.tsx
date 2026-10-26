@@ -23,6 +23,7 @@ export interface CarouselProps<T> {
  */
 export function Carousel<T>(props: CarouselProps<T>): JSX.Element {
   const [currentPage, setCurrentPage] = createSignal(0);
+  const [scrollSnaps, setScrollSnaps] = createSignal<number[]>([]);
   const mobileSlides = () => props.slidesPerViewMobile ?? 1;
   const desktopSlides = () => props.slidesPerViewDesktop ?? 2;
   const [slidesPerView, setSlidesPerView] = createSignal(mobileSlides());
@@ -30,14 +31,21 @@ export function Carousel<T>(props: CarouselProps<T>): JSX.Element {
   let viewportRef: HTMLDivElement | null = null;
   let emblaApi: EmblaCarouselType | undefined;
 
-  const totalPages = createMemo(() =>
-    Math.max(1, Math.ceil(props.items.length / slidesPerView()))
-  );
+  const totalPages = createMemo(() => {
+    const snaps = scrollSnaps();
+    if (snaps.length > 0) return snaps.length;
+    return Math.max(1, Math.ceil(props.items.length / slidesPerView()));
+  });
 
   const slideWidthPercent = createMemo(() => 100 / slidesPerView());
 
   onSettled(() => {
-    if (typeof window === "undefined" || !viewportRef || typeof IntersectionObserver === "undefined") return;
+    if (
+      typeof window === "undefined" ||
+      !viewportRef ||
+      typeof IntersectionObserver === "undefined" ||
+      typeof ResizeObserver === "undefined"
+    ) return;
 
     const currentWidth = window.innerWidth || 1024;
     const initialView = currentWidth >= 768 ? desktopSlides() : mobileSlides();
@@ -50,15 +58,18 @@ export function Carousel<T>(props: CarouselProps<T>): JSX.Element {
         loop: false,
         align: "start",
         containScroll: "trimSnaps",
+        slidesToScroll: initialView,
       });
 
-      const onSelect = () => {
+      const syncState = () => {
         if (!emblaApi) return;
+        setScrollSnaps(emblaApi.scrollSnapList());
         setCurrentPage(emblaApi.selectedScrollSnap());
       };
 
-      emblaApi.on("select", onSelect);
-      emblaApi.on("reInit", onSelect);
+      emblaApi.on("select", syncState);
+      emblaApi.on("reInit", syncState);
+      syncState();
     } catch (err) {
       console.error("[Carousel] Failed to initialize Embla Carousel:", err);
     }
@@ -67,7 +78,9 @@ export function Carousel<T>(props: CarouselProps<T>): JSX.Element {
       const nextView = window.innerWidth >= 768 ? desktopSlides() : mobileSlides();
       if (nextView !== slidesPerView()) {
         setSlidesPerView(nextView);
-        emblaApi?.reInit();
+        emblaApi?.reInit({
+          slidesToScroll: nextView,
+        });
       }
     };
 

@@ -59,16 +59,31 @@ declare module "virtual:file-routes" {
       $$route?: undefined;
     },
     {
-      path: "/api/*slug";
+      path: "/api/ping";
       page: false;
-      $HEAD: FileRouteLazyRef<Pick<typeof import("./src/routes/api/[...slug]"), Extract<"HEAD", keyof typeof import("./src/routes/api/[...slug]")>>>;
-      $GET: FileRouteLazyRef<Pick<typeof import("./src/routes/api/[...slug]"), Extract<"GET", keyof typeof import("./src/routes/api/[...slug]")>>>;
-      $POST: FileRouteLazyRef<Pick<typeof import("./src/routes/api/[...slug]"), Extract<"POST", keyof typeof import("./src/routes/api/[...slug]")>>>;
-      $PUT: FileRouteLazyRef<Pick<typeof import("./src/routes/api/[...slug]"), Extract<"PUT", keyof typeof import("./src/routes/api/[...slug]")>>>;
-      $DELETE: FileRouteLazyRef<Pick<typeof import("./src/routes/api/[...slug]"), Extract<"DELETE", keyof typeof import("./src/routes/api/[...slug]")>>>;
-      $PATCH: FileRouteLazyRef<Pick<typeof import("./src/routes/api/[...slug]"), Extract<"PATCH", keyof typeof import("./src/routes/api/[...slug]")>>>;
-      $OPTIONS: FileRouteLazyRef<Pick<typeof import("./src/routes/api/[...slug]"), Extract<"OPTIONS", keyof typeof import("./src/routes/api/[...slug]")>>>;
-      $QUERY: FileRouteLazyRef<Pick<typeof import("./src/routes/api/[...slug]"), Extract<"QUERY", keyof typeof import("./src/routes/api/[...slug]")>>>;
+      $GET: FileRouteLazyRef<Pick<typeof import("./src/routes/api/ping"), Extract<"GET", keyof typeof import("./src/routes/api/ping")>>>;
+      $HEAD: FileRouteLazyRef<Pick<typeof import("./src/routes/api/ping"), Extract<"GET", keyof typeof import("./src/routes/api/ping")>>>;
+      $$route?: undefined;
+    },
+    {
+      path: "/api/storage/data/:type";
+      page: false;
+      $$route: FileRouteEagerRef<Pick<typeof import("./src/routes/api/storage/data/[type]"), Extract<"route", keyof typeof import("./src/routes/api/storage/data/[type]")>>>;
+      $GET: FileRouteLazyRef<Pick<typeof import("./src/routes/api/storage/data/[type]"), Extract<"GET", keyof typeof import("./src/routes/api/storage/data/[type]")>>>;
+      $HEAD: FileRouteLazyRef<Pick<typeof import("./src/routes/api/storage/data/[type]"), Extract<"GET", keyof typeof import("./src/routes/api/storage/data/[type]")>>>;
+    },
+    {
+      path: "/api/storage/file/*path";
+      page: false;
+      $GET: FileRouteLazyRef<Pick<typeof import("./src/routes/api/storage/file/[...path]"), Extract<"GET", keyof typeof import("./src/routes/api/storage/file/[...path]")>>>;
+      $HEAD: FileRouteLazyRef<Pick<typeof import("./src/routes/api/storage/file/[...path]"), Extract<"GET", keyof typeof import("./src/routes/api/storage/file/[...path]")>>>;
+      $$route?: undefined;
+    },
+    {
+      path: "/api/storage/status";
+      page: false;
+      $GET: FileRouteLazyRef<Pick<typeof import("./src/routes/api/storage/status"), Extract<"GET", keyof typeof import("./src/routes/api/storage/status")>>>;
+      $HEAD: FileRouteLazyRef<Pick<typeof import("./src/routes/api/storage/status"), Extract<"GET", keyof typeof import("./src/routes/api/storage/status")>>>;
       $$route?: undefined;
     }
   ];

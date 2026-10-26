@@ -31,9 +31,7 @@ export default defineConfig({
         wrangler: {
           name: "nattakarn",
           compatibility_date: "2026-07-30",
-          compatibility_flags: [
-            "nodejs_compat",
-          ],
+          compatibility_flags: ["nodejs_compat"],
           observability: {
             enabled: true,
             head_sampling_rate: 1,
@@ -42,24 +40,25 @@ export default defineConfig({
               enabled: true,
               head_sampling_rate: 1,
               invocation_logs: true,
-              persist: true
+              persist: true,
             },
             traces: {
               enabled: true,
               head_sampling_rate: 1,
-              persist: true
+              persist: true,
             },
           },
         },
       },
       commands: {
-        preview: "bunx wrangler dev --env .env",
+        preview: "bunx wrangler dev --env-file .env",
         deploy: "bunx wrangler --cwd ./ deploy",
       },
       routeRules: {
         "/": {
           headers: {
-            "cache-control": "public, max-age=0, s-maxage=60, stale-while-revalidate=60",
+            "cache-control":
+              "public, max-age=0, s-maxage=60, stale-while-revalidate=60",
           },
         },
       },

@@ -64,8 +64,7 @@ Thumbs.db
 .turbo
 .turbo/**
 # Local data export staging
-data/
-data/**
+.secrets/
 
 # Cloudflare
 .wrangler/

@@ -13,27 +13,27 @@ import {
 } from "./fetchers";
 
 const rawWorksQuery = query(async () => {
-  try {
-    return await fetchWorksData();
-  } catch {
+  const [data, error] = await fetchWorksData();
+  if (error) {
     return NOT_FOUND_PROJECTS;
   }
+  return data;
 }, PORTFOLIO_QUERY_KEYS.WORKS);
 
 const rawPersonalQuery = query(async () => {
-  try {
-    return await fetchPersonalInfo();
-  } catch {
+  const [data, error] = await fetchPersonalInfo();
+  if (error) {
     return NOT_FOUND_PERSONAL_INFO;
   }
+  return data;
 }, PORTFOLIO_QUERY_KEYS.PERSONAL);
 
 const rawMusicQuery = query(async () => {
-  try {
-    return await fetchMusicWorksData();
-  } catch {
+  const [data, error] = await fetchMusicWorksData();
+  if (error) {
     return NOT_FOUND_MUSIC_WORKS;
   }
+  return data;
 }, PORTFOLIO_QUERY_KEYS.MUSIC);
 
 export function getWorksDataQuery(): Promise<readonly ProjectData[]> {

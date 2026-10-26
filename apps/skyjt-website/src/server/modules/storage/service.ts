@@ -1,52 +1,33 @@
 import mime from "mime";
 import { GetObjectCommand } from "@aws-sdk/client-s3";
-import { getStorageContext } from "./s3Client";
+import { getStorageContext, type S3Context } from "./s3Client";
+import {
+  StorageNotFoundError,
+  StorageOperationError,
+  type StorageError,
+} from "./errors";
+import { type Result, ok, err } from "~/types/result";
 
 export function getMimeType(filename: string): string {
   const cleanPath = filename.split(/[?#]/)[0] ?? filename;
   return mime.getType(cleanPath) || "application/octet-stream";
 }
 
-export interface GetObjectBytesResult {
-  readonly data: Uint8Array;
-  readonly contentType: string;
-}
-
-export async function getObjectBytes(key: string): Promise<GetObjectBytesResult | null> {
-  const normalizedKey = key.replace(/^\/+/, "");
-  const context = getStorageContext();
-  try {
-    const command = new GetObjectCommand({
-      Bucket: context.bucket,
-      Key: normalizedKey,
-    });
-    const response = await context.client.send(command);
-
-    if (!response.Body) {
-      return null;
-    }
-
-    const byteStream = await response.Body.transformToByteArray();
-    const contentType =
-      response.ContentType && response.ContentType !== "application/octet-stream"
-        ? response.ContentType
-        : getMimeType(normalizedKey);
-
-    return {
-      data: byteStream,
-      contentType,
-    };
-  } catch (error: unknown) {
-    if (
-      typeof error === "object" &&
-      error !== null &&
-      "name" in error &&
-      (error as { name: string }).name === "NoSuchKey"
-    ) {
-      return null;
-    }
-    throw error;
+function isNotFoundError(error: unknown): boolean {
+  if (typeof error !== "object" || error === null) {
+    return false;
   }
+  const e = error as Record<string, unknown>;
+  if (e.name === "NoSuchKey" || e.name === "NotFound") {
+    return true;
+  }
+  if (typeof e.$metadata === "object" && e.$metadata !== null) {
+    const meta = e.$metadata as Record<string, unknown>;
+    if (meta.httpStatusCode === 404) {
+      return true;
+    }
+  }
+  return false;
 }
 
 export interface GetObjectStreamResult {
@@ -55,9 +36,20 @@ export interface GetObjectStreamResult {
   readonly contentLength?: number;
 }
 
-export async function getObjectStream(key: string): Promise<GetObjectStreamResult | null> {
+export async function getObjectStream(
+  key: string,
+  customContext?: S3Context,
+  envOrEvent?: unknown
+): Promise<Result<GetObjectStreamResult, StorageError>> {
   const normalizedKey = key.replace(/^\/+/, "");
-  const context = getStorageContext();
+  const [context, contextError] = customContext
+    ? ok(customContext)
+    : getStorageContext(envOrEvent);
+
+  if (contextError) {
+    return err(contextError);
+  }
+
   try {
     const command = new GetObjectCommand({
       Bucket: context.bucket,
@@ -66,7 +58,7 @@ export async function getObjectStream(key: string): Promise<GetObjectStreamResul
     const response = await context.client.send(command);
 
     if (!response.Body) {
-      return null;
+      return err(new StorageNotFoundError(normalizedKey));
     }
 
     const contentType =
@@ -74,27 +66,38 @@ export async function getObjectStream(key: string): Promise<GetObjectStreamResul
         ? response.ContentType
         : getMimeType(normalizedKey);
 
-    return {
+    return ok({
       stream: response.Body.transformToWebStream(),
       contentType,
       contentLength: response.ContentLength,
-    };
+    });
   } catch (error: unknown) {
-    if (
-      typeof error === "object" &&
-      error !== null &&
-      "name" in error &&
-      (error as { name: string }).name === "NoSuchKey"
-    ) {
-      return null;
+    if (isNotFoundError(error)) {
+      return err(new StorageNotFoundError(normalizedKey));
     }
-    throw error;
+    return err(
+      new StorageOperationError(
+        error instanceof Error ? error.message : String(error),
+        error
+      )
+    );
   }
 }
 
-export async function getObjectText(key: string): Promise<string | null> {
+export async function getObjectText(
+  key: string,
+  customContext?: S3Context,
+  envOrEvent?: unknown
+): Promise<Result<string, StorageError>> {
   const normalizedKey = key.replace(/^\/+/, "");
-  const context = getStorageContext();
+  const [context, contextError] = customContext
+    ? ok(customContext)
+    : getStorageContext(envOrEvent);
+
+  if (contextError) {
+    return err(contextError);
+  }
+
   try {
     const command = new GetObjectCommand({
       Bucket: context.bucket,
@@ -103,19 +106,20 @@ export async function getObjectText(key: string): Promise<string | null> {
     const response = await context.client.send(command);
 
     if (!response.Body) {
-      return null;
+      return err(new StorageNotFoundError(normalizedKey));
     }
 
-    return await response.Body.transformToString();
+    const text = await response.Body.transformToString();
+    return ok(text);
   } catch (error: unknown) {
-    if (
-      typeof error === "object" &&
-      error !== null &&
-      "name" in error &&
-      (error as { name: string }).name === "NoSuchKey"
-    ) {
-      return null;
+    if (isNotFoundError(error)) {
+      return err(new StorageNotFoundError(normalizedKey));
     }
-    throw error;
+    return err(
+      new StorageOperationError(
+        error instanceof Error ? error.message : String(error),
+        error
+      )
+    );
   }
 }

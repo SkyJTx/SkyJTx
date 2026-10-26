@@ -6,7 +6,7 @@ import { extractAuthorIdentifiers, parseScoresFromHtml } from "./musescore/parse
 import type { ScrapedMusicScore } from "./musescore/types";
 
 const TARGET_BASE_URL = process.env.MUSESCORE_URL ?? process.argv[2] ?? "https://musescore.com/user/29513374";
-const OUTPUT_FILE = resolve(import.meta.dirname, "../apps/skyjt-website/public/data/musicWorksData.json");
+const OUTPUT_FILE = resolve(import.meta.dirname, "../apps/skyjt-website/public/.secrets/musicWorksData.json");
 const MAX_PAGES = 5;
 
 async function run(): Promise<void> {

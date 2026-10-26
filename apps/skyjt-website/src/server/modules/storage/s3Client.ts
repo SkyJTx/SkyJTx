@@ -1,6 +1,7 @@
 import { S3Client } from "@aws-sdk/client-s3";
 import { type S3StorageConfig, getS3Config } from "./config";
 import { StorageConfigError } from "./errors";
+import { type Result, ok, err } from "~/types/result";
 
 export interface S3Context {
   readonly client: S3Client;
@@ -9,15 +10,17 @@ export interface S3Context {
 
 let storageContext: S3Context | null = null;
 
-export function getStorageContext(): S3Context {
-  if (storageContext) {
-    return storageContext;
+export function getStorageContext(envOrEvent?: unknown): Result<S3Context, StorageConfigError> {
+  if (storageContext && !envOrEvent) {
+    return ok(storageContext);
   }
 
-  const config: S3StorageConfig | null = getS3Config();
+  const config: S3StorageConfig | null = getS3Config(envOrEvent);
   if (!config) {
-    throw new StorageConfigError(
-      "Missing or invalid Cloudflare R2 / S3 storage credentials in environment variables."
+    return err(
+      new StorageConfigError(
+        "Missing or invalid Cloudflare R2 / S3 storage credentials in environment variables."
+      )
     );
   }
 
@@ -30,20 +33,28 @@ export function getStorageContext(): S3Context {
     },
   });
 
-  storageContext = {
+  const context: S3Context = {
     client,
     bucket: config.bucket,
   };
 
-  return storageContext;
+  if (!envOrEvent) {
+    storageContext = context;
+  }
+
+  return ok(context);
 }
 
 export function resetStorageContext(): void {
   storageContext = null;
 }
 
-export function getS3Client(): S3Client {
-  return getStorageContext().client;
+export function getS3Client(envOrEvent?: unknown): Result<S3Client, StorageConfigError> {
+  const [context, error] = getStorageContext(envOrEvent);
+  if (error) {
+    return err(error);
+  }
+  return ok(context.client);
 }
 
 export function resetS3Client(): void {

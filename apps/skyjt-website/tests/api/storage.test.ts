@@ -1,10 +1,15 @@
 import { describe, it, expect } from "vitest";
-import app from "~/server";
-import { getMimeType } from "~/server/modules/storage";
+import { GET as getStorageStatus } from "~/routes/api/storage/status";
+import { GET as getStorageData } from "~/routes/api/storage/data/[type]";
+import { GET as getStorageFile } from "~/routes/api/storage/file/[...path]";
+import { getMimeType, getStorageContext, getObjectText, getObjectStream } from "~/server/modules/storage";
 
 describe("API Route: /api/storage", () => {
   it("responds to /api/storage/data/personal with JSON payload", async () => {
-    const res = await app.fetch(new Request("http://localhost/api/storage/data/personal"));
+    const res = await getStorageData({
+      request: new Request("http://localhost/api/storage/data/personal"),
+      params: { type: "personal" },
+    } as any);
     expect(res.status).toBe(200);
     expect(res.headers.get("content-type")).toContain("application/json");
     const json = await res.json();
@@ -13,7 +18,10 @@ describe("API Route: /api/storage", () => {
   });
 
   it("responds to /api/storage/data/works with JSON array", async () => {
-    const res = await app.fetch(new Request("http://localhost/api/storage/data/works"));
+    const res = await getStorageData({
+      request: new Request("http://localhost/api/storage/data/works"),
+      params: { type: "works" },
+    } as any);
     expect(res.status).toBe(200);
     expect(res.headers.get("content-type")).toContain("application/json");
     const json = await res.json();
@@ -21,7 +29,10 @@ describe("API Route: /api/storage", () => {
   });
 
   it("responds to /api/storage/data/music with JSON array", async () => {
-    const res = await app.fetch(new Request("http://localhost/api/storage/data/music"));
+    const res = await getStorageData({
+      request: new Request("http://localhost/api/storage/data/music"),
+      params: { type: "music" },
+    } as any);
     expect(res.status).toBe(200);
     expect(res.headers.get("content-type")).toContain("application/json");
     const json = await res.json();
@@ -29,7 +40,10 @@ describe("API Route: /api/storage", () => {
   });
 
   it("streams existing file with correct headers and zero buffer copies", async () => {
-    const res = await app.fetch(new Request("http://localhost/api/storage/file/Works/AIDM/AIDM%20(1).jpg"));
+    const res = await getStorageFile({
+      request: new Request("http://localhost/api/storage/file/Works/AIDM/AIDM%20(1).jpg"),
+      params: { path: "Works/AIDM/AIDM%20(1).jpg" },
+    } as any);
     expect(res.status).toBe(200);
     expect(res.headers.get("content-type")).toBe("image/jpeg");
     expect(res.headers.get("content-disposition")).toBe("inline");
@@ -39,7 +53,10 @@ describe("API Route: /api/storage", () => {
   });
 
   it("returns 404 for non-existent file", async () => {
-    const res = await app.fetch(new Request("http://localhost/api/storage/file/non-existent-file-12345.xyz"));
+    const res = await getStorageFile({
+      request: new Request("http://localhost/api/storage/file/non-existent-file-12345.xyz"),
+      params: { path: "non-existent-file-12345.xyz" },
+    } as any);
     expect(res.status).toBe(404);
     expect(res.headers.get("content-type")).toContain("application/problem+json");
     const body = await res.json();
@@ -76,6 +93,49 @@ describe("API Route: /api/storage", () => {
     it("falls back to application/octet-stream for unknown extensions", () => {
       expect(getMimeType("unknown.customext123")).toBe("application/octet-stream");
       expect(getMimeType("no_extension")).toBe("application/octet-stream");
+    });
+  });
+
+  describe("Storage Status API", () => {
+    it("exposes storageReady and storageContext", async () => {
+      const res = await getStorageStatus({
+        request: new Request("http://localhost/api/storage/status"),
+      } as any);
+      expect(res.status).toBe(200);
+      const json = await res.json();
+      expect(json.storageReady).toBe(true);
+      expect(json.hasStorage).toBe(true);
+      expect(json.hasContext).toBe(true);
+    });
+  });
+
+  describe("Result tuple service contracts", () => {
+    it("returns [data, undefined] on valid storage context", () => {
+      const [context, error] = getStorageContext();
+      expect(error).toBeUndefined();
+      expect(context).toBeDefined();
+      expect(typeof context?.bucket).toBe("string");
+    });
+
+    it("returns [data, undefined] on valid getObjectText", async () => {
+      const [text, error] = await getObjectText("personalInfo.json");
+      expect(error).toBeUndefined();
+      expect(typeof text).toBe("string");
+    });
+
+    it("returns [data, undefined] on valid getObjectStream", async () => {
+      const [streamResult, error] = await getObjectStream("Works/AIDM/AIDM (1).jpg");
+      expect(error).toBeUndefined();
+      expect(streamResult).toBeDefined();
+      expect(streamResult?.stream).toBeDefined();
+    });
+
+    it("returns [undefined, error] with StorageNotFoundError on missing key", async () => {
+      const [text, error] = await getObjectText("missing-file-xyz.json");
+      expect(text).toBeUndefined();
+      expect(error).toBeDefined();
+      expect(error?.code).toBe("STORAGE_NOT_FOUND");
+      expect(error?.status).toBe(404);
     });
   });
 });

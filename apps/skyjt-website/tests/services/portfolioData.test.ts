@@ -1,6 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import * as v from "valibot";
-import { createEdenServer } from "~/services/eden-server";
 import {
   fetchWorksData,
   fetchPersonalInfo,
@@ -9,7 +8,7 @@ import {
   getPersonalInfoQuery,
   getMusicWorksDataQuery,
   clearPortfolioCache,
-  setEdenForTesting,
+  setFetcherForTesting,
   WorksDataSchema,
   MusicWorksDataSchema,
   PersonalInfoSchema,
@@ -42,6 +41,7 @@ describe("portfolioData service", () => {
   beforeEach(() => {
     vi.restoreAllMocks();
     clearPortfolioCache();
+    setFetcherForTesting(null);
   });
 
   describe("schema validation", () => {
@@ -107,23 +107,15 @@ describe("portfolioData service", () => {
         },
       ];
 
-      setEdenForTesting(
-        createEdenServer({
-          fetcher: async (req) => {
-            if (req.url.includes("/data/works")) {
-              return new Response(JSON.stringify(mockProjects), {
-                status: 200,
-                headers: { "Content-Type": "application/json" },
-              });
-            }
-            return new Response("Not Found", { status: 404 });
-          },
-        })
-      );
+      setFetcherForTesting(async (type) => {
+        if (type === "works") return mockProjects;
+        throw new Error("Not Found");
+      });
 
-      const data = await fetchWorksData();
+      const [data, error] = await fetchWorksData();
+      expect(error).toBeUndefined();
       expect(data).toHaveLength(1);
-      expect(data[0]?.id).toBe("remote-p1");
+      expect(data?.[0]?.id).toBe("remote-p1");
     });
 
     it("uses in-memory cache on consecutive calls within TTL", async () => {
@@ -139,33 +131,29 @@ describe("portfolioData service", () => {
       ];
 
       let callCount = 0;
-      setEdenForTesting(
-        createEdenServer({
-          fetcher: async () => {
-            callCount++;
-            return new Response(JSON.stringify(mockProjects), {
-              status: 200,
-              headers: { "Content-Type": "application/json" },
-            });
-          },
-        })
-      );
+      setFetcherForTesting(async () => {
+        callCount++;
+        return mockProjects;
+      });
 
-      const data1 = await fetchWorksData();
-      const data2 = await fetchWorksData();
+      const [data1, error1] = await fetchWorksData();
+      const [data2, error2] = await fetchWorksData();
 
       expect(callCount).toBe(1);
+      expect(error1).toBeUndefined();
+      expect(error2).toBeUndefined();
       expect(data1).toEqual(data2);
     });
 
-    it("throws descriptive error when fetch fails instead of returning fake data", async () => {
-      setEdenForTesting(
-        createEdenServer({
-          fetcher: async () => new Response("Not Found", { status: 404 }),
-        })
-      );
+    it("returns scoped error when fetch fails instead of throwing unhandled exception", async () => {
+      setFetcherForTesting(async () => {
+        throw new Error("Failed to fetch works data: Not Found");
+      });
 
-      await expect(fetchWorksData()).rejects.toThrow("Failed to fetch works data");
+      const [data, error] = await fetchWorksData();
+      expect(data).toBeUndefined();
+      expect(error).toBeDefined();
+      expect(error?.message).toContain("Failed to fetch works data");
     });
   });
 
@@ -181,23 +169,15 @@ describe("portfolioData service", () => {
         },
       ];
 
-      setEdenForTesting(
-        createEdenServer({
-          fetcher: async (req) => {
-            if (req.url.includes("/data/music")) {
-              return new Response(JSON.stringify(mockScores), {
-                status: 200,
-                headers: { "Content-Type": "application/json" },
-              });
-            }
-            return new Response("Not Found", { status: 404 });
-          },
-        })
-      );
+      setFetcherForTesting(async (type) => {
+        if (type === "music") return mockScores;
+        throw new Error("Not Found");
+      });
 
-      const data = await fetchMusicWorksData();
+      const [data, error] = await fetchMusicWorksData();
+      expect(error).toBeUndefined();
       expect(data).toHaveLength(1);
-      expect(data[0]?.id).toBe("score-1");
+      expect(data?.[0]?.id).toBe("score-1");
     });
 
     it("uses in-memory cache on consecutive calls within TTL", async () => {
@@ -212,33 +192,29 @@ describe("portfolioData service", () => {
       ];
 
       let callCount = 0;
-      setEdenForTesting(
-        createEdenServer({
-          fetcher: async () => {
-            callCount++;
-            return new Response(JSON.stringify(mockScores), {
-              status: 200,
-              headers: { "Content-Type": "application/json" },
-            });
-          },
-        })
-      );
+      setFetcherForTesting(async () => {
+        callCount++;
+        return mockScores;
+      });
 
-      const data1 = await fetchMusicWorksData();
-      const data2 = await fetchMusicWorksData();
+      const [data1, error1] = await fetchMusicWorksData();
+      const [data2, error2] = await fetchMusicWorksData();
 
       expect(callCount).toBe(1);
+      expect(error1).toBeUndefined();
+      expect(error2).toBeUndefined();
       expect(data1).toEqual(data2);
     });
 
-    it("throws descriptive error when music fetch fails instead of returning fake data", async () => {
-      setEdenForTesting(
-        createEdenServer({
-          fetcher: async () => new Response("Not Found", { status: 404 }),
-        })
-      );
+    it("returns scoped error when music fetch fails instead of throwing unhandled exception", async () => {
+      setFetcherForTesting(async () => {
+        throw new Error("Failed to fetch music works data: Not Found");
+      });
 
-      await expect(fetchMusicWorksData()).rejects.toThrow("Failed to fetch music works data");
+      const [data, error] = await fetchMusicWorksData();
+      expect(data).toBeUndefined();
+      expect(error).toBeDefined();
+      expect(error?.message).toContain("Failed to fetch music works data");
     });
   });
 
@@ -258,23 +234,15 @@ describe("portfolioData service", () => {
         myselfPhotoUrl: "/api/storage/file/me.jpg",
       };
 
-      setEdenForTesting(
-        createEdenServer({
-          fetcher: async (req) => {
-            if (req.url.includes("/data/personal")) {
-              return new Response(JSON.stringify(mockInfo), {
-                status: 200,
-                headers: { "Content-Type": "application/json" },
-              });
-            }
-            return new Response("Not Found", { status: 404 });
-          },
-        })
-      );
+      setFetcherForTesting(async (type) => {
+        if (type === "personal") return mockInfo;
+        throw new Error("Not Found");
+      });
 
-      const data = await fetchPersonalInfo();
-      expect(data.fullName).toBe("Jane Doe");
-      expect(data.location).toBe("Tokyo, Japan");
+      const [data, error] = await fetchPersonalInfo();
+      expect(error).toBeUndefined();
+      expect(data?.fullName).toBe("Jane Doe");
+      expect(data?.location).toBe("Tokyo, Japan");
     });
 
     it("uses in-memory cache on consecutive calls within TTL", async () => {
@@ -293,33 +261,29 @@ describe("portfolioData service", () => {
       };
 
       let callCount = 0;
-      setEdenForTesting(
-        createEdenServer({
-          fetcher: async () => {
-            callCount++;
-            return new Response(JSON.stringify(mockInfo), {
-              status: 200,
-              headers: { "Content-Type": "application/json" },
-            });
-          },
-        })
-      );
+      setFetcherForTesting(async () => {
+        callCount++;
+        return mockInfo;
+      });
 
-      const data1 = await fetchPersonalInfo();
-      const data2 = await fetchPersonalInfo();
+      const [data1, error1] = await fetchPersonalInfo();
+      const [data2, error2] = await fetchPersonalInfo();
 
       expect(callCount).toBe(1);
+      expect(error1).toBeUndefined();
+      expect(error2).toBeUndefined();
       expect(data1).toEqual(data2);
     });
 
-    it("throws descriptive error on personal info fetch failure instead of returning fake data", async () => {
-      setEdenForTesting(
-        createEdenServer({
-          fetcher: async () => new Response("Internal Server Error", { status: 500 }),
-        })
-      );
+    it("returns scoped error on personal info fetch failure instead of throwing unhandled exception", async () => {
+      setFetcherForTesting(async () => {
+        throw new Error("Failed to fetch personal info: Internal Server Error");
+      });
 
-      await expect(fetchPersonalInfo()).rejects.toThrow("Failed to fetch personal info");
+      const [data, error] = await fetchPersonalInfo();
+      expect(data).toBeUndefined();
+      expect(error).toBeDefined();
+      expect(error?.message).toContain("Failed to fetch personal info");
     });
   });
 
