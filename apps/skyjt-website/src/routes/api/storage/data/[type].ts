@@ -4,10 +4,11 @@ import {
   WorksDataSchema,
   PersonalInfoSchema,
   MusicWorksDataSchema,
+  ContactDataSchema,
 } from "~/types";
 import { getObjectText } from "~/server/modules/storage";
 
-export const StorageDataTypeSchema = v.picklist(["works", "personal", "music"]);
+export const StorageDataTypeSchema = v.picklist(["works", "personal", "music", "contact"]);
 export type StorageDataType = v.InferOutput<typeof StorageDataTypeSchema>;
 
 export const route = defineRoute({
@@ -23,6 +24,7 @@ const DATA_REGISTRY: Record<
   works: { file: "worksData.json", schema: WorksDataSchema },
   personal: { file: "personalInfo.json", schema: PersonalInfoSchema },
   music: { file: "musicWorksData.json", schema: MusicWorksDataSchema },
+  contact: { file: "contactData.json", schema: ContactDataSchema },
 };
 
 export const GET = route.handler(async (event) => {

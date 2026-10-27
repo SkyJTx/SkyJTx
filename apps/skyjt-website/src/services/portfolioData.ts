@@ -7,12 +7,14 @@ export {
   MusicWorkDataSchema,
   MusicWorksDataSchema,
   PersonalInfoSchema,
+  ContactDataSchema,
 } from "~/types";
 export {
   STORAGE_BASE_URL,
   WORKS_DATA_URL,
   PERSONAL_INFO_URL,
   MUSIC_WORKS_DATA_URL,
+  CONTACT_DATA_URL,
   SUPABASE_BASE_URL,
   SUPABASE_WORKS_URL,
   SUPABASE_PERSONAL_URL,
@@ -23,4 +25,5 @@ export {
   NOT_FOUND_PERSONAL_INFO,
   NOT_FOUND_PROJECTS,
   NOT_FOUND_MUSIC_WORKS,
+  NOT_FOUND_CONTACT_DATA,
 } from "~/constants";

@@ -5,6 +5,7 @@ import {
   getPersonalInfoQuery,
   getWorksDataQuery,
   getMusicWorksDataQuery,
+  getContactDataQuery,
 } from "~/services";
 import { HomePresentation } from "~/presentations/home";
 import { AboutPresentation } from "~/presentations/about";
@@ -20,6 +21,7 @@ export const route = defineRoute({
     getPersonalInfoQuery();
     getWorksDataQuery();
     getMusicWorksDataQuery();
+    getContactDataQuery();
   },
 });
 

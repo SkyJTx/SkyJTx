@@ -86,3 +86,63 @@ export const PersonalInfoSchema = v.object({
   myselfPhotoUrl: v.string(),
 });
 export type PersonalInfo = v.InferOutput<typeof PersonalInfoSchema>;
+
+/**
+ * Permitted contact/social channel icon identifiers.
+ */
+export const CONTACT_ICON_NAMES = [
+  "github",
+  "linkedin",
+  "music",
+  "file-text",
+  "mail",
+  "link",
+] as const;
+export type ContactIconName = (typeof CONTACT_ICON_NAMES)[number];
+
+/**
+ * Direct contact and reachability metadata schema.
+ */
+export const ContactChannelSchema = v.object({
+  email: v.string(),
+  phone: v.optional(v.string()),
+  location: v.string(),
+  availabilityStatus: v.string(),
+  openTo: v.array(v.string()),
+});
+export type ContactChannel = v.InferOutput<typeof ContactChannelSchema>;
+
+/**
+ * Social media link item schema.
+ */
+export const SocialMediaItemSchema = v.object({
+  platform: v.string(),
+  handle: v.string(),
+  url: v.string(),
+  icon: v.picklist(CONTACT_ICON_NAMES),
+  purpose: v.string(),
+});
+export type SocialMediaItem = v.InferOutput<typeof SocialMediaItemSchema>;
+
+/**
+ * Work media / creative artifact link item schema.
+ */
+export const WorkMediaItemSchema = v.object({
+  title: v.string(),
+  platform: v.string(),
+  handle: v.string(),
+  url: v.string(),
+  icon: v.picklist(CONTACT_ICON_NAMES),
+  purpose: v.string(),
+});
+export type WorkMediaItem = v.InferOutput<typeof WorkMediaItemSchema>;
+
+/**
+ * Complete ContactData domain schema.
+ */
+export const ContactDataSchema = v.object({
+  contact: ContactChannelSchema,
+  socialMedia: v.array(SocialMediaItemSchema),
+  workMedia: v.array(WorkMediaItemSchema),
+});
+export type ContactData = v.InferOutput<typeof ContactDataSchema>;

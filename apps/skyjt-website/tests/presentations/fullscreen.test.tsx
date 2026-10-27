@@ -38,11 +38,12 @@ describe("Fullscreen and unclipped presentations", () => {
     expect(section?.classList.contains("min-h-dvh")).toBe(true);
   });
 
-  it("ContactsPresentation has min-h-screen and min-h-dvh", () => {
+  it("ContactsPresentation has min-h-screen, min-h-dvh, and unboxed editorial layout", () => {
     const { container } = render(() => <ContactsPresentation />);
     const section = container.querySelector("#Contacts");
     expect(section).not.toBeNull();
     expect(section?.classList.contains("min-h-screen")).toBe(true);
     expect(section?.classList.contains("min-h-dvh")).toBe(true);
+    expect(section?.querySelector(".card")).toBeNull();
   });
 });

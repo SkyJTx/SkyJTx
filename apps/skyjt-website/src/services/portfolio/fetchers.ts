@@ -5,9 +5,11 @@ import {
   type PersonalInfo,
   type ProjectData,
   type MusicWorkData,
+  type ContactData,
   WorksDataSchema,
   MusicWorksDataSchema,
   PersonalInfoSchema,
+  ContactDataSchema,
 } from "~/types";
 import { type Result, ok, err } from "~/types/result";
 import {
@@ -18,9 +20,11 @@ import {
   setPersonalCache,
   getMusicCache,
   setMusicCache,
+  getContactCache,
+  setContactCache,
 } from "./cache";
 
-export type StorageDataType = "works" | "personal" | "music";
+export type StorageDataType = "works" | "personal" | "music" | "contact";
 
 export interface PortfolioValidationError {
   readonly name: "PortfolioValidationError";
@@ -50,6 +54,7 @@ const STORAGE_FILES: Record<StorageDataType, string> = {
   works: "worksData.json",
   personal: "personalInfo.json",
   music: "musicWorksData.json",
+  contact: "contactData.json",
 };
 
 async function fetchStorageData<T>(
@@ -173,6 +178,20 @@ export async function fetchMusicWorksData(): Promise<Result<readonly MusicWorkDa
   if (error) {
     return err(error);
   }
-  setMusicCache({ data, timestamp: Date.now() });
+setMusicCache({ data, timestamp: Date.now() });
   return ok(data);
+}
+
+export async function fetchContactData(): Promise<Result<Readonly<ContactData>, PortfolioFetchError>> {
+  const cache = getContactCache();
+  if (isCacheFresh(cache)) {
+    return ok(cache.data);
+  }
+  const [data, error] = await fetchStorageData("contact", ContactDataSchema);
+  if (error) {
+    return err(error);
+  }
+  const frozen = Object.freeze(data);
+  setContactCache({ data: frozen, timestamp: Date.now() });
+  return ok(frozen);
 }

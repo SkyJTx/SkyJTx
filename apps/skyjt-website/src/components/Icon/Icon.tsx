@@ -8,6 +8,8 @@ export type IconName =
   | "github"
   | "mail"
   | "linkedin"
+  | "copy"
+  | "music"
   | "location"
   | "phone"
   | "resume"
@@ -170,6 +172,15 @@ export function Icon(props: IconProps): JSX.Element {
         </Match>
         <Match when={props.name === "check"}>
           <polyline points="20 6 9 17 4 12" />
+        </Match>
+        <Match when={props.name === "copy"}>
+          <rect width="14" height="14" x="8" y="8" rx="2" ry="2" />
+          <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" />
+        </Match>
+        <Match when={props.name === "music"}>
+          <path d="M9 18V5l12-2v13" />
+          <circle cx="6" cy="18" r="3" />
+          <circle cx="18" cy="16" r="3" />
         </Match>
         <Match when={props.name === "link"}>
           <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />

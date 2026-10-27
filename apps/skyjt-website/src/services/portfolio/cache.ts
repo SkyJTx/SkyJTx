@@ -1,4 +1,4 @@
-import type { ProjectData, PersonalInfo, MusicWorkData } from "~/types";
+import type { ProjectData, PersonalInfo, MusicWorkData, ContactData } from "~/types";
 import { PORTFOLIO_CACHE_TTL_MS } from "~/constants";
 
 export interface CacheEntry<T> {
@@ -9,6 +9,7 @@ export interface CacheEntry<T> {
 let worksCache: CacheEntry<readonly ProjectData[]> | null = null;
 let personalCache: CacheEntry<Readonly<PersonalInfo>> | null = null;
 let musicCache: CacheEntry<readonly MusicWorkData[]> | null = null;
+let contactCache: CacheEntry<Readonly<ContactData>> | null = null;
 
 export function isCacheFresh<T>(cache: CacheEntry<T> | null, ttl = PORTFOLIO_CACHE_TTL_MS): cache is CacheEntry<T> {
   return cache !== null && Date.now() - cache.timestamp < ttl;
@@ -38,8 +39,17 @@ export function setMusicCache(entry: CacheEntry<readonly MusicWorkData[]> | null
   musicCache = entry;
 }
 
+export function getContactCache(): CacheEntry<Readonly<ContactData>> | null {
+  return contactCache;
+}
+
+export function setContactCache(entry: CacheEntry<Readonly<ContactData>> | null): void {
+  contactCache = entry;
+}
+
 export function clearPortfolioCache(): void {
   worksCache = null;
   personalCache = null;
   musicCache = null;
+  contactCache = null;
 }

@@ -1,4 +1,5 @@
 import { S3Client } from "@aws-sdk/client-s3";
+import { FetchHttpHandler } from "@smithy/fetch-http-handler";
 import { type S3StorageConfig, getS3Config } from "./config";
 import { StorageConfigError } from "./errors";
 import { type Result, ok, err } from "~/types/result";
@@ -31,6 +32,7 @@ export function getStorageContext(envOrEvent?: unknown): Result<S3Context, Stora
       accessKeyId: config.accessKeyId,
       secretAccessKey: config.secretAccessKey,
     },
+    requestHandler: new FetchHttpHandler(),
   });
 
   const context: S3Context = {
